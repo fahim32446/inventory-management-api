@@ -1,0 +1,43 @@
+{
+  "name": "inventory",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=test tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.1",
+    "@hono/zod-openapi": "^0.19.8",
+    "@scalar/hono-api-reference": "^0.9.4",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
+    "dotenv-expand": "^12.0.2",
+    "drizzle-orm": "^0.44.2",
+    "drizzle-zod": "^0.5.1",
+    "express": "^5.2.1",
+    "geoip-lite": "^1.4.10",
+    "hono": "^4.7.9",
+    "hono-pino": "^0.8.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.12",
+    "pg": "^8.16.0",
+    "pino-pretty": "^13.0.0",
+    "stoker": "^1.4.2",
+    "ua-parser-js": "^2.0.7",
+    "zod": "^3.25.63"
+  },
+  "devDependencies": {
+    "@types/geoip-lite": "^1.4.4",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.11.17",
+    "@types/nodemailer": "^7.0.4",
+    "@types/pg": "^8.15.4",
+    "@types/ua-parser-js": "^0.7.39",
+    "cross-env": "^7.0.3",
+    "drizzle-kit": "^0.31.1",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
