@@ -35,13 +35,6 @@ export default function configureOpenAPI(app: AppOpenAPI) {
             type: "http",
             scheme: "bearer",
             bearerFormat: "JWT",
-
-            initialValue:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjM5LCJvcmdJZCI6NCwiZW1haWwiOiJmYWhpbUBnbWFpbC5jb20iLCJleHAiOjE3NTE5OTI3Mjh9.J0Nxv6hNCkwXNbDu8Fm8I7mOkvdMMj3Ssbu4iP1sLQI",
-            defaultValue:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjM5LCJvcmdJZCI6NCwiZW1haWwiOiJmYWhpbUBnbWFpbC5jb20iLCJleHAiOjE3NTE5OTI3Mjh9.J0Nxv6hNCkwXNbDu8Fm8I7mOkvdMMj3Ssbu4iP1sLQI",
-            value:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjM5LCJvcmdJZCI6NCwiZW1haWwiOiJmYWhpbUBnbWFpbC5jb20iLCJleHAiOjE3NTE5OTI3Mjh9.J0Nxv6hNCkwXNbDu8Fm8I7mOkvdMMj3Ssbu4iP1sLQI",
           },
         },
       },

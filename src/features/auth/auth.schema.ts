@@ -1,7 +1,7 @@
-import { IUserCreate } from "@/db/schema.type";
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+import { IUserCreate } from "../../db/schema.type";
 
 export class AuthSchema {
   public readonly signUp = createRoute({

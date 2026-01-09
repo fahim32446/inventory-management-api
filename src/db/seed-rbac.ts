@@ -1,6 +1,6 @@
-import { roles, permissions, rolePermissions } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { db } from "./db";
+import { permissions, rolePermissions, roles } from "./schema";
 
 /* ----------------------------------
    Permission list (source of truth)

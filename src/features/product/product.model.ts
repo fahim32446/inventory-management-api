@@ -1,7 +1,7 @@
-import { AbstractModels } from '@/abstract/abstract.model';
+import { AbstractModels } from "abstract/abstract.model";
 
-import { eq, getTableColumns } from 'drizzle-orm';
-import type { IProductType, IUpdateProductType } from './product.schema';
+import { eq, getTableColumns } from "drizzle-orm";
+import type { IProductType, IUpdateProductType } from "./product.schema";
 
 export class ProductModel extends AbstractModels {
   async addProduct(body: IProductType & { orgId: number }) {

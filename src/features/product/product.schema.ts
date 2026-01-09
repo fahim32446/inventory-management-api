@@ -1,8 +1,8 @@
-import { idParams } from '@/config/types';
-import { ZProduct } from '@/db/schema.type';
-import { createRoute, z } from '@hono/zod-openapi';
-import * as HttpStatusCodes from 'stoker/http-status-codes';
-import { jsonContent, jsonContentRequired } from 'stoker/openapi/helpers';
+import { idParams } from "config/types";
+import { ZProduct } from "db/schema.type";
+import { createRoute, z } from "@hono/zod-openapi";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
 export const ZUpdateProduct = ZProduct.partial();
 
@@ -11,24 +11,24 @@ export type IUpdateProductType = z.infer<typeof ZUpdateProduct>;
 
 export class ProductSchema {
   readonly addProduct = createRoute({
-    path: '/',
-    method: 'post',
-    tags: ['product'],
+    path: "/",
+    method: "post",
+    tags: ["product"],
     security: [
       {
         bearerAuth: [],
       },
     ],
-    request: { body: jsonContentRequired(ZProduct, 'create product') },
+    request: { body: jsonContentRequired(ZProduct, "create product") },
     responses: {
-      [HttpStatusCodes.CREATED]: jsonContent(ZProduct, 'Product created response'),
+      [HttpStatusCodes.CREATED]: jsonContent(ZProduct, "Product created response"),
     },
   });
 
   readonly getProduct = createRoute({
-    path: '/',
-    method: 'get',
-    tags: ['product'],
+    path: "/",
+    method: "get",
+    tags: ["product"],
     security: [
       {
         bearerAuth: [],
@@ -38,38 +38,36 @@ export class ProductSchema {
       query: z.object({
         limit: z
           .string()
-          .default('10')
+          .default("10")
           .transform((val) => (val ? parseInt(val) : 10)),
         offset: z
           .string()
-          .default('0')
+          .default("0")
           .transform((val) => (val ? parseInt(val) : 0)),
       }),
     },
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
         z.object({
-         
-            count: z.number(),
-            result: z.array(ZProduct),
-        
+          count: z.number(),
+          result: z.array(ZProduct),
         }),
-        'Product fetched'
+        "Product fetched"
       ),
 
       [HttpStatusCodes.NOT_FOUND]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        'No product found'
+        "No product found"
       ),
     },
   });
 
   readonly updateProduct = createRoute({
-    path: '/:id',
-    method: 'put',
-    tags: ['product'],
+    path: "/:id",
+    method: "put",
+    tags: ["product"],
     security: [
       {
         bearerAuth: [],
@@ -77,17 +75,17 @@ export class ProductSchema {
     ],
     request: {
       params: idParams,
-      body: jsonContentRequired(ZUpdateProduct, 'Update product'),
+      body: jsonContentRequired(ZUpdateProduct, "Update product"),
     },
     responses: {
-      [HttpStatusCodes.OK]: jsonContent(ZProduct, 'Product updated'),
+      [HttpStatusCodes.OK]: jsonContent(ZProduct, "Product updated"),
     },
   });
 
   readonly deleteProduct = createRoute({
-    path: '/:id',
-    method: 'delete',
-    tags: ['product'],
+    path: "/:id",
+    method: "delete",
+    tags: ["product"],
     security: [
       {
         bearerAuth: [],
@@ -99,7 +97,7 @@ export class ProductSchema {
         z.object({
           message: z.string(),
         }),
-        'Product deleted'
+        "Product deleted"
       ),
     },
   });

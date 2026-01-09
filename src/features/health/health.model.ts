@@ -1,4 +1,4 @@
-import { AbstractModels } from '@/abstract/abstract.model';
+import { AbstractModels } from "../../abstract/abstract.model";
 
 export class HealthModel extends AbstractModels {
   public async insertHealthLogDB() {

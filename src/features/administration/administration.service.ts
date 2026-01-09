@@ -1,4 +1,4 @@
-import type { AppRouteHandler } from "@/config/types";
+import type { AppRouteHandler } from "config/types";
 import bcrypt from "bcryptjs";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { administrationModel } from "./administration.model";

@@ -1,9 +1,7 @@
-import type { AppRouteHandler } from "@/config/types";
-import { db } from "@/db/db";
-import env from "@/env";
 import bcrypt from "bcryptjs";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
+import nodemailer from "nodemailer";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { AuthModel } from "./auth.model";
 import type {
@@ -14,26 +12,30 @@ import type {
   ISignIn,
   ISignUp,
 } from "./auth.schema";
-import nodemailer from "nodemailer";
-import { sessions } from "@/db/schema";
+
 import { eq } from "drizzle-orm";
-import { UAParser } from "ua-parser-js";
-import geoip from "geoip-lite";
+// import { UAParser } from "ua-parser-js";
+// import geoip from "geoip-lite";
+
+import { AppRouteHandler } from "../../config/types";
+import { db } from "../../db/db";
+import { sessions } from "../../db/schema";
+import env from "../../env";
 
 const getAuditInfo = (c: any) => {
   const userAgent = c.req.header("User-Agent") || "";
   const ip = c.req.header("X-Forwarded-For") || c.req.header("X-Real-IP") || "127.0.0.1";
 
-  const parser = new UAParser(userAgent);
-  const result = parser.getResult();
-  const geo = geoip.lookup(ip);
+  // const parser = new UAParser(userAgent);
+  // const result = parser.getResult();
+  // const geo = geoip.lookup(ip);
 
   return {
     ip,
-    location: geo ? `${geo.city}, ${geo.country}` : "Unknown",
-    browser: `${result.browser.name || "Unknown"} ${result.browser.version || ""}`.trim(),
-    device: `${result.device.vendor || "Unknown"} ${result.device.model || ""}`.trim(),
-    os: `${result.os.name || "Unknown"} ${result.os.version || ""}`.trim(),
+    location: "Unknown",
+    browser: "Unknown",
+    device: "Unknown",
+    os: "Unknown",
   };
 };
 
@@ -111,7 +113,7 @@ export class AuthService {
         exp: Math.floor(Date.now() / 1000) * 60 * 15,
       };
 
-      const accessToken = await sign(accessPayload, env.JWT_SECRET);
+      const accessToken = await sign(accessPayload, env.JWT_SECRET!);
 
       const refreshToken = crypto.randomUUID();
       const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -120,7 +122,7 @@ export class AuthService {
 
       await this.db_conn.insertSession(user.userId, refreshToken, refreshExpiresAt, trx);
 
-      setCookie(c, env.COOKIES_NAME, refreshToken, {
+      setCookie(c, env.COOKIES_NAME!, refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
@@ -155,7 +157,7 @@ export class AuthService {
   };
 
   refreshToken: AppRouteHandler<IRefreshToken> = async (c) => {
-    const refreshToken = getCookie(c, env.COOKIES_NAME);
+    const refreshToken = getCookie(c, env.COOKIES_NAME!);
 
     if (!refreshToken) {
       return c.json({ message: "No refresh token" }, HttpStatusCodes.UNAUTHORIZED);
@@ -168,14 +170,14 @@ export class AuthService {
 
     const accessToken = await sign(
       { userId: session.userId, exp: Math.floor(Date.now() / 1000) * 60 * 15 },
-      env.JWT_SECRET
+      env.JWT_SECRET!
     );
 
     return c.json({ accessToken }, HttpStatusCodes.OK);
   };
 
   logout: AppRouteHandler<ILogout> = async (c) => {
-    const refreshToken = getCookie(c, env.COOKIES_NAME);
+    const refreshToken = getCookie(c, env.COOKIES_NAME!);
 
     if (refreshToken) {
       const deletedSession = await db
@@ -192,7 +194,7 @@ export class AuthService {
           ...auditInfo,
         });
       }
-      deleteCookie(c, env.COOKIES_NAME);
+      deleteCookie(c, env.COOKIES_NAME!);
     }
 
     return c.json({ message: "Logged out" }, HttpStatusCodes.OK);

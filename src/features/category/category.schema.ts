@@ -1,8 +1,8 @@
-import { idParams } from '@/config/types';
-import { ZCategory } from '@/db/schema.type';
-import { createRoute, z } from '@hono/zod-openapi';
-import * as HttpStatusCodes from 'stoker/http-status-codes';
-import { jsonContent, jsonContentRequired } from 'stoker/openapi/helpers';
+import { idParams } from "config/types";
+import { ZCategory } from "db/schema.type";
+import { createRoute, z } from "@hono/zod-openapi";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
 export const ZUpdateCategory = ZCategory.partial();
 
@@ -11,27 +11,24 @@ export type IUpdateCategoryType = z.infer<typeof ZUpdateCategory>;
 
 export class CategorySchema {
   readonly addCategory = createRoute({
-    path: '/',
-    method: 'post',
-    tags: ['category'],
+    path: "/",
+    method: "post",
+    tags: ["category"],
     security: [
       {
         bearerAuth: [],
       },
     ],
-    request: { body: jsonContentRequired(ZCategory, 'create category') },
+    request: { body: jsonContentRequired(ZCategory, "create category") },
     responses: {
-      [HttpStatusCodes.CREATED]: jsonContent(
-        ZCategory,
-        'Category created response'
-      ),
+      [HttpStatusCodes.CREATED]: jsonContent(ZCategory, "Category created response"),
     },
   });
 
   readonly getCategory = createRoute({
-    path: '/',
-    method: 'get',
-    tags: ['category'],
+    path: "/",
+    method: "get",
+    tags: ["category"],
     security: [
       {
         bearerAuth: [],
@@ -41,11 +38,11 @@ export class CategorySchema {
       query: z.object({
         limit: z
           .string()
-          .default('10')
+          .default("10")
           .transform((val) => (val ? parseInt(val) : 10)),
         offset: z
           .string()
-          .default('0')
+          .default("0")
           .transform((val) => (val ? parseInt(val) : 0)),
       }),
     },
@@ -55,22 +52,22 @@ export class CategorySchema {
           count: z.number(),
           result: z.array(ZCategory),
         }),
-        'Category fetched'
+        "Category fetched"
       ),
 
       [HttpStatusCodes.NOT_FOUND]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        'No category found'
+        "No category found"
       ),
     },
   });
 
   readonly updateCategory = createRoute({
-    path: '/:id',
-    method: 'put',
-    tags: ['category'],
+    path: "/:id",
+    method: "put",
+    tags: ["category"],
     security: [
       {
         bearerAuth: [],
@@ -78,17 +75,17 @@ export class CategorySchema {
     ],
     request: {
       params: idParams,
-      body: jsonContentRequired(ZUpdateCategory, 'Update category'),
+      body: jsonContentRequired(ZUpdateCategory, "Update category"),
     },
     responses: {
-      [HttpStatusCodes.OK]: jsonContent(ZCategory, 'Category updated'),
+      [HttpStatusCodes.OK]: jsonContent(ZCategory, "Category updated"),
     },
   });
 
   readonly deleteCategory = createRoute({
-    path: '/:id',
-    method: 'delete',
-    tags: ['category'],
+    path: "/:id",
+    method: "delete",
+    tags: ["category"],
     security: [
       {
         bearerAuth: [],
@@ -100,7 +97,7 @@ export class CategorySchema {
         z.object({
           message: z.string(),
         }),
-        'Category deleted'
+        "Category deleted"
       ),
     },
   });

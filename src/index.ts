@@ -1,11 +1,45 @@
-import { serve } from '@hono/node-server';
+import { handle } from "hono/aws-lambda";
+import configureOpenAPI from "./config/configure-open-api";
+import createApp, { createRouter } from "./config/create-app";
+import { seedRBAC } from "./db/seed-rbac";
+import { HealthRoute } from "./features/health/health.router";
+import { publicRoutes } from "./routes/public.routes";
 
-import 'dotenv/config';
-import { app } from './app';
-import env from './env';
+const app = createApp();
 
-const port = env.PORT;
+configureOpenAPI(app);
 
-console.log(`🚀 Server running at http://localhost:${port}`);
+app.get("/", (c) => {
+  return c.text("Hello Hono aws lambda awsss!");
+});
 
-serve({ fetch: app.fetch, port });
+export const abcRoutes = createRouter();
+
+abcRoutes.openapi(
+  {
+    method: "get",
+    path: "/abc",
+    responses: {
+      200: { description: "abc" },
+    },
+  },
+  (c) => c.text("ABC")
+);
+
+const health = new HealthRoute();
+
+app.route("/", abcRoutes);
+app.route("/health", health.routes);
+app.route("/api/v1", publicRoutes);
+
+app.get("/api/rbac/seed", async (c) => {
+  await seedRBAC();
+  return c.text("RBAC seeded successfully");
+});
+
+app.onError((err, c) => {
+  console.error("GLOBAL ERROR:", err);
+  return c.json({ error: "Internal Server Error" }, 500);
+});
+
+export const handler = handle(app);

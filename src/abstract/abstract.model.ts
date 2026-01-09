@@ -1,6 +1,10 @@
-import type { Transaction } from "@/config/types";
-import { db } from "@/db/db";
-import * as table from "@/db/schema";
+// import { db } from "db/db";
+// import * as table from "db/schema";
+// import type { Transaction } from "config/types";
+
+import { Transaction } from "../config/types";
+import { db } from "../db/db";
+import * as table from "../db/schema";
 
 export abstract class AbstractModels {
   protected readonly db = db;

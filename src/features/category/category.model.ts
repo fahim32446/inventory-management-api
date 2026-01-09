@@ -1,7 +1,7 @@
-import { AbstractModels } from '@/abstract/abstract.model';
+import { AbstractModels } from "abstract/abstract.model";
 
-import { eq, getTableColumns } from 'drizzle-orm';
-import type { ICategoryType, IUpdateCategoryType } from './category.schema';
+import { eq, getTableColumns } from "drizzle-orm";
+import type { ICategoryType, IUpdateCategoryType } from "./category.schema";
 
 export class CategoryModel extends AbstractModels {
   async addCategory(body: ICategoryType & { orgId: number }) {

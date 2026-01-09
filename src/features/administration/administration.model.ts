@@ -1,4 +1,4 @@
-import { AbstractModels } from "@/abstract/abstract.model";
+import { AbstractModels } from "abstract/abstract.model";
 import { and, eq, isNull, or } from "drizzle-orm";
 import type { IZRole, IZUpdateUser, IZUser } from "./administration.schema";
 

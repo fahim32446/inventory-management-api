@@ -1,5 +1,4 @@
-import { createRouter } from "@/config/create-app";
-
+import { createRouter } from "../../config/create-app";
 import { AuthSchema } from "./auth.schema";
 import { AuthService } from "./auth.service";
 

@@ -1,6 +1,6 @@
-import { createRouter } from '@/config/create-app';
-import { ProductSchema } from './product.schema';
-import { ProductService } from './product.service';
+import { createRouter } from "config/create-app";
+import { ProductSchema } from "./product.schema";
+import { ProductService } from "./product.service";
 
 export class ProductRouter {
   private service = new ProductService();
