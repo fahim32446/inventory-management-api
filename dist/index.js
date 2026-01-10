@@ -344,11 +344,11 @@ var require_dist = __commonJS({
     function enhanceMissingParametersError(action, paramsToAdd) {
       try {
         return action();
-      } catch (error2) {
-        if (error2 instanceof MissingParameterDataError) {
-          throw new MissingParameterDataError(Object.assign(Object.assign({}, error2.data), paramsToAdd));
+      } catch (error) {
+        if (error instanceof MissingParameterDataError) {
+          throw new MissingParameterDataError(Object.assign(Object.assign({}, error.data), paramsToAdd));
         }
-        throw error2;
+        throw error;
       }
     }
     var UnknownZodTypeError = class extends ZodToOpenAPIError {
@@ -1242,410 +1242,6 @@ var require_dist = __commonJS({
   }
 });
 
-// node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/package.json
-var require_package = __commonJS({
-  "node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/package.json"(exports2, module2) {
-    module2.exports = {
-      name: "dotenv",
-      version: "16.6.1",
-      description: "Loads environment variables from .env file",
-      main: "lib/main.js",
-      types: "lib/main.d.ts",
-      exports: {
-        ".": {
-          types: "./lib/main.d.ts",
-          require: "./lib/main.js",
-          default: "./lib/main.js"
-        },
-        "./config": "./config.js",
-        "./config.js": "./config.js",
-        "./lib/env-options": "./lib/env-options.js",
-        "./lib/env-options.js": "./lib/env-options.js",
-        "./lib/cli-options": "./lib/cli-options.js",
-        "./lib/cli-options.js": "./lib/cli-options.js",
-        "./package.json": "./package.json"
-      },
-      scripts: {
-        "dts-check": "tsc --project tests/types/tsconfig.json",
-        lint: "standard",
-        pretest: "npm run lint && npm run dts-check",
-        test: "tap run --allow-empty-coverage --disable-coverage --timeout=60000",
-        "test:coverage": "tap run --show-full-coverage --timeout=60000 --coverage-report=text --coverage-report=lcov",
-        prerelease: "npm test",
-        release: "standard-version"
-      },
-      repository: {
-        type: "git",
-        url: "git://github.com/motdotla/dotenv.git"
-      },
-      homepage: "https://github.com/motdotla/dotenv#readme",
-      funding: "https://dotenvx.com",
-      keywords: [
-        "dotenv",
-        "env",
-        ".env",
-        "environment",
-        "variables",
-        "config",
-        "settings"
-      ],
-      readmeFilename: "README.md",
-      license: "BSD-2-Clause",
-      devDependencies: {
-        "@types/node": "^18.11.3",
-        decache: "^4.6.2",
-        sinon: "^14.0.1",
-        standard: "^17.0.0",
-        "standard-version": "^9.5.0",
-        tap: "^19.2.0",
-        typescript: "^4.8.4"
-      },
-      engines: {
-        node: ">=12"
-      },
-      browser: {
-        fs: false
-      }
-    };
-  }
-});
-
-// node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/lib/main.js
-var require_main = __commonJS({
-  "node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/lib/main.js"(exports2, module2) {
-    var fs = require("fs");
-    var path2 = require("path");
-    var os = require("os");
-    var crypto2 = require("crypto");
-    var packageJson = require_package();
-    var version2 = packageJson.version;
-    var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
-    function parse2(src) {
-      const obj = {};
-      let lines = src.toString();
-      lines = lines.replace(/\r\n?/mg, "\n");
-      let match2;
-      while ((match2 = LINE.exec(lines)) != null) {
-        const key = match2[1];
-        let value = match2[2] || "";
-        value = value.trim();
-        const maybeQuote = value[0];
-        value = value.replace(/^(['"`])([\s\S]*)\1$/mg, "$2");
-        if (maybeQuote === '"') {
-          value = value.replace(/\\n/g, "\n");
-          value = value.replace(/\\r/g, "\r");
-        }
-        obj[key] = value;
-      }
-      return obj;
-    }
-    function _parseVault(options) {
-      options = options || {};
-      const vaultPath = _vaultPath(options);
-      options.path = vaultPath;
-      const result = DotenvModule.configDotenv(options);
-      if (!result.parsed) {
-        const err = new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`);
-        err.code = "MISSING_DATA";
-        throw err;
-      }
-      const keys = _dotenvKey(options).split(",");
-      const length = keys.length;
-      let decrypted;
-      for (let i = 0; i < length; i++) {
-        try {
-          const key = keys[i].trim();
-          const attrs = _instructions(result, key);
-          decrypted = DotenvModule.decrypt(attrs.ciphertext, attrs.key);
-          break;
-        } catch (error2) {
-          if (i + 1 >= length) {
-            throw error2;
-          }
-        }
-      }
-      return DotenvModule.parse(decrypted);
-    }
-    function _warn(message) {
-      console.log(`[dotenv@${version2}][WARN] ${message}`);
-    }
-    function _debug(message) {
-      console.log(`[dotenv@${version2}][DEBUG] ${message}`);
-    }
-    function _log(message) {
-      console.log(`[dotenv@${version2}] ${message}`);
-    }
-    function _dotenvKey(options) {
-      if (options && options.DOTENV_KEY && options.DOTENV_KEY.length > 0) {
-        return options.DOTENV_KEY;
-      }
-      if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
-        return process.env.DOTENV_KEY;
-      }
-      return "";
-    }
-    function _instructions(result, dotenvKey) {
-      let uri;
-      try {
-        uri = new URL(dotenvKey);
-      } catch (error2) {
-        if (error2.code === "ERR_INVALID_URL") {
-          const err = new Error("INVALID_DOTENV_KEY: Wrong format. Must be in valid uri format like dotenv://:key_1234@dotenvx.com/vault/.env.vault?environment=development");
-          err.code = "INVALID_DOTENV_KEY";
-          throw err;
-        }
-        throw error2;
-      }
-      const key = uri.password;
-      if (!key) {
-        const err = new Error("INVALID_DOTENV_KEY: Missing key part");
-        err.code = "INVALID_DOTENV_KEY";
-        throw err;
-      }
-      const environment = uri.searchParams.get("environment");
-      if (!environment) {
-        const err = new Error("INVALID_DOTENV_KEY: Missing environment part");
-        err.code = "INVALID_DOTENV_KEY";
-        throw err;
-      }
-      const environmentKey = `DOTENV_VAULT_${environment.toUpperCase()}`;
-      const ciphertext = result.parsed[environmentKey];
-      if (!ciphertext) {
-        const err = new Error(`NOT_FOUND_DOTENV_ENVIRONMENT: Cannot locate environment ${environmentKey} in your .env.vault file.`);
-        err.code = "NOT_FOUND_DOTENV_ENVIRONMENT";
-        throw err;
-      }
-      return { ciphertext, key };
-    }
-    function _vaultPath(options) {
-      let possibleVaultPath = null;
-      if (options && options.path && options.path.length > 0) {
-        if (Array.isArray(options.path)) {
-          for (const filepath of options.path) {
-            if (fs.existsSync(filepath)) {
-              possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
-            }
-          }
-        } else {
-          possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
-        }
-      } else {
-        possibleVaultPath = path2.resolve(process.cwd(), ".env.vault");
-      }
-      if (fs.existsSync(possibleVaultPath)) {
-        return possibleVaultPath;
-      }
-      return null;
-    }
-    function _resolveHome(envPath2) {
-      return envPath2[0] === "~" ? path2.join(os.homedir(), envPath2.slice(1)) : envPath2;
-    }
-    function _configVault(options) {
-      const debug = Boolean(options && options.debug);
-      const quiet = options && "quiet" in options ? options.quiet : true;
-      if (debug || !quiet) {
-        _log("Loading env from encrypted .env.vault");
-      }
-      const parsed = DotenvModule._parseVault(options);
-      let processEnv = process.env;
-      if (options && options.processEnv != null) {
-        processEnv = options.processEnv;
-      }
-      DotenvModule.populate(processEnv, parsed, options);
-      return { parsed };
-    }
-    function configDotenv(options) {
-      const dotenvPath = path2.resolve(process.cwd(), ".env");
-      let encoding = "utf8";
-      const debug = Boolean(options && options.debug);
-      const quiet = options && "quiet" in options ? options.quiet : true;
-      if (options && options.encoding) {
-        encoding = options.encoding;
-      } else {
-        if (debug) {
-          _debug("No encoding is specified. UTF-8 is used by default");
-        }
-      }
-      let optionPaths = [dotenvPath];
-      if (options && options.path) {
-        if (!Array.isArray(options.path)) {
-          optionPaths = [_resolveHome(options.path)];
-        } else {
-          optionPaths = [];
-          for (const filepath of options.path) {
-            optionPaths.push(_resolveHome(filepath));
-          }
-        }
-      }
-      let lastError;
-      const parsedAll = {};
-      for (const path3 of optionPaths) {
-        try {
-          const parsed = DotenvModule.parse(fs.readFileSync(path3, { encoding }));
-          DotenvModule.populate(parsedAll, parsed, options);
-        } catch (e) {
-          if (debug) {
-            _debug(`Failed to load ${path3} ${e.message}`);
-          }
-          lastError = e;
-        }
-      }
-      let processEnv = process.env;
-      if (options && options.processEnv != null) {
-        processEnv = options.processEnv;
-      }
-      DotenvModule.populate(processEnv, parsedAll, options);
-      if (debug || !quiet) {
-        const keysCount = Object.keys(parsedAll).length;
-        const shortPaths = [];
-        for (const filePath of optionPaths) {
-          try {
-            const relative = path2.relative(process.cwd(), filePath);
-            shortPaths.push(relative);
-          } catch (e) {
-            if (debug) {
-              _debug(`Failed to load ${filePath} ${e.message}`);
-            }
-            lastError = e;
-          }
-        }
-        _log(`injecting env (${keysCount}) from ${shortPaths.join(",")}`);
-      }
-      if (lastError) {
-        return { parsed: parsedAll, error: lastError };
-      } else {
-        return { parsed: parsedAll };
-      }
-    }
-    function config2(options) {
-      if (_dotenvKey(options).length === 0) {
-        return DotenvModule.configDotenv(options);
-      }
-      const vaultPath = _vaultPath(options);
-      if (!vaultPath) {
-        _warn(`You set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}. Did you forget to build it?`);
-        return DotenvModule.configDotenv(options);
-      }
-      return DotenvModule._configVault(options);
-    }
-    function decrypt(encrypted, keyStr) {
-      const key = Buffer.from(keyStr.slice(-64), "hex");
-      let ciphertext = Buffer.from(encrypted, "base64");
-      const nonce = ciphertext.subarray(0, 12);
-      const authTag = ciphertext.subarray(-16);
-      ciphertext = ciphertext.subarray(12, -16);
-      try {
-        const aesgcm = crypto2.createDecipheriv("aes-256-gcm", key, nonce);
-        aesgcm.setAuthTag(authTag);
-        return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
-      } catch (error2) {
-        const isRange = error2 instanceof RangeError;
-        const invalidKeyLength = error2.message === "Invalid key length";
-        const decryptionFailed = error2.message === "Unsupported state or unable to authenticate data";
-        if (isRange || invalidKeyLength) {
-          const err = new Error("INVALID_DOTENV_KEY: It must be 64 characters long (or more)");
-          err.code = "INVALID_DOTENV_KEY";
-          throw err;
-        } else if (decryptionFailed) {
-          const err = new Error("DECRYPTION_FAILED: Please check your DOTENV_KEY");
-          err.code = "DECRYPTION_FAILED";
-          throw err;
-        } else {
-          throw error2;
-        }
-      }
-    }
-    function populate(processEnv, parsed, options = {}) {
-      const debug = Boolean(options && options.debug);
-      const override = Boolean(options && options.override);
-      if (typeof parsed !== "object") {
-        const err = new Error("OBJECT_REQUIRED: Please check the processEnv argument being passed to populate");
-        err.code = "OBJECT_REQUIRED";
-        throw err;
-      }
-      for (const key of Object.keys(parsed)) {
-        if (Object.prototype.hasOwnProperty.call(processEnv, key)) {
-          if (override === true) {
-            processEnv[key] = parsed[key];
-          }
-          if (debug) {
-            if (override === true) {
-              _debug(`"${key}" is already defined and WAS overwritten`);
-            } else {
-              _debug(`"${key}" is already defined and was NOT overwritten`);
-            }
-          }
-        } else {
-          processEnv[key] = parsed[key];
-        }
-      }
-    }
-    var DotenvModule = {
-      configDotenv,
-      _configVault,
-      _parseVault,
-      config: config2,
-      decrypt,
-      parse: parse2,
-      populate
-    };
-    module2.exports.configDotenv = DotenvModule.configDotenv;
-    module2.exports._configVault = DotenvModule._configVault;
-    module2.exports._parseVault = DotenvModule._parseVault;
-    module2.exports.config = DotenvModule.config;
-    module2.exports.decrypt = DotenvModule.decrypt;
-    module2.exports.parse = DotenvModule.parse;
-    module2.exports.populate = DotenvModule.populate;
-    module2.exports = DotenvModule;
-  }
-});
-
-// node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/lib/env-options.js
-var require_env_options = __commonJS({
-  "node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/lib/env-options.js"(exports2, module2) {
-    var options = {};
-    if (process.env.DOTENV_CONFIG_ENCODING != null) {
-      options.encoding = process.env.DOTENV_CONFIG_ENCODING;
-    }
-    if (process.env.DOTENV_CONFIG_PATH != null) {
-      options.path = process.env.DOTENV_CONFIG_PATH;
-    }
-    if (process.env.DOTENV_CONFIG_QUIET != null) {
-      options.quiet = process.env.DOTENV_CONFIG_QUIET;
-    }
-    if (process.env.DOTENV_CONFIG_DEBUG != null) {
-      options.debug = process.env.DOTENV_CONFIG_DEBUG;
-    }
-    if (process.env.DOTENV_CONFIG_OVERRIDE != null) {
-      options.override = process.env.DOTENV_CONFIG_OVERRIDE;
-    }
-    if (process.env.DOTENV_CONFIG_DOTENV_KEY != null) {
-      options.DOTENV_KEY = process.env.DOTENV_CONFIG_DOTENV_KEY;
-    }
-    module2.exports = options;
-  }
-});
-
-// node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/lib/cli-options.js
-var require_cli_options = __commonJS({
-  "node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/lib/cli-options.js"(exports2, module2) {
-    var re = /^dotenv_config_(encoding|path|quiet|debug|override|DOTENV_KEY)=(.+)$/;
-    module2.exports = function optionMatcher(args) {
-      const options = args.reduce(function(acc, cur) {
-        const matches = cur.match(re);
-        if (matches) {
-          acc[matches[1]] = matches[2];
-        }
-        return acc;
-      }, {});
-      if (!("quiet" in options)) {
-        options.quiet = "true";
-      }
-      return options;
-    };
-  }
-});
-
 // node_modules/.pnpm/postgres-array@2.0.0/node_modules/postgres-array/index.js
 var require_postgres_array = __commonJS({
   "node_modules/.pnpm/postgres-array@2.0.0/node_modules/postgres-array/index.js"(exports2) {
@@ -1937,17 +1533,17 @@ var require_postgres_interval = __commonJS({
       if (!interval2) return {};
       var matches = INTERVAL.exec(interval2);
       var isNegative = matches[8] === "-";
-      return Object.keys(positions).reduce(function(parsed, property) {
+      return Object.keys(positions).reduce(function(parsed2, property) {
         var position = positions[property];
         var value = matches[position];
-        if (!value) return parsed;
+        if (!value) return parsed2;
         value = property === "milliseconds" ? parseMilliseconds(value) : parseInt(value, 10);
-        if (!value) return parsed;
+        if (!value) return parsed2;
         if (isNegative && ~negatives.indexOf(property)) {
           value *= -1;
         }
-        parsed[property] = value;
-        return parsed;
+        parsed2[property] = value;
+        return parsed2;
       }, {});
     }
   }
@@ -4767,11 +4363,11 @@ var require_connection = __commonJS({
           }
           self.emit("connect");
         });
-        const reportStreamError = function(error2) {
-          if (self._ending && (error2.code === "ECONNRESET" || error2.code === "EPIPE")) {
+        const reportStreamError = function(error) {
+          if (self._ending && (error.code === "ECONNRESET" || error.code === "EPIPE")) {
             return;
           }
-          self.emit("error", error2);
+          self.emit("error", error);
         };
         this.stream.on("error", reportStreamError);
         this.stream.on("close", function() {
@@ -4932,8 +4528,8 @@ var require_split2 = __commonJS({
       for (let i = 0; i < list.length; i++) {
         try {
           push(this, this.mapper(list[i]));
-        } catch (error2) {
-          return cb(error2);
+        } catch (error) {
+          return cb(error);
         }
       }
       this.overflow = this[kLast].length > this.maxLength;
@@ -4948,8 +4544,8 @@ var require_split2 = __commonJS({
       if (this[kLast]) {
         try {
           push(this, this.mapper(this[kLast]));
-        } catch (error2) {
-          return cb(error2);
+        } catch (error) {
+          return cb(error);
         }
       }
       cb();
@@ -5309,19 +4905,19 @@ var require_client = __commonJS({
         });
         this._attachListeners(con);
         con.once("end", () => {
-          const error2 = this._ending ? new Error("Connection terminated") : new Error("Connection terminated unexpectedly");
+          const error = this._ending ? new Error("Connection terminated") : new Error("Connection terminated unexpectedly");
           clearTimeout(this.connectionTimeoutHandle);
-          this._errorAllQueries(error2);
+          this._errorAllQueries(error);
           this._ended = true;
           if (!this._ending) {
             if (this._connecting && !this._connectionError) {
               if (this._connectionCallback) {
-                this._connectionCallback(error2);
+                this._connectionCallback(error);
               } else {
-                this._handleErrorEvent(error2);
+                this._handleErrorEvent(error);
               }
             } else if (!this._connectionError) {
-              this._handleErrorEvent(error2);
+              this._handleErrorEvent(error);
             }
           }
           process.nextTick(() => {
@@ -5335,9 +4931,9 @@ var require_client = __commonJS({
           return;
         }
         return new this._Promise((resolve, reject) => {
-          this._connect((error2) => {
-            if (error2) {
-              reject(error2);
+          this._connect((error) => {
+            if (error) {
+              reject(error);
             } else {
               resolve();
             }
@@ -5520,16 +5116,16 @@ var require_client = __commonJS({
       }
       _handleCommandComplete(msg) {
         if (this.activeQuery == null) {
-          const error2 = new Error("Received unexpected commandComplete message from backend.");
-          this._handleErrorEvent(error2);
+          const error = new Error("Received unexpected commandComplete message from backend.");
+          this._handleErrorEvent(error);
           return;
         }
         this.activeQuery.handleCommandComplete(msg, this.connection);
       }
       _handleParseComplete() {
         if (this.activeQuery == null) {
-          const error2 = new Error("Received unexpected parseComplete message from backend.");
-          this._handleErrorEvent(error2);
+          const error = new Error("Received unexpected parseComplete message from backend.");
+          this._handleErrorEvent(error);
           return;
         }
         if (this.activeQuery.name) {
@@ -5654,11 +5250,11 @@ var require_client = __commonJS({
         if (readTimeout) {
           queryCallback = query.callback;
           readTimeoutTimer = setTimeout(() => {
-            const error2 = new Error("Query read timeout");
+            const error = new Error("Query read timeout");
             process.nextTick(() => {
-              query.handleError(error2, this.connection);
+              query.handleError(error, this.connection);
             });
-            queryCallback(error2);
+            queryCallback(error);
             query.callback = () => {
             };
             const index = this.queryQueue.indexOf(query);
@@ -6357,9 +5953,9 @@ var require_client2 = __commonJS({
         return;
       }
       return new this._Promise((resolve, reject) => {
-        this._connect((error2) => {
-          if (error2) {
-            reject(error2);
+        this._connect((error) => {
+          if (error) {
+            reject(error);
           } else {
             resolve();
           }
@@ -6398,11 +5994,11 @@ var require_client2 = __commonJS({
       if (readTimeout) {
         queryCallback = query.callback;
         readTimeoutTimer = setTimeout(() => {
-          const error2 = new Error("Query read timeout");
+          const error = new Error("Query read timeout");
           process.nextTick(() => {
-            query.handleError(error2, this.connection);
+            query.handleError(error, this.connection);
           });
-          queryCallback(error2);
+          queryCallback(error);
           query.callback = () => {
           };
           const index = this._queryQueue.indexOf(query);
@@ -6566,6 +6162,364 @@ var require_lib2 = __commonJS({
         }
       });
     }
+  }
+});
+
+// node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/package.json
+var require_package = __commonJS({
+  "node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/package.json"(exports2, module2) {
+    module2.exports = {
+      name: "dotenv",
+      version: "16.6.1",
+      description: "Loads environment variables from .env file",
+      main: "lib/main.js",
+      types: "lib/main.d.ts",
+      exports: {
+        ".": {
+          types: "./lib/main.d.ts",
+          require: "./lib/main.js",
+          default: "./lib/main.js"
+        },
+        "./config": "./config.js",
+        "./config.js": "./config.js",
+        "./lib/env-options": "./lib/env-options.js",
+        "./lib/env-options.js": "./lib/env-options.js",
+        "./lib/cli-options": "./lib/cli-options.js",
+        "./lib/cli-options.js": "./lib/cli-options.js",
+        "./package.json": "./package.json"
+      },
+      scripts: {
+        "dts-check": "tsc --project tests/types/tsconfig.json",
+        lint: "standard",
+        pretest: "npm run lint && npm run dts-check",
+        test: "tap run --allow-empty-coverage --disable-coverage --timeout=60000",
+        "test:coverage": "tap run --show-full-coverage --timeout=60000 --coverage-report=text --coverage-report=lcov",
+        prerelease: "npm test",
+        release: "standard-version"
+      },
+      repository: {
+        type: "git",
+        url: "git://github.com/motdotla/dotenv.git"
+      },
+      homepage: "https://github.com/motdotla/dotenv#readme",
+      funding: "https://dotenvx.com",
+      keywords: [
+        "dotenv",
+        "env",
+        ".env",
+        "environment",
+        "variables",
+        "config",
+        "settings"
+      ],
+      readmeFilename: "README.md",
+      license: "BSD-2-Clause",
+      devDependencies: {
+        "@types/node": "^18.11.3",
+        decache: "^4.6.2",
+        sinon: "^14.0.1",
+        standard: "^17.0.0",
+        "standard-version": "^9.5.0",
+        tap: "^19.2.0",
+        typescript: "^4.8.4"
+      },
+      engines: {
+        node: ">=12"
+      },
+      browser: {
+        fs: false
+      }
+    };
+  }
+});
+
+// node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/lib/main.js
+var require_main = __commonJS({
+  "node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/lib/main.js"(exports2, module2) {
+    var fs = require("fs");
+    var path2 = require("path");
+    var os = require("os");
+    var crypto2 = require("crypto");
+    var packageJson = require_package();
+    var version2 = packageJson.version;
+    var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
+    function parse2(src) {
+      const obj = {};
+      let lines = src.toString();
+      lines = lines.replace(/\r\n?/mg, "\n");
+      let match2;
+      while ((match2 = LINE.exec(lines)) != null) {
+        const key = match2[1];
+        let value = match2[2] || "";
+        value = value.trim();
+        const maybeQuote = value[0];
+        value = value.replace(/^(['"`])([\s\S]*)\1$/mg, "$2");
+        if (maybeQuote === '"') {
+          value = value.replace(/\\n/g, "\n");
+          value = value.replace(/\\r/g, "\r");
+        }
+        obj[key] = value;
+      }
+      return obj;
+    }
+    function _parseVault(options) {
+      options = options || {};
+      const vaultPath = _vaultPath(options);
+      options.path = vaultPath;
+      const result = DotenvModule.configDotenv(options);
+      if (!result.parsed) {
+        const err = new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`);
+        err.code = "MISSING_DATA";
+        throw err;
+      }
+      const keys = _dotenvKey(options).split(",");
+      const length = keys.length;
+      let decrypted;
+      for (let i = 0; i < length; i++) {
+        try {
+          const key = keys[i].trim();
+          const attrs = _instructions(result, key);
+          decrypted = DotenvModule.decrypt(attrs.ciphertext, attrs.key);
+          break;
+        } catch (error) {
+          if (i + 1 >= length) {
+            throw error;
+          }
+        }
+      }
+      return DotenvModule.parse(decrypted);
+    }
+    function _warn(message) {
+      console.log(`[dotenv@${version2}][WARN] ${message}`);
+    }
+    function _debug(message) {
+      console.log(`[dotenv@${version2}][DEBUG] ${message}`);
+    }
+    function _log(message) {
+      console.log(`[dotenv@${version2}] ${message}`);
+    }
+    function _dotenvKey(options) {
+      if (options && options.DOTENV_KEY && options.DOTENV_KEY.length > 0) {
+        return options.DOTENV_KEY;
+      }
+      if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
+        return process.env.DOTENV_KEY;
+      }
+      return "";
+    }
+    function _instructions(result, dotenvKey) {
+      let uri;
+      try {
+        uri = new URL(dotenvKey);
+      } catch (error) {
+        if (error.code === "ERR_INVALID_URL") {
+          const err = new Error("INVALID_DOTENV_KEY: Wrong format. Must be in valid uri format like dotenv://:key_1234@dotenvx.com/vault/.env.vault?environment=development");
+          err.code = "INVALID_DOTENV_KEY";
+          throw err;
+        }
+        throw error;
+      }
+      const key = uri.password;
+      if (!key) {
+        const err = new Error("INVALID_DOTENV_KEY: Missing key part");
+        err.code = "INVALID_DOTENV_KEY";
+        throw err;
+      }
+      const environment = uri.searchParams.get("environment");
+      if (!environment) {
+        const err = new Error("INVALID_DOTENV_KEY: Missing environment part");
+        err.code = "INVALID_DOTENV_KEY";
+        throw err;
+      }
+      const environmentKey = `DOTENV_VAULT_${environment.toUpperCase()}`;
+      const ciphertext = result.parsed[environmentKey];
+      if (!ciphertext) {
+        const err = new Error(`NOT_FOUND_DOTENV_ENVIRONMENT: Cannot locate environment ${environmentKey} in your .env.vault file.`);
+        err.code = "NOT_FOUND_DOTENV_ENVIRONMENT";
+        throw err;
+      }
+      return { ciphertext, key };
+    }
+    function _vaultPath(options) {
+      let possibleVaultPath = null;
+      if (options && options.path && options.path.length > 0) {
+        if (Array.isArray(options.path)) {
+          for (const filepath of options.path) {
+            if (fs.existsSync(filepath)) {
+              possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
+            }
+          }
+        } else {
+          possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
+        }
+      } else {
+        possibleVaultPath = path2.resolve(process.cwd(), ".env.vault");
+      }
+      if (fs.existsSync(possibleVaultPath)) {
+        return possibleVaultPath;
+      }
+      return null;
+    }
+    function _resolveHome(envPath) {
+      return envPath[0] === "~" ? path2.join(os.homedir(), envPath.slice(1)) : envPath;
+    }
+    function _configVault(options) {
+      const debug = Boolean(options && options.debug);
+      const quiet = options && "quiet" in options ? options.quiet : true;
+      if (debug || !quiet) {
+        _log("Loading env from encrypted .env.vault");
+      }
+      const parsed2 = DotenvModule._parseVault(options);
+      let processEnv = process.env;
+      if (options && options.processEnv != null) {
+        processEnv = options.processEnv;
+      }
+      DotenvModule.populate(processEnv, parsed2, options);
+      return { parsed: parsed2 };
+    }
+    function configDotenv(options) {
+      const dotenvPath = path2.resolve(process.cwd(), ".env");
+      let encoding = "utf8";
+      const debug = Boolean(options && options.debug);
+      const quiet = options && "quiet" in options ? options.quiet : true;
+      if (options && options.encoding) {
+        encoding = options.encoding;
+      } else {
+        if (debug) {
+          _debug("No encoding is specified. UTF-8 is used by default");
+        }
+      }
+      let optionPaths = [dotenvPath];
+      if (options && options.path) {
+        if (!Array.isArray(options.path)) {
+          optionPaths = [_resolveHome(options.path)];
+        } else {
+          optionPaths = [];
+          for (const filepath of options.path) {
+            optionPaths.push(_resolveHome(filepath));
+          }
+        }
+      }
+      let lastError;
+      const parsedAll = {};
+      for (const path3 of optionPaths) {
+        try {
+          const parsed2 = DotenvModule.parse(fs.readFileSync(path3, { encoding }));
+          DotenvModule.populate(parsedAll, parsed2, options);
+        } catch (e) {
+          if (debug) {
+            _debug(`Failed to load ${path3} ${e.message}`);
+          }
+          lastError = e;
+        }
+      }
+      let processEnv = process.env;
+      if (options && options.processEnv != null) {
+        processEnv = options.processEnv;
+      }
+      DotenvModule.populate(processEnv, parsedAll, options);
+      if (debug || !quiet) {
+        const keysCount = Object.keys(parsedAll).length;
+        const shortPaths = [];
+        for (const filePath of optionPaths) {
+          try {
+            const relative = path2.relative(process.cwd(), filePath);
+            shortPaths.push(relative);
+          } catch (e) {
+            if (debug) {
+              _debug(`Failed to load ${filePath} ${e.message}`);
+            }
+            lastError = e;
+          }
+        }
+        _log(`injecting env (${keysCount}) from ${shortPaths.join(",")}`);
+      }
+      if (lastError) {
+        return { parsed: parsedAll, error: lastError };
+      } else {
+        return { parsed: parsedAll };
+      }
+    }
+    function config2(options) {
+      if (_dotenvKey(options).length === 0) {
+        return DotenvModule.configDotenv(options);
+      }
+      const vaultPath = _vaultPath(options);
+      if (!vaultPath) {
+        _warn(`You set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}. Did you forget to build it?`);
+        return DotenvModule.configDotenv(options);
+      }
+      return DotenvModule._configVault(options);
+    }
+    function decrypt(encrypted, keyStr) {
+      const key = Buffer.from(keyStr.slice(-64), "hex");
+      let ciphertext = Buffer.from(encrypted, "base64");
+      const nonce = ciphertext.subarray(0, 12);
+      const authTag = ciphertext.subarray(-16);
+      ciphertext = ciphertext.subarray(12, -16);
+      try {
+        const aesgcm = crypto2.createDecipheriv("aes-256-gcm", key, nonce);
+        aesgcm.setAuthTag(authTag);
+        return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
+      } catch (error) {
+        const isRange = error instanceof RangeError;
+        const invalidKeyLength = error.message === "Invalid key length";
+        const decryptionFailed = error.message === "Unsupported state or unable to authenticate data";
+        if (isRange || invalidKeyLength) {
+          const err = new Error("INVALID_DOTENV_KEY: It must be 64 characters long (or more)");
+          err.code = "INVALID_DOTENV_KEY";
+          throw err;
+        } else if (decryptionFailed) {
+          const err = new Error("DECRYPTION_FAILED: Please check your DOTENV_KEY");
+          err.code = "DECRYPTION_FAILED";
+          throw err;
+        } else {
+          throw error;
+        }
+      }
+    }
+    function populate(processEnv, parsed2, options = {}) {
+      const debug = Boolean(options && options.debug);
+      const override = Boolean(options && options.override);
+      if (typeof parsed2 !== "object") {
+        const err = new Error("OBJECT_REQUIRED: Please check the processEnv argument being passed to populate");
+        err.code = "OBJECT_REQUIRED";
+        throw err;
+      }
+      for (const key of Object.keys(parsed2)) {
+        if (Object.prototype.hasOwnProperty.call(processEnv, key)) {
+          if (override === true) {
+            processEnv[key] = parsed2[key];
+          }
+          if (debug) {
+            if (override === true) {
+              _debug(`"${key}" is already defined and WAS overwritten`);
+            } else {
+              _debug(`"${key}" is already defined and was NOT overwritten`);
+            }
+          }
+        } else {
+          processEnv[key] = parsed2[key];
+        }
+      }
+    }
+    var DotenvModule = {
+      configDotenv,
+      _configVault,
+      _parseVault,
+      config: config2,
+      decrypt,
+      parse: parse2,
+      populate
+    };
+    module2.exports.configDotenv = DotenvModule.configDotenv;
+    module2.exports._configVault = DotenvModule._configVault;
+    module2.exports._parseVault = DotenvModule._parseVault;
+    module2.exports.config = DotenvModule.config;
+    module2.exports.decrypt = DotenvModule.decrypt;
+    module2.exports.parse = DotenvModule.parse;
+    module2.exports.populate = DotenvModule.populate;
+    module2.exports = DotenvModule;
   }
 });
 
@@ -6936,12 +6890,12 @@ var require_fetch = __commonJS({
         options.cookie = false;
       }
       let fetchRes = options.fetchRes;
-      let parsed = urllib.parse(url);
+      let parsed2 = urllib.parse(url);
       let method = (options.method || "").toString().trim().toUpperCase() || "GET";
       let finished = false;
       let cookies;
       let body;
-      let handler2 = parsed.protocol === "https:" ? https : http;
+      let handler2 = parsed2.protocol === "https:" ? https : http;
       let headers = {
         "accept-encoding": "gzip,deflate",
         "user-agent": "nodemailer/" + packageData.version
@@ -6952,8 +6906,8 @@ var require_fetch = __commonJS({
       if (options.userAgent) {
         headers["user-agent"] = options.userAgent;
       }
-      if (parsed.auth) {
-        headers.Authorization = "Basic " + Buffer.from(parsed.auth).toString("base64");
+      if (parsed2.auth) {
+        headers.Authorization = "Basic " + Buffer.from(parsed2.auth).toString("base64");
       }
       if (cookies = options.cookies.get(url)) {
         headers.cookie = cookies;
@@ -7006,9 +6960,9 @@ var require_fetch = __commonJS({
       let req;
       let reqOptions = {
         method,
-        host: parsed.hostname,
-        path: parsed.path,
-        port: parsed.port ? parsed.port : parsed.protocol === "https:" ? 443 : 80,
+        host: parsed2.hostname,
+        path: parsed2.path,
+        port: parsed2.port ? parsed2.port : parsed2.protocol === "https:" ? 443 : 80,
         headers,
         rejectUnauthorized: false,
         agent: false
@@ -7018,8 +6972,8 @@ var require_fetch = __commonJS({
           reqOptions[key] = options.tls[key];
         });
       }
-      if (parsed.protocol === "https:" && parsed.hostname && parsed.hostname !== reqOptions.host && !net.isIP(parsed.hostname) && !reqOptions.servername) {
-        reqOptions.servername = parsed.hostname;
+      if (parsed2.protocol === "https:" && parsed2.hostname && parsed2.hostname !== reqOptions.host && !net.isIP(parsed2.hostname) && !reqOptions.servername) {
+        reqOptions.servername = parsed2.hostname;
       }
       try {
         req = handler2.request(reqOptions);
@@ -9779,8 +9733,8 @@ var require_mime_types = __commonJS({
         if (!filename) {
           return defaultMimeType;
         }
-        let parsed = path2.parse(filename);
-        let extension = (parsed.ext.substr(1) || parsed.name || "").split("?").shift().trim().toLowerCase();
+        let parsed2 = path2.parse(filename);
+        let extension = (parsed2.ext.substr(1) || parsed2.name || "").split("?").shift().trim().toLowerCase();
         let value = defaultMimeType;
         if (extensions.has(extension)) {
           value = extensions.get(extension);
@@ -9839,7 +9793,7 @@ var require_punycode = __commonJS({
     var baseMinusTMin = base - tMin;
     var floor = Math.floor;
     var stringFromCharCode = String.fromCharCode;
-    function error2(type) {
+    function error(type) {
       throw new RangeError(errors[type]);
     }
     function map(array, callback) {
@@ -9924,7 +9878,7 @@ var require_punycode = __commonJS({
       }
       for (let j = 0; j < basic; ++j) {
         if (input.charCodeAt(j) >= 128) {
-          error2("not-basic");
+          error("not-basic");
         }
         output.push(input.charCodeAt(j));
       }
@@ -9932,14 +9886,14 @@ var require_punycode = __commonJS({
         const oldi = i;
         for (let w = 1, k = base; ; k += base) {
           if (index >= inputLength) {
-            error2("invalid-input");
+            error("invalid-input");
           }
           const digit = basicToDigit(input.charCodeAt(index++));
           if (digit >= base) {
-            error2("invalid-input");
+            error("invalid-input");
           }
           if (digit > floor((maxInt - i) / w)) {
-            error2("overflow");
+            error("overflow");
           }
           i += digit * w;
           const t = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
@@ -9948,14 +9902,14 @@ var require_punycode = __commonJS({
           }
           const baseMinusT = base - t;
           if (w > floor(maxInt / baseMinusT)) {
-            error2("overflow");
+            error("overflow");
           }
           w *= baseMinusT;
         }
         const out = output.length + 1;
         bias = adapt(i - oldi, out, oldi == 0);
         if (floor(i / out) > maxInt - n) {
-          error2("overflow");
+          error("overflow");
         }
         n += floor(i / out);
         i %= out;
@@ -9989,13 +9943,13 @@ var require_punycode = __commonJS({
         }
         const handledCPCountPlusOne = handledCPCount + 1;
         if (m2 - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
-          error2("overflow");
+          error("overflow");
         }
         delta += (m2 - n) * handledCPCountPlusOne;
         n = m2;
         for (const currentValue of input) {
           if (currentValue < n && ++delta > maxInt) {
-            error2("overflow");
+            error("overflow");
           }
           if (currentValue === n) {
             let q = delta;
@@ -14077,7 +14031,7 @@ var require_smtp_connection = __commonJS({
         this._destroyed = false;
         this._closing = false;
         this._onSocketData = (chunk) => this._onData(chunk);
-        this._onSocketError = (error2) => this._onError(error2, "ESOCKET", false, "CONN");
+        this._onSocketError = (error) => this._onError(error, "ESOCKET", false, "CONN");
         this._onSocketClose = () => this._onClose();
         this._onSocketEnd = () => this._onEnd();
         this._onSocketTimeout = () => this._onTimeout();
@@ -15662,10 +15616,10 @@ var require_xoauth2 = __commonJS({
           "Requesting token using: %s",
           JSON.stringify(loggedUrlOptions)
         );
-        this.postRequest(this.options.accessUrl, urlOptions, this.options, (error2, body) => {
+        this.postRequest(this.options.accessUrl, urlOptions, this.options, (error, body) => {
           let data;
-          if (error2) {
-            return callback(error2);
+          if (error) {
+            return callback(error);
           }
           try {
             data = JSON.parse(body.toString());
@@ -18100,11 +18054,11 @@ var require_nodemailer = __commonJS({
           transporter = new JSONTransport(options);
         } else if (options.SES) {
           if (options.SES.ses && options.SES.aws) {
-            let error2 = new Error(
+            let error = new Error(
               "Using legacy SES configuration, expecting @aws-sdk/client-sesv2, see https://nodemailer.com/transports/ses/"
             );
-            error2.code = "LegacyConfig";
-            throw error2;
+            error.code = "LegacyConfig";
+            throw error;
           }
           transporter = new SESTransport(options);
         } else {
@@ -18698,12 +18652,15 @@ var package_default = {
   type: "module",
   version: "1.0.0",
   scripts: {
-    dev: "tsx watch src/server.ts",
+    dev: "cross-env NODE_ENV=test tsx watch src/server.ts",
+    prod: "cross-env NODE_ENV=production tsx watch src/server.ts",
     start: "node dist/server.js",
     build: "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",
     zip: 'powershell -Command "Compress-Archive -Force dist/index.js lambda.zip"',
     update: "aws lambda update-function-code --zip-file fileb://lambda.zip --function-name hello",
-    deploy: "run-s build zip update"
+    deploy: "run-s build zip update",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   dependencies: {
     "@hono/node-server": "^1.14.1",
@@ -21407,8 +21364,8 @@ var ZodError = class _ZodError extends Error {
       return issue.message;
     };
     const fieldErrors = { _errors: [] };
-    const processError = (error2) => {
-      for (const issue of error2.issues) {
+    const processError = (error) => {
+      for (const issue of error.issues) {
         if (issue.code === "invalid_union") {
           issue.unionErrors.map(processError);
         } else if (issue.code === "invalid_return_type") {
@@ -21471,8 +21428,8 @@ var ZodError = class _ZodError extends Error {
   }
 };
 ZodError.create = (issues) => {
-  const error2 = new ZodError(issues);
-  return error2;
+  const error = new ZodError(issues);
+  return error;
 };
 
 // node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/locales/en.js
@@ -21736,8 +21693,8 @@ var handleResult = (ctx, result) => {
       get error() {
         if (this._error)
           return this._error;
-        const error2 = new ZodError(ctx.common.issues);
-        this._error = error2;
+        const error = new ZodError(ctx.common.issues);
+        this._error = error;
         return this._error;
       }
     };
@@ -24392,25 +24349,25 @@ var ZodFunction = class _ZodFunction extends ZodType {
       });
       return INVALID;
     }
-    function makeArgsIssue(args, error2) {
+    function makeArgsIssue(args, error) {
       return makeIssue({
         data: args,
         path: ctx.path,
         errorMaps: [ctx.common.contextualErrorMap, ctx.schemaErrorMap, getErrorMap(), en_default].filter((x) => !!x),
         issueData: {
           code: ZodIssueCode.invalid_arguments,
-          argumentsError: error2
+          argumentsError: error
         }
       });
     }
-    function makeReturnsIssue(returns, error2) {
+    function makeReturnsIssue(returns, error) {
       return makeIssue({
         data: returns,
         path: ctx.path,
         errorMaps: [ctx.common.contextualErrorMap, ctx.schemaErrorMap, getErrorMap(), en_default].filter((x) => !!x),
         issueData: {
           code: ZodIssueCode.invalid_return_type,
-          returnTypeError: error2
+          returnTypeError: error
         }
       });
     }
@@ -24419,15 +24376,15 @@ var ZodFunction = class _ZodFunction extends ZodType {
     if (this._def.returns instanceof ZodPromise) {
       const me = this;
       return OK(async function(...args) {
-        const error2 = new ZodError([]);
+        const error = new ZodError([]);
         const parsedArgs = await me._def.args.parseAsync(args, params).catch((e) => {
-          error2.addIssue(makeArgsIssue(args, e));
-          throw error2;
+          error.addIssue(makeArgsIssue(args, e));
+          throw error;
         });
         const result = await Reflect.apply(fn, this, parsedArgs);
         const parsedReturns = await me._def.returns._def.type.parseAsync(result, params).catch((e) => {
-          error2.addIssue(makeReturnsIssue(result, e));
-          throw error2;
+          error.addIssue(makeReturnsIssue(result, e));
+          throw error;
         });
         return parsedReturns;
       });
@@ -27990,8 +27947,8 @@ var PgGeometryObject = class extends PgColumn {
     return "geometry(point)";
   }
   mapFromDriverValue(value) {
-    const parsed = parseEWKB(value);
-    return { x: parsed[0], y: parsed[1] };
+    const parsed2 = parseEWKB(value);
+    return { x: parsed2[0], y: parsed2[1] };
   }
   mapToDriverValue(value) {
     return `point(${value.x} ${value.y})`;
@@ -28929,17 +28886,6 @@ function mapRelationalRow(tablesConfig, tableConfig, row, buildQueryResultSelect
   }
   return result;
 }
-
-// node_modules/.pnpm/dotenv@16.6.1/node_modules/dotenv/config.js
-(function() {
-  require_main().config(
-    Object.assign(
-      {},
-      require_env_options(),
-      require_cli_options()(process.argv)
-    )
-  );
-})();
 
 // node_modules/.pnpm/pg@8.16.3/node_modules/pg/esm/index.mjs
 var import_lib = __toESM(require_lib2(), 1);
@@ -32494,9 +32440,9 @@ var NodePgSession = class _NodePgSession extends PgSession {
       const result = await transaction(tx);
       await tx.execute(sql`commit`);
       return result;
-    } catch (error2) {
+    } catch (error) {
       await tx.execute(sql`rollback`);
-      throw error2;
+      throw error;
     } finally {
       if (this.client instanceof Pool2) {
         session.client.release();
@@ -32604,19 +32550,60 @@ function drizzle(...params) {
   drizzle2.mock = mock;
 })(drizzle || (drizzle = {}));
 
+// src/env.ts
+var import_dotenv = __toESM(require_main(), 1);
+var import_dotenv_expand = __toESM(require_main2(), 1);
+var import_node_path = __toESM(require("node:path"), 1);
+var cwd = process.cwd();
+(0, import_dotenv_expand.expand)(
+  (0, import_dotenv.config)({
+    path: import_node_path.default.resolve(cwd, ".env")
+  })
+);
+if (process.env.NODE_ENV === "test" || !process.env.NODE_ENV) {
+  (0, import_dotenv_expand.expand)(
+    (0, import_dotenv.config)({
+      path: import_node_path.default.resolve(cwd, ".env.test"),
+      override: true
+    })
+  );
+}
+console.log({ env: process.env.PORT });
+var EnvSchema = external_exports.object({
+  NODE_ENV: external_exports.enum(["test", "production"]).default("test"),
+  PORT: external_exports.coerce.number().default(5050),
+  EMAIL_USER: external_exports.string(),
+  EMAIL_PASS: external_exports.string(),
+  DB_HOST: external_exports.string().optional(),
+  DB_PORT: external_exports.coerce.number().optional(),
+  DB_USER: external_exports.string().optional(),
+  DB_PASSWORD: external_exports.string().optional(),
+  DB_NAME: external_exports.string().optional(),
+  DATABASE_URL: external_exports.string(),
+  JWT_SECRET: external_exports.string(),
+  COOKIES_NAME: external_exports.string(),
+  LOG_LEVEL: external_exports.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("debug")
+});
+var parsed = EnvSchema.safeParse(process.env);
+if (!parsed.success) {
+  console.error("\u274C Invalid environment variables:");
+  console.error(parsed.error.flatten().fieldErrors);
+  process.exit(1);
+}
+var env = parsed.data;
+var env_default = env;
+
 // src/db/db.ts
 var pool = new Pool({
-  // host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || "5432"),
-  // user: process.env.DB_USER,
-  // password: process.env.DB_PASSWORD,
-  // database: process.env.DB_NAME,
-  connectionString: "postgres://neondb_owner:npg_aT8Ifpm1BgNZ@ep-gentle-truth-a10d3izh-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require",
-  ssl: {
-    rejectUnauthorized: false
-  }
+  host: env_default.DB_HOST,
+  port: env_default.DB_PORT,
+  user: env_default.DB_USER,
+  password: env_default.DB_PASSWORD,
+  database: env_default.DB_NAME,
+  connectionString: env_default.DATABASE_URL,
+  ssl: env_default.NODE_ENV === "production" ? true : false
 });
-var db = drizzle({ client: pool });
+var db = drizzle(pool);
 pool.on("connect", () => {
   console.log("Database is connected");
 });
@@ -37223,41 +37210,6 @@ var verify2 = Jwt.verify;
 var decode2 = Jwt.decode;
 var sign2 = Jwt.sign;
 
-// src/env.ts
-var import_dotenv = __toESM(require_main(), 1);
-var import_dotenv_expand = __toESM(require_main2(), 1);
-var import_node_path = __toESM(require("node:path"), 1);
-(0, import_dotenv_expand.expand)(
-  (0, import_dotenv.config)({
-    path: import_node_path.default.resolve(process.cwd(), ".env")
-  })
-);
-var envPath = import_node_path.default.resolve(process.cwd(), ".env");
-(0, import_dotenv_expand.expand)((0, import_dotenv.config)({ path: envPath }));
-var EnvSchema = external_exports.object({
-  NODE_ENV: external_exports.enum(["test", "production"]).default("test"),
-  PORT: external_exports.coerce.number().default(5050),
-  EMAIL_PASS: external_exports.string().optional(),
-  EMAIL_USER: external_exports.string().optional(),
-  DB_HOST: external_exports.string().optional(),
-  DB_PORT: external_exports.coerce.number().optional(),
-  DB_USER: external_exports.string().optional(),
-  DB_PASSWORD: external_exports.string().optional(),
-  DB_NAME: external_exports.string().optional(),
-  LOG_LEVEL: external_exports.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).optional(),
-  DATABASE_URL: external_exports.string().optional().default(
-    "postgres://neondb_owner:npg_aT8Ifpm1BgNZ@ep-gentle-truth-a10d3izh-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
-  ),
-  JWT_SECRET: external_exports.string().optional(),
-  COOKIES_NAME: external_exports.string().optional()
-});
-var { data: env, error } = EnvSchema.safeParse(process.env);
-if (error) {
-  console.error("\u274C Invalid env:");
-  console.error(JSON.stringify(error.flatten().fieldErrors, null, 2));
-}
-var env_default = env;
-
 // src/middlewares/authMiddleware.ts
 var authMiddleware = () => {
   return async (c2, next) => {
@@ -37472,7 +37424,7 @@ var AuthSchema = class {
     request: {
       body: json_content_required_default(
         external_exports.object({
-          email: external_exports.string().nonempty().default("fahim@gmail.com"),
+          email: external_exports.string().nonempty().default("azmir.ahx@gmail.com"),
           password: external_exports.string().nonempty().default("12345678")
         }),
         "login user"
@@ -37623,7 +37575,8 @@ var AuthService = class {
     const { agency_name, email, name, password } = body;
     return await db.transaction(async (tx) => {
       const existingUser = await this.db_conn.checkExistingUser(email);
-      if (existingUser) {
+      console.log({ existingUser });
+      if (existingUser?.length) {
         return c2.json({ message: "Email already in use" }, CONFLICT);
       }
       const hashedPassword = await bcryptjs_default.hash(password, 10);

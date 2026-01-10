@@ -48,8 +48,9 @@ export class AuthService {
 
     return await db.transaction(async (tx) => {
       const existingUser = await this.db_conn.checkExistingUser(email);
+      console.log({ existingUser });
 
-      if (existingUser) {
+      if (existingUser?.length) {
         return c.json({ message: "Email already in use" }, HttpStatusCodes.CONFLICT);
       }
 
@@ -113,7 +114,7 @@ export class AuthService {
         exp: Math.floor(Date.now() / 1000) * 60 * 15,
       };
 
-      const accessToken = await sign(accessPayload, env.JWT_SECRET!);
+      const accessToken = await sign(accessPayload, env.JWT_SECRET);
 
       const refreshToken = crypto.randomUUID();
       const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -122,7 +123,7 @@ export class AuthService {
 
       await this.db_conn.insertSession(user.userId, refreshToken, refreshExpiresAt, trx);
 
-      setCookie(c, env.COOKIES_NAME!, refreshToken, {
+      setCookie(c, env.COOKIES_NAME, refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",

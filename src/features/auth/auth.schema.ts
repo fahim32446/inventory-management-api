@@ -37,7 +37,7 @@ export class AuthSchema {
     request: {
       body: jsonContentRequired(
         z.object({
-          email: z.string().nonempty().default("fahim@gmail.com"),
+          email: z.string().nonempty().default("azmir.ahx@gmail.com"),
           password: z.string().nonempty().default("12345678"),
         }),
         "login user"

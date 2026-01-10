@@ -3,12 +3,15 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "cross-env NODE_ENV=test tsx watch src/server.ts",
+    "prod": "cross-env NODE_ENV=production tsx watch src/server.ts",
     "start": "node dist/server.js",
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",
     "zip": "powershell -Command \"Compress-Archive -Force dist/index.js lambda.zip\"",
     "update": "aws lambda update-function-code --zip-file fileb://lambda.zip --function-name hello",
-    "deploy": "run-s build zip update"
+    "deploy": "run-s build zip update",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",

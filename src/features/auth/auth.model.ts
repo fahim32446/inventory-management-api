@@ -9,7 +9,7 @@ export class AuthModel extends AbstractModels {
       .insert(this.table.organization)
       .values({ name })
       .returning()
-      .then((rows: any) => rows[0]);
+      .then((rows) => rows[0]);
 
     return org;
   }
@@ -20,7 +20,7 @@ export class AuthModel extends AbstractModels {
       .from(this.table.roles)
       .where(and(eq(this.table.roles.isAdmin, true), isNull(this.table.roles.orgId)))
       .limit(1)
-      .then((rows: any) => rows[0]);
+      .then((rows) => rows[0]);
   }
 
   async createAdminUser(body: IUserCreateType, orgId: number, roleId: number, tx?: Transaction) {
@@ -35,7 +35,7 @@ export class AuthModel extends AbstractModels {
         roleId,
       })
       .returning()
-      .then((rows: any) => rows[0]);
+      .then((rows) => rows[0]);
 
     return user;
   }
@@ -47,7 +47,7 @@ export class AuthModel extends AbstractModels {
       .leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId))
       .where(eq(this.table.users.email, email))
       .limit(1)
-      .then((rows: any) => rows[0]);
+      .then((rows) => rows[0]);
 
     return result;
   }
@@ -94,7 +94,7 @@ export class AuthModel extends AbstractModels {
         expiresAt,
       })
       .returning()
-      .then((rows: any) => rows[0]);
+      .then((rows) => rows[0]);
   }
 
   async findOTP(userId: number, code: string, type: "FORGOT_PASSWORD", tx?: Transaction) {
@@ -109,7 +109,7 @@ export class AuthModel extends AbstractModels {
         )
       )
       .limit(1)
-      .then((rows: any) => rows[0]);
+      .then((rows) => rows[0]);
   }
 
   async deleteOTP(id: number, tx?: Transaction) {

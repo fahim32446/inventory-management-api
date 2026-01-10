@@ -1,4 +1,4 @@
-import { eq, and, inArray } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "./db";
 import { permissions, rolePermissions, roles } from "./schema";
 
