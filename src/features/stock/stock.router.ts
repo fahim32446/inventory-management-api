@@ -1,6 +1,6 @@
-import { createRouter } from '@/config/create-app';
-import { StockService } from './stock.service';
-import { StockSchema } from './stock.schema';
+import { StockService } from "./stock.service";
+import { StockSchema } from "./stock.schema";
+import { createRouter } from "../../config/create-app";
 
 export class StockRouter {
   private service = new StockService();

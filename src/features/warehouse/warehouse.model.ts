@@ -1,18 +1,10 @@
-import { AbstractModels } from '@/abstract/abstract.model';
-
-import { eq, getTableColumns } from 'drizzle-orm';
-import type { IUpdateWarehousesType, IWarehousesType } from './warehouse.schema';
+import { eq, getTableColumns } from "drizzle-orm";
+import type { IUpdateWarehousesType, IWarehousesType } from "./warehouse.schema";
+import { AbstractModels } from "../../abstract/abstract.model";
 
 export class WarehouseModel extends AbstractModels {
   async addWarehouse(body: IWarehousesType & { orgId: number }) {
-    const res = await this.query()
-      .insert(this.table.warehouses)
-      .values(body)
-      .returning()
-      .then((rows) => {
-        const { orgId, ...rest } = rows[0];
-        return rest;
-      });
+    const res = await this.query().insert(this.table.warehouses).values(body).returning();
 
     return res;
   }
@@ -22,11 +14,7 @@ export class WarehouseModel extends AbstractModels {
       .update(this.table.warehouses)
       .set(body)
       .where(eq(this.table.warehouses.whId, id))
-      .returning()
-      .then((rows) => {
-        const { orgId, ...rest } = rows[0];
-        return rest;
-      });
+      .returning();
 
     return res;
   }
@@ -35,11 +23,7 @@ export class WarehouseModel extends AbstractModels {
     const res = await this.query()
       .delete(this.table.warehouses)
       .where(eq(this.table.warehouses.whId, id))
-      .returning()
-      .then((rows) => {
-        const { orgId, ...rest } = rows[0];
-        return rest;
-      });
+      .returning();
 
     return res;
   }

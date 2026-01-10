@@ -1,8 +1,8 @@
-import { idParams } from '@/config/types';
-import { ZSupplier } from '@/db/schema.type';
-import { createRoute, z } from '@hono/zod-openapi';
-import * as HttpStatusCodes from 'stoker/http-status-codes';
-import { jsonContent, jsonContentRequired } from 'stoker/openapi/helpers';
+import { createRoute, z } from "@hono/zod-openapi";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+import { ZSupplier } from "../../db/schema.type";
+import { idParams } from "../../config/types";
 
 export const ZUpdateSupplier = ZSupplier.partial();
 
@@ -11,27 +11,24 @@ export type IUpdateSupplierType = z.infer<typeof ZUpdateSupplier>;
 
 export class SupplierSchema {
   readonly addSupplier = createRoute({
-    path: '/',
-    method: 'post',
-    tags: ['supplier'],
+    path: "/",
+    method: "post",
+    tags: ["supplier"],
     security: [
       {
         bearerAuth: [],
       },
     ],
-    request: { body: jsonContentRequired(ZSupplier, 'create supplier') },
+    request: { body: jsonContentRequired(ZSupplier, "create supplier") },
     responses: {
-      [HttpStatusCodes.CREATED]: jsonContent(
-        ZSupplier,
-        'Supplier created response'
-      ),
+      [HttpStatusCodes.CREATED]: jsonContent(ZSupplier, "Supplier created response"),
     },
   });
 
   readonly getSupplier = createRoute({
-    path: '/',
-    method: 'get',
-    tags: ['supplier'],
+    path: "/",
+    method: "get",
+    tags: ["supplier"],
     security: [
       {
         bearerAuth: [],
@@ -41,11 +38,11 @@ export class SupplierSchema {
       query: z.object({
         limit: z
           .string()
-          .default('10')
+          .default("10")
           .transform((val) => (val ? parseInt(val) : 10)),
         offset: z
           .string()
-          .default('0')
+          .default("0")
           .transform((val) => (val ? parseInt(val) : 0)),
       }),
     },
@@ -55,22 +52,22 @@ export class SupplierSchema {
           count: z.number(),
           result: z.array(ZSupplier),
         }),
-        'Supplier fetched'
+        "Supplier fetched"
       ),
 
       [HttpStatusCodes.NOT_FOUND]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        'No supplier found'
+        "No supplier found"
       ),
     },
   });
 
   readonly updateSupplier = createRoute({
-    path: '/:id',
-    method: 'put',
-    tags: ['supplier'],
+    path: "/:id",
+    method: "put",
+    tags: ["supplier"],
     security: [
       {
         bearerAuth: [],
@@ -78,17 +75,17 @@ export class SupplierSchema {
     ],
     request: {
       params: idParams,
-      body: jsonContentRequired(ZUpdateSupplier, 'Update supplier'),
+      body: jsonContentRequired(ZUpdateSupplier, "Update supplier"),
     },
     responses: {
-      [HttpStatusCodes.OK]: jsonContent(ZSupplier, 'Supplier updated'),
+      [HttpStatusCodes.OK]: jsonContent(ZSupplier, "Supplier updated"),
     },
   });
 
   readonly deleteSupplier = createRoute({
-    path: '/:id',
-    method: 'delete',
-    tags: ['supplier'],
+    path: "/:id",
+    method: "delete",
+    tags: ["supplier"],
     security: [
       {
         bearerAuth: [],
@@ -100,7 +97,7 @@ export class SupplierSchema {
         z.object({
           message: z.string(),
         }),
-        'Supplier deleted'
+        "Supplier deleted"
       ),
     },
   });

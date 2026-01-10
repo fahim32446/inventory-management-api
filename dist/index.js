@@ -6569,6 +6569,78 @@ var require_lib2 = __commonJS({
   }
 });
 
+// node_modules/.pnpm/dotenv-expand@12.0.3/node_modules/dotenv-expand/lib/main.js
+var require_main2 = __commonJS({
+  "node_modules/.pnpm/dotenv-expand@12.0.3/node_modules/dotenv-expand/lib/main.js"(exports2, module2) {
+    "use strict";
+    function _resolveEscapeSequences(value) {
+      return value.replace(/\\\$/g, "$");
+    }
+    function expandValue(value, processEnv, runningParsed) {
+      const env2 = { ...runningParsed, ...processEnv };
+      const regex = /(?<!\\)\${([^{}]+)}|(?<!\\)\$([A-Za-z_][A-Za-z0-9_]*)/g;
+      let result = value;
+      let match2;
+      const seen = /* @__PURE__ */ new Set();
+      while ((match2 = regex.exec(result)) !== null) {
+        seen.add(result);
+        const [template, bracedExpression, unbracedExpression] = match2;
+        const expression = bracedExpression || unbracedExpression;
+        const opRegex = /(:\+|\+|:-|-)/;
+        const opMatch = expression.match(opRegex);
+        const splitter = opMatch ? opMatch[0] : null;
+        const r = expression.split(splitter);
+        let defaultValue;
+        let value2;
+        const key = r.shift();
+        if ([":+", "+"].includes(splitter)) {
+          defaultValue = env2[key] ? r.join(splitter) : "";
+          value2 = null;
+        } else {
+          defaultValue = r.join(splitter);
+          value2 = env2[key];
+        }
+        if (value2) {
+          if (seen.has(value2)) {
+            result = result.replace(template, defaultValue);
+          } else {
+            result = result.replace(template, value2);
+          }
+        } else {
+          result = result.replace(template, defaultValue);
+        }
+        if (result === runningParsed[key]) {
+          break;
+        }
+        regex.lastIndex = 0;
+      }
+      return result;
+    }
+    function expand2(options) {
+      const runningParsed = {};
+      let processEnv = process.env;
+      if (options && options.processEnv != null) {
+        processEnv = options.processEnv;
+      }
+      for (const key in options.parsed) {
+        let value = options.parsed[key];
+        if (processEnv[key] && processEnv[key] !== value) {
+          value = processEnv[key];
+        } else {
+          value = expandValue(value, processEnv, runningParsed);
+        }
+        options.parsed[key] = _resolveEscapeSequences(value);
+        runningParsed[key] = _resolveEscapeSequences(value);
+      }
+      for (const processKey in options.parsed) {
+        processEnv[processKey] = options.parsed[processKey];
+      }
+      return options;
+    }
+    module2.exports.expand = expand2;
+  }
+});
+
 // node_modules/.pnpm/nodemailer@7.0.12/node_modules/nodemailer/lib/fetch/cookies.js
 var require_cookies = __commonJS({
   "node_modules/.pnpm/nodemailer@7.0.12/node_modules/nodemailer/lib/fetch/cookies.js"(exports2, module2) {
@@ -18121,82 +18193,9 @@ var require_nodemailer = __commonJS({
   }
 });
 
-// node_modules/.pnpm/dotenv-expand@12.0.3/node_modules/dotenv-expand/lib/main.js
-var require_main2 = __commonJS({
-  "node_modules/.pnpm/dotenv-expand@12.0.3/node_modules/dotenv-expand/lib/main.js"(exports2, module2) {
-    "use strict";
-    function _resolveEscapeSequences(value) {
-      return value.replace(/\\\$/g, "$");
-    }
-    function expandValue(value, processEnv, runningParsed) {
-      const env2 = { ...runningParsed, ...processEnv };
-      const regex = /(?<!\\)\${([^{}]+)}|(?<!\\)\$([A-Za-z_][A-Za-z0-9_]*)/g;
-      let result = value;
-      let match2;
-      const seen = /* @__PURE__ */ new Set();
-      while ((match2 = regex.exec(result)) !== null) {
-        seen.add(result);
-        const [template, bracedExpression, unbracedExpression] = match2;
-        const expression = bracedExpression || unbracedExpression;
-        const opRegex = /(:\+|\+|:-|-)/;
-        const opMatch = expression.match(opRegex);
-        const splitter = opMatch ? opMatch[0] : null;
-        const r = expression.split(splitter);
-        let defaultValue;
-        let value2;
-        const key = r.shift();
-        if ([":+", "+"].includes(splitter)) {
-          defaultValue = env2[key] ? r.join(splitter) : "";
-          value2 = null;
-        } else {
-          defaultValue = r.join(splitter);
-          value2 = env2[key];
-        }
-        if (value2) {
-          if (seen.has(value2)) {
-            result = result.replace(template, defaultValue);
-          } else {
-            result = result.replace(template, value2);
-          }
-        } else {
-          result = result.replace(template, defaultValue);
-        }
-        if (result === runningParsed[key]) {
-          break;
-        }
-        regex.lastIndex = 0;
-      }
-      return result;
-    }
-    function expand2(options) {
-      const runningParsed = {};
-      let processEnv = process.env;
-      if (options && options.processEnv != null) {
-        processEnv = options.processEnv;
-      }
-      for (const key in options.parsed) {
-        let value = options.parsed[key];
-        if (processEnv[key] && processEnv[key] !== value) {
-          value = processEnv[key];
-        } else {
-          value = expandValue(value, processEnv, runningParsed);
-        }
-        options.parsed[key] = _resolveEscapeSequences(value);
-        runningParsed[key] = _resolveEscapeSequences(value);
-      }
-      for (const processKey in options.parsed) {
-        processEnv[processKey] = options.parsed[processKey];
-      }
-      return options;
-    }
-    module2.exports.expand = expand2;
-  }
-});
-
 // src/index.ts
 var index_exports = {};
 __export(index_exports, {
-  abcRoutes: () => abcRoutes,
   handler: () => handler
 });
 module.exports = __toCommonJS(index_exports);
@@ -25533,6 +25532,7 @@ var logger = (fn = console.log) => {
 // node_modules/.pnpm/stoker@1.4.3_@asteasolution_a3c80c252ae1b5d252ed7311a0869f6a/node_modules/stoker/dist/esm/http-status-codes.js
 var BAD_REQUEST = 400;
 var CONFLICT = 409;
+var CREATED = 201;
 var INTERNAL_SERVER_ERROR = 500;
 var NOT_FOUND = 404;
 var OK2 = 200;
@@ -32582,18 +32582,18 @@ function construct(client, config2 = {}) {
 }
 function drizzle(...params) {
   if (typeof params[0] === "string") {
-    const instance3 = new esm_default.Pool({
+    const instance9 = new esm_default.Pool({
       connectionString: params[0]
     });
-    return construct(instance3, params[1]);
+    return construct(instance9, params[1]);
   }
   if (isConfig(params[0])) {
     const { connection, client, ...drizzleConfig } = params[0];
     if (client) return construct(client, drizzleConfig);
-    const instance3 = typeof connection === "string" ? new esm_default.Pool({
+    const instance9 = typeof connection === "string" ? new esm_default.Pool({
       connectionString: connection
     }) : new esm_default.Pool(connection);
-    return construct(instance3, drizzleConfig);
+    return construct(instance9, drizzleConfig);
   }
   return construct(params[0], params[1]);
 }
@@ -32867,778 +32867,200 @@ async function seedRBAC() {
   console.log("\u2705 RBAC seeding completed safely");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/foreign-keys.js
-var ForeignKeyBuilder2 = class {
-  static [entityKind] = "MySqlForeignKeyBuilder";
-  /** @internal */
-  reference;
-  /** @internal */
-  _onUpdate;
-  /** @internal */
-  _onDelete;
-  constructor(config2, actions) {
-    this.reference = () => {
-      const { name, columns, foreignColumns } = config2();
-      return { name, columns, foreignTable: foreignColumns[0].table, foreignColumns };
-    };
-    if (actions) {
-      this._onUpdate = actions.onUpdate;
-      this._onDelete = actions.onDelete;
-    }
-  }
-  onUpdate(action) {
-    this._onUpdate = action;
-    return this;
-  }
-  onDelete(action) {
-    this._onDelete = action;
-    return this;
-  }
-  /** @internal */
-  build(table) {
-    return new ForeignKey2(table, this);
-  }
-};
-var ForeignKey2 = class {
-  constructor(table, builder) {
-    this.table = table;
-    this.reference = builder.reference;
-    this.onUpdate = builder._onUpdate;
-    this.onDelete = builder._onDelete;
-  }
-  static [entityKind] = "MySqlForeignKey";
-  reference;
-  onUpdate;
-  onDelete;
-  getName() {
-    const { name, columns, foreignColumns } = this.reference();
-    const columnNames = columns.map((column) => column.name);
-    const foreignColumnNames = foreignColumns.map((column) => column.name);
-    const chunks = [
-      this.table[TableName],
-      ...columnNames,
-      foreignColumns[0].table[TableName],
-      ...foreignColumnNames
-    ];
-    return name ?? `${chunks.join("_")}_fk`;
-  }
-};
-
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/unique-constraint.js
-function uniqueKeyName2(table, columns) {
-  return `${table[TableName]}_${columns.join("_")}_unique`;
-}
-var UniqueConstraintBuilder2 = class {
-  constructor(columns, name) {
-    this.name = name;
-    this.columns = columns;
-  }
-  static [entityKind] = "MySqlUniqueConstraintBuilder";
-  /** @internal */
-  columns;
-  /** @internal */
-  build(table) {
-    return new UniqueConstraint2(table, this.columns, this.name);
-  }
-};
-var UniqueOnConstraintBuilder2 = class {
-  static [entityKind] = "MySqlUniqueOnConstraintBuilder";
-  /** @internal */
-  name;
-  constructor(name) {
-    this.name = name;
-  }
-  on(...columns) {
-    return new UniqueConstraintBuilder2(columns, this.name);
-  }
-};
-var UniqueConstraint2 = class {
-  constructor(table, columns, name) {
-    this.table = table;
-    this.columns = columns;
-    this.name = name ?? uniqueKeyName2(this.table, this.columns.map((column) => column.name));
-  }
-  static [entityKind] = "MySqlUniqueConstraint";
-  columns;
-  name;
-  nullsNotDistinct = false;
-  getName() {
-    return this.name;
-  }
-};
-
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/common.js
-var MySqlColumnBuilder = class extends ColumnBuilder {
-  static [entityKind] = "MySqlColumnBuilder";
-  foreignKeyConfigs = [];
-  references(ref, actions = {}) {
-    this.foreignKeyConfigs.push({ ref, actions });
-    return this;
-  }
-  unique(name) {
-    this.config.isUnique = true;
-    this.config.uniqueName = name;
-    return this;
-  }
-  generatedAlwaysAs(as, config2) {
-    this.config.generated = {
-      as,
-      type: "always",
-      mode: config2?.mode ?? "virtual"
-    };
-    return this;
-  }
-  /** @internal */
-  buildForeignKeys(column, table) {
-    return this.foreignKeyConfigs.map(({ ref, actions }) => {
-      return ((ref2, actions2) => {
-        const builder = new ForeignKeyBuilder2(() => {
-          const foreignColumn = ref2();
-          return { columns: [column], foreignColumns: [foreignColumn] };
-        });
-        if (actions2.onUpdate) {
-          builder.onUpdate(actions2.onUpdate);
-        }
-        if (actions2.onDelete) {
-          builder.onDelete(actions2.onDelete);
-        }
-        return builder.build(table);
-      })(ref, actions);
-    });
-  }
-};
-var MySqlColumn = class extends Column {
-  constructor(table, config2) {
-    if (!config2.uniqueName) {
-      config2.uniqueName = uniqueKeyName2(table, [config2.name]);
-    }
-    super(table, config2);
-    this.table = table;
-  }
-  static [entityKind] = "MySqlColumn";
-};
-var MySqlColumnBuilderWithAutoIncrement = class extends MySqlColumnBuilder {
-  static [entityKind] = "MySqlColumnBuilderWithAutoIncrement";
-  constructor(name, dataType, columnType) {
-    super(name, dataType, columnType);
-    this.config.autoIncrement = false;
-  }
-  autoincrement() {
-    this.config.autoIncrement = true;
-    this.config.hasDefault = true;
-    return this;
-  }
-};
-var MySqlColumnWithAutoIncrement = class extends MySqlColumn {
-  static [entityKind] = "MySqlColumnWithAutoIncrement";
-  autoIncrement = this.config.autoIncrement;
-};
-
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/char.js
-var MySqlCharBuilder = class extends MySqlColumnBuilder {
-  static [entityKind] = "MySqlCharBuilder";
-  constructor(name, config2) {
-    super(name, "string", "MySqlChar");
-    this.config.length = config2.length;
-    this.config.enum = config2.enum;
-  }
-  /** @internal */
-  build(table) {
-    return new MySqlChar(
-      table,
-      this.config
-    );
-  }
-};
-var MySqlChar = class extends MySqlColumn {
-  static [entityKind] = "MySqlChar";
-  length = this.config.length;
-  enumValues = this.config.enum;
-  getSQLType() {
-    return this.length === void 0 ? `char` : `char(${this.length})`;
-  }
-};
-
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/varbinary.js
-var MySqlVarBinaryBuilder = class extends MySqlColumnBuilder {
-  static [entityKind] = "MySqlVarBinaryBuilder";
-  /** @internal */
-  constructor(name, config2) {
-    super(name, "string", "MySqlVarBinary");
-    this.config.length = config2?.length;
-  }
-  /** @internal */
-  build(table) {
-    return new MySqlVarBinary(
-      table,
-      this.config
-    );
-  }
-};
-var MySqlVarBinary = class extends MySqlColumn {
-  static [entityKind] = "MySqlVarBinary";
-  length = this.config.length;
-  mapFromDriverValue(value) {
-    if (typeof value === "string") return value;
-    if (Buffer.isBuffer(value)) return value.toString();
-    const str = [];
-    for (const v of value) {
-      str.push(v === 49 ? "1" : "0");
-    }
-    return str.join("");
-  }
-  getSQLType() {
-    return this.length === void 0 ? `varbinary` : `varbinary(${this.length})`;
-  }
-};
-
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/varchar.js
-var MySqlVarCharBuilder = class extends MySqlColumnBuilder {
-  static [entityKind] = "MySqlVarCharBuilder";
-  /** @internal */
-  constructor(name, config2) {
-    super(name, "string", "MySqlVarChar");
-    this.config.length = config2.length;
-    this.config.enum = config2.enum;
-  }
-  /** @internal */
-  build(table) {
-    return new MySqlVarChar(
-      table,
-      this.config
-    );
-  }
-};
-var MySqlVarChar = class extends MySqlColumn {
-  static [entityKind] = "MySqlVarChar";
-  length = this.config.length;
-  enumValues = this.config.enum;
-  getSQLType() {
-    return this.length === void 0 ? `varchar` : `varchar(${this.length})`;
-  }
-};
-
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/foreign-keys.js
-var ForeignKeyBuilder3 = class {
-  static [entityKind] = "SQLiteForeignKeyBuilder";
-  /** @internal */
-  reference;
-  /** @internal */
-  _onUpdate;
-  /** @internal */
-  _onDelete;
-  constructor(config2, actions) {
-    this.reference = () => {
-      const { name, columns, foreignColumns } = config2();
-      return { name, columns, foreignTable: foreignColumns[0].table, foreignColumns };
-    };
-    if (actions) {
-      this._onUpdate = actions.onUpdate;
-      this._onDelete = actions.onDelete;
-    }
-  }
-  onUpdate(action) {
-    this._onUpdate = action;
-    return this;
-  }
-  onDelete(action) {
-    this._onDelete = action;
-    return this;
-  }
-  /** @internal */
-  build(table) {
-    return new ForeignKey3(table, this);
-  }
-};
-var ForeignKey3 = class {
-  constructor(table, builder) {
-    this.table = table;
-    this.reference = builder.reference;
-    this.onUpdate = builder._onUpdate;
-    this.onDelete = builder._onDelete;
-  }
-  static [entityKind] = "SQLiteForeignKey";
-  reference;
-  onUpdate;
-  onDelete;
-  getName() {
-    const { name, columns, foreignColumns } = this.reference();
-    const columnNames = columns.map((column) => column.name);
-    const foreignColumnNames = foreignColumns.map((column) => column.name);
-    const chunks = [
-      this.table[TableName],
-      ...columnNames,
-      foreignColumns[0].table[TableName],
-      ...foreignColumnNames
-    ];
-    return name ?? `${chunks.join("_")}_fk`;
-  }
-};
-
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/unique-constraint.js
-function uniqueKeyName3(table, columns) {
-  return `${table[TableName]}_${columns.join("_")}_unique`;
-}
-var UniqueConstraintBuilder3 = class {
-  constructor(columns, name) {
-    this.name = name;
-    this.columns = columns;
-  }
-  static [entityKind] = "SQLiteUniqueConstraintBuilder";
-  /** @internal */
-  columns;
-  /** @internal */
-  build(table) {
-    return new UniqueConstraint3(table, this.columns, this.name);
-  }
-};
-var UniqueOnConstraintBuilder3 = class {
-  static [entityKind] = "SQLiteUniqueOnConstraintBuilder";
-  /** @internal */
-  name;
-  constructor(name) {
-    this.name = name;
-  }
-  on(...columns) {
-    return new UniqueConstraintBuilder3(columns, this.name);
-  }
-};
-var UniqueConstraint3 = class {
-  constructor(table, columns, name) {
-    this.table = table;
-    this.columns = columns;
-    this.name = name ?? uniqueKeyName3(this.table, this.columns.map((column) => column.name));
-  }
-  static [entityKind] = "SQLiteUniqueConstraint";
-  columns;
-  name;
-  getName() {
-    return this.name;
-  }
-};
-
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/columns/common.js
-var SQLiteColumnBuilder = class extends ColumnBuilder {
-  static [entityKind] = "SQLiteColumnBuilder";
-  foreignKeyConfigs = [];
-  references(ref, actions = {}) {
-    this.foreignKeyConfigs.push({ ref, actions });
-    return this;
-  }
-  unique(name) {
-    this.config.isUnique = true;
-    this.config.uniqueName = name;
-    return this;
-  }
-  generatedAlwaysAs(as, config2) {
-    this.config.generated = {
-      as,
-      type: "always",
-      mode: config2?.mode ?? "virtual"
-    };
-    return this;
-  }
-  /** @internal */
-  buildForeignKeys(column, table) {
-    return this.foreignKeyConfigs.map(({ ref, actions }) => {
-      return ((ref2, actions2) => {
-        const builder = new ForeignKeyBuilder3(() => {
-          const foreignColumn = ref2();
-          return { columns: [column], foreignColumns: [foreignColumn] };
-        });
-        if (actions2.onUpdate) {
-          builder.onUpdate(actions2.onUpdate);
-        }
-        if (actions2.onDelete) {
-          builder.onDelete(actions2.onDelete);
-        }
-        return builder.build(table);
-      })(ref, actions);
-    });
-  }
-};
-var SQLiteColumn = class extends Column {
-  constructor(table, config2) {
-    if (!config2.uniqueName) {
-      config2.uniqueName = uniqueKeyName3(table, [config2.name]);
-    }
-    super(table, config2);
-    this.table = table;
-  }
-  static [entityKind] = "SQLiteColumn";
-};
-
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/columns/text.js
-var SQLiteTextBuilder = class extends SQLiteColumnBuilder {
-  static [entityKind] = "SQLiteTextBuilder";
-  constructor(name, config2) {
-    super(name, "string", "SQLiteText");
-    this.config.enumValues = config2.enum;
-    this.config.length = config2.length;
-  }
-  /** @internal */
-  build(table) {
-    return new SQLiteText(
-      table,
-      this.config
-    );
-  }
-};
-var SQLiteText = class extends SQLiteColumn {
-  static [entityKind] = "SQLiteText";
-  enumValues = this.config.enumValues;
-  length = this.config.length;
-  constructor(table, config2) {
-    super(table, config2);
-  }
-  getSQLType() {
-    return `text${this.config.length ? `(${this.config.length})` : ""}`;
-  }
-};
-var SQLiteTextJsonBuilder = class extends SQLiteColumnBuilder {
-  static [entityKind] = "SQLiteTextJsonBuilder";
-  constructor(name) {
-    super(name, "json", "SQLiteTextJson");
-  }
-  /** @internal */
-  build(table) {
-    return new SQLiteTextJson(
-      table,
-      this.config
-    );
-  }
-};
-var SQLiteTextJson = class extends SQLiteColumn {
-  static [entityKind] = "SQLiteTextJson";
-  getSQLType() {
-    return "text";
-  }
-  mapFromDriverValue(value) {
-    return JSON.parse(value);
-  }
-  mapToDriverValue(value) {
-    return JSON.stringify(value);
-  }
-};
-
-// node_modules/.pnpm/drizzle-zod@0.5.1_drizzle-o_93a4a91ac346d4b719e222d9cf7f585d/node_modules/drizzle-zod/index.mjs
-var m = external_exports.union([external_exports.string(), external_exports.number(), external_exports.boolean(), external_exports.null()]);
-var f = external_exports.lazy((() => external_exports.union([m, external_exports.array(f), external_exports.record(f)])));
-function c(t, n) {
-  const r = getTableColumns(t), o = Object.entries(r);
-  let i = Object.fromEntries(o.map((([e, t2]) => [e, p(t2)])));
-  n && (i = Object.assign(i, Object.fromEntries(Object.entries(n).map((([e, t2]) => [e, "function" == typeof t2 ? t2(i) : t2])))));
-  for (const [e, t2] of o) t2.notNull ? t2.hasDefault && (i[e] = i[e].optional()) : i[e] = i[e].nullable().optional();
-  return external_exports.object(i);
-}
-function b(t, n) {
-  const r = getTableColumns(t), o = Object.entries(r);
-  let i = Object.fromEntries(o.map((([e, t2]) => [e, p(t2)])));
-  n && (i = Object.assign(i, Object.fromEntries(Object.entries(n).map((([e, t2]) => [e, "function" == typeof t2 ? t2(i) : t2])))));
-  for (const [e, t2] of o) t2.notNull || (i[e] = i[e].nullable());
-  return external_exports.object(i);
-}
-function p(e) {
-  let m2;
-  if ((function(e2) {
-    return "enumValues" in e2 && Array.isArray(e2.enumValues) && e2.enumValues.length > 0;
-  })(e) && (m2 = e.enumValues.length ? external_exports.enum(e.enumValues) : external_exports.string()), !m2) {
-    if (is(e, PgUUID)) m2 = external_exports.string().uuid();
-    else if ("custom" === e.dataType) m2 = external_exports.any();
-    else if ("json" === e.dataType) m2 = f;
-    else if ("array" === e.dataType) m2 = external_exports.array(p(e.baseColumn));
-    else if ("number" === e.dataType) m2 = external_exports.number();
-    else if ("bigint" === e.dataType) m2 = external_exports.bigint();
-    else if ("boolean" === e.dataType) m2 = external_exports.boolean();
-    else if ("date" === e.dataType) m2 = external_exports.date();
-    else if ("string" === e.dataType) {
-      let i = external_exports.string();
-      (is(e, PgChar) || is(e, PgVarchar) || is(e, MySqlVarChar) || is(e, MySqlVarBinary) || is(e, MySqlChar) || is(e, SQLiteText)) && "number" == typeof e.length && (i = i.max(e.length)), m2 = i;
-    }
-  }
-  return m2 || (m2 = external_exports.any()), m2;
-}
-
-// src/db/schema.type.ts
-var IHealthLog = b(healthLogs);
-var IUserCreate = c(users, {
-  name: (schema) => schema.name.min(1).max(50),
-  email: (schema) => schema.email.email({ message: "Provide a valid email" }),
-  password: (schema) => schema.password.min(6, { message: "Password too short" })
-}).extend({ agency_name: external_exports.string().optional() }).required({
-  name: true,
-  email: true,
-  password: true,
-  agency_name: true
-}).omit({
-  createdAt: true,
-  type: true,
-  userId: true,
-  orgId: true,
-  roleId: true
+// src/features/administration/administration.schema.ts
+var ZRole = external_exports.object({
+  id: external_exports.number().optional(),
+  name: external_exports.string(),
+  permissionId: external_exports.array(external_exports.number())
 });
-var ZSupplier = c(suppliers, {
-  name: (schema) => schema.name.min(1).max(50),
-  email: (schema) => schema.email.email({ message: "Provide a valid email" })
-}).omit({
-  createdAt: true,
-  supId: true,
-  orgId: true
+var ZPermission = external_exports.object({
+  id: external_exports.number().optional(),
+  key: external_exports.string()
 });
-var ZWarehouse = c(warehouses, {
-  name: (schema) => schema.name.min(1).max(50)
-}).omit({
-  createdAt: true,
-  whId: true,
-  orgId: true
+var ZAssignPermissions = external_exports.object({
+  permissions: external_exports.array(external_exports.string())
+  // permission keys
 });
-var ZCategory = c(categories, {
-  name: (schema) => schema.name.min(1).max(50)
-}).omit({
-  createdAt: true,
-  catId: true,
-  orgId: true
+var ZUser = external_exports.object({
+  id: external_exports.number().optional(),
+  name: external_exports.string(),
+  email: external_exports.string(),
+  password: external_exports.string(),
+  roleId: external_exports.number().nullable()
 });
-var ZProduct = c(products, {
-  name: (schema) => schema.name.min(1).max(50)
-}).omit({
-  createdAt: true,
-  productId: true,
-  orgId: true
+var ZUpdateUser = ZUser.partial().extend({
+  password: external_exports.string().optional()
+  // password can be optional
 });
-
-// src/features/health/health.schema.ts
-var HealthSchema = class {
-  createHealth = createRoute({
-    path: "/",
+var ZAssignRole = external_exports.object({
+  roleId: external_exports.number()
+});
+var administrationSchema = class {
+  getPermission = createRoute({
+    path: "/permissions",
     method: "get",
-    tags: ["health"],
-    security: [
-      {
-        bearerAuth: []
-      }
-    ],
-    request: {},
+    tags: ["administration"],
+    security: [{ bearerAuth: [] }],
     responses: {
-      [OK2]: json_content_default(IHealthLog, "Insert to db for test purpose")
+      [OK2]: json_content_default(
+        external_exports.object({ count: external_exports.number(), result: external_exports.array(ZPermission) }),
+        "Permissions fetched successfully"
+      )
     }
   });
-};
-var instance = new HealthSchema();
-
-// src/abstract/abstract.model.ts
-var AbstractModels = class {
-  db = db;
-  table = schema_exports;
-  query(tx) {
-    return tx ?? this.db;
-  }
-  async logAudit(data, tx) {
-    return await this.query(tx).insert(this.table.auditLog).values({
-      userId: data.userId,
-      orgId: data.orgId,
-      action: data.action,
-      details: data.details,
-      ip: data.ip,
-      location: data.location,
-      browser: data.browser,
-      device: data.device,
-      os: data.os
-    });
-  }
-};
-
-// src/features/health/health.model.ts
-var HealthModel = class extends AbstractModels {
-  async insertHealthLogDB() {
-    const [row] = await this.query().insert(this.table.healthLogs).values({}).returning();
-    return row;
-  }
-};
-
-// src/features/health/health.service.ts
-var HealthService = class {
-  db = new HealthModel();
-  healthCheck = async (c2) => {
-    const auth2 = c2.get("jwtPayload");
-    const result = await this.db.insertHealthLogDB();
-    return c2.json(result, OK2);
-  };
-};
-
-// src/features/health/health.router.ts
-var HealthRoute = class {
-  controller = new HealthService();
-  schema = new HealthSchema();
-  routes = createRouter().openapi(
-    this.schema.createHealth,
-    this.controller.healthCheck
-  );
-};
-
-// src/features/auth/auth.schema.ts
-var AuthSchema = class {
-  signUp = createRoute({
-    path: "/signup",
+  // Create a Role
+  createRole = createRoute({
+    path: "/role",
     method: "post",
-    tags: ["auth"],
+    tags: ["administration"],
+    security: [{ bearerAuth: [] }],
+    request: { body: json_content_required_default(ZRole, "Create a new role") },
+    responses: {
+      [CREATED]: json_content_default(
+        external_exports.object({
+          roleName: external_exports.string()
+        }),
+        "Role created successfully"
+      )
+    }
+  });
+  getRoleDetails = createRoute({
+    path: "/role/details/:id",
+    method: "get",
+    tags: ["administration"],
+    security: [{ bearerAuth: [] }],
     request: {
-      body: json_content_required_default(IUserCreate, "signup users")
+      params: external_exports.object({ id: external_exports.string() })
     },
     responses: {
       [OK2]: json_content_default(
         external_exports.object({
-          id: external_exports.number(),
-          name: external_exports.string(),
-          email: external_exports.string()
+          result: external_exports.object({
+            roleId: external_exports.number(),
+            name: external_exports.string(),
+            permissions: external_exports.array(external_exports.object({ permissionId: external_exports.number(), key: external_exports.string() }))
+          })
         }),
-        "User created response"
-      ),
-      [CONFLICT]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "Email already exists"
+        "Role fetched successfully"
       )
     }
   });
-  signIn = createRoute({
-    path: "/login",
-    method: "post",
-    tags: ["auth"],
-    request: {
-      body: json_content_required_default(
+  // Get all Roles
+  getRoles = createRoute({
+    path: "/role",
+    method: "get",
+    tags: ["administration"],
+    security: [{ bearerAuth: [] }],
+    responses: {
+      [OK2]: json_content_default(
         external_exports.object({
-          email: external_exports.string().nonempty().default("fahim@gmail.com"),
-          password: external_exports.string().nonempty().default("12345678")
+          count: external_exports.number(),
+          result: external_exports.array(
+            external_exports.object({
+              roleId: external_exports.number(),
+              name: external_exports.string(),
+              isAdmin: external_exports.boolean().nullable()
+            })
+          )
         }),
-        "login user"
+        "Roles fetched successfully"
       )
+    }
+  });
+  // Update a Role
+  updateRole = createRoute({
+    path: "/role/:id",
+    method: "put",
+    tags: ["administration"],
+    security: [{ bearerAuth: [] }],
+    request: {
+      params: external_exports.object({ id: external_exports.string() }),
+      body: json_content_required_default(ZRole, "Update role details")
     },
     responses: {
       [OK2]: json_content_default(
-        external_exports.object({
-          id: external_exports.number(),
-          name: external_exports.string(),
-          company_name: external_exports.string(),
-          email: external_exports.string(),
-          type: external_exports.string(),
-          accessToken: external_exports.string()
-        }),
-        "User login response"
+        external_exports.object({ roleName: external_exports.string(), message: external_exports.string() }),
+        "Role updated successfully"
       ),
-      [UNAUTHORIZED]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "Wrong credential"
-      ),
-      [NOT_FOUND]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "No user found"
+      [BAD_REQUEST]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "You can't update admin role"
       )
     }
   });
-  refreshToken = createRoute({
-    path: "/refresh-token",
-    method: "get",
-    tags: ["auth"],
-    request: {},
-    responses: {
-      [OK2]: json_content_default(
-        external_exports.object({
-          accessToken: external_exports.string()
-        }),
-        "New refresh token generated"
-      ),
-      [UNAUTHORIZED]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "Invalid or expired refresh token"
-      )
-    }
-  });
-  logout = createRoute({
-    path: "/logout",
-    method: "get",
-    tags: ["auth"],
-    request: {},
-    responses: {
-      [OK2]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "Logged out"
-      ),
-      [UNAUTHORIZED]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "Invalid or expired refresh token"
-      )
-    }
-  });
-  forgotPassword = createRoute({
-    path: "/forgot-password",
+  createUser = createRoute({
+    path: "/user",
     method: "post",
-    tags: ["auth"],
-    request: {
-      body: json_content_required_default(
-        external_exports.object({
-          email: external_exports.string().email()
-        }),
-        "Forgot password request"
+    tags: ["administration"],
+    security: [{ bearerAuth: [] }],
+    request: { body: json_content_required_default(ZUser, "Create a new user") },
+    responses: {
+      [CREATED]: json_content_default(ZUser, "User created successfully"),
+      [BAD_REQUEST]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "User already exists"
       )
+    }
+  });
+  // Get all Users
+  getUsers = createRoute({
+    path: "/user/list",
+    method: "get",
+    tags: ["administration"],
+    security: [{ bearerAuth: [] }],
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(
+            external_exports.object({
+              userId: external_exports.number(),
+              name: external_exports.string(),
+              email: external_exports.string(),
+              type: external_exports.string().nullable(),
+              roleId: external_exports.number().nullable(),
+              roleName: external_exports.string().nullable()
+            })
+          )
+        }),
+        "Users fetched successfully"
+      )
+    }
+  });
+  // Update User
+  updateUser = createRoute({
+    path: "/user/:id",
+    method: "put",
+    tags: ["administration"],
+    security: [{ bearerAuth: [] }],
+    request: {
+      params: external_exports.object({ id: external_exports.string() }),
+      body: json_content_required_default(ZUpdateUser, "Update user details")
     },
     responses: {
-      [OK2]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "OTP sent successfully"
-      ),
-      [NOT_FOUND]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
+      [OK2]: json_content_default(ZUser, "User updated successfully"),
+      [BAD_REQUEST]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
         "User not found"
       )
     }
   });
-  resetPassword = createRoute({
-    path: "/reset-password",
-    method: "post",
-    tags: ["auth"],
-    request: {
-      body: json_content_required_default(
-        external_exports.object({
-          email: external_exports.string().email(),
-          code: external_exports.string().length(6),
-          newPassword: external_exports.string().min(6)
-        }),
-        "Reset password request"
-      )
-    },
+  // Delete User
+  deleteUser = createRoute({
+    path: "/user/:id",
+    method: "delete",
+    tags: ["administration"],
+    security: [{ bearerAuth: [] }],
+    request: { params: external_exports.object({ id: external_exports.string() }) },
     responses: {
       [OK2]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "Password reset successfully"
-      ),
-      [BAD_REQUEST]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "Invalid or expired OTP"
+        external_exports.object({ message: external_exports.string() }),
+        "User deleted successfully"
       )
     }
   });
 };
-var instance2 = new AuthSchema();
+var instance = new administrationSchema();
 
 // node_modules/.pnpm/bcryptjs@3.0.3/node_modules/bcryptjs/index.js
 var import_crypto2 = __toESM(require("crypto"), 1);
@@ -35363,6 +34785,1965 @@ var bcryptjs_default = {
   decodeBase64: decodeBase642
 };
 
+// src/abstract/abstract.model.ts
+var AbstractModels = class {
+  db = db;
+  table = schema_exports;
+  query(tx) {
+    return tx ?? this.db;
+  }
+  async logAudit(data, tx) {
+    return await this.query(tx).insert(this.table.auditLog).values({
+      userId: data.userId,
+      orgId: data.orgId,
+      action: data.action,
+      details: data.details,
+      ip: data.ip,
+      location: data.location,
+      browser: data.browser,
+      device: data.device,
+      os: data.os
+    });
+  }
+};
+
+// src/features/administration/administration.model.ts
+var administrationModel = class extends AbstractModels {
+  async getPermission() {
+    const res = await this.query().select().from(this.table.permissions);
+    return res;
+  }
+  async createRole(body) {
+    const role = await this.db.transaction(async (tx) => {
+      const [role2] = await tx.insert(this.table.roles).values({ name: body.name, orgId: body.orgId, isAdmin: body.isAdmin }).returning();
+      const rolePermissionValues = body?.permissionId?.map((permissionId) => ({
+        roleId: role2.roleId,
+        permissionId
+      }));
+      if (rolePermissionValues.length > 0) {
+        await tx.insert(this.table.rolePermissions).values(rolePermissionValues);
+      }
+      return { roleName: body.name, rolePermissionValues };
+    });
+    return role;
+  }
+  async roleIsAdmin(roleId) {
+    const [res] = await this.query().select().from(this.table.roles).where(eq(this.table.roles.roleId, roleId));
+    return res;
+  }
+  async updateRole(body, roleId) {
+    const res = await this.db.transaction(async (tx) => {
+      await tx.update(this.table.roles).set({
+        name: body.name,
+        isAdmin: body.isAdmin
+      }).where(eq(this.table.roles.roleId, roleId));
+      await tx.delete(this.table.rolePermissions).where(eq(this.table.rolePermissions.roleId, roleId));
+      if (body.permissionId?.length) {
+        const rolePermissionValues = body.permissionId.map((permissionId) => ({
+          roleId,
+          permissionId
+        }));
+        await tx.insert(this.table.rolePermissions).values(rolePermissionValues);
+      }
+      return {
+        roleId,
+        roleName: body.name,
+        permissions: body.permissionId ?? []
+      };
+    });
+    return res;
+  }
+  async getRoleDetails(id) {
+    const result = await this.query().transaction(async (tx) => {
+      const rows = await tx.select().from(this.table.roles).leftJoin(
+        this.table.rolePermissions,
+        eq(this.table.roles.roleId, this.table.rolePermissions.roleId)
+      ).leftJoin(
+        this.table.permissions,
+        eq(this.table.rolePermissions.permissionId, this.table.permissions.permissionId)
+      ).where(eq(this.table.roles.roleId, Number(id)));
+      if (!rows.length) {
+        return null;
+      }
+      const { roles: roles2 } = rows[0];
+      const permissions2 = rows.filter((r) => r.permissions !== null).map((r) => ({
+        permissionId: r.permissions.permissionId,
+        key: r.permissions.key
+      }));
+      return {
+        roleId: roles2.roleId,
+        name: roles2.name,
+        permissions: permissions2
+      };
+    });
+    return result;
+  }
+  async getRoles(orgId) {
+    const result = await this.query().select({
+      roleId: this.table.roles.roleId,
+      name: this.table.roles.name,
+      isAdmin: this.table.roles.isAdmin
+    }).from(this.table.roles).where(or(eq(this.table.roles.orgId, orgId), isNull(this.table.roles.orgId)));
+    return result;
+  }
+  async createUser(body, orgId) {
+    const user = await this.query().insert(this.table.users).values({
+      name: body.name,
+      email: body.email,
+      password: body.password,
+      type: "EMPLOYEE",
+      roleId: body.roleId,
+      orgId
+    }).returning().then((rows) => rows[0]);
+    return user;
+  }
+  async getUsers(orgId) {
+    const result = await this.query().select({
+      userId: this.table.users.userId,
+      name: this.table.users.name,
+      email: this.table.users.email,
+      type: this.table.users.type,
+      roleId: this.table.users.roleId,
+      roleName: this.table.roles.name
+    }).from(this.table.users).leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId)).where(eq(this.table.users.orgId, orgId));
+    return result;
+  }
+  async updateUser(body, orgId, id) {
+    const user = await this.query().update(this.table.users).set(body).where(and(eq(this.table.users.userId, id), eq(this.table.users.orgId, orgId))).returning();
+    return user;
+  }
+  async deleteUser(orgId, id) {
+    const user = await this.query().delete(this.table.users).where(eq(this.table.users.userId, id) && eq(this.table.users.orgId, orgId)).returning();
+    return user;
+  }
+  // async updateWarehouse(body: IUpdateWarehousesType & { orgId?: number }, id: number) {
+  //   const res = await this.query()
+  //     .update(this.table.warehouses)
+  //     .set(body)
+  //     .where(eq(this.table.warehouses.whId, id))
+  //     .returning()
+  //     .then((rows) => {
+  //       const { orgId, ...rest } = rows[0];
+  //       return rest;
+  //     });
+  //   return res;
+  // }
+  // async deleteWarehouse(id: number) {
+  //   const res = await this.query()
+  //     .delete(this.table.warehouses)
+  //     .where(eq(this.table.warehouses.whId, id))
+  //     .returning()
+  //     .then((rows) => {
+  //       const { orgId, ...rest } = rows[0];
+  //       return rest;
+  //     });
+  //   return res;
+  // }
+  // async getWarehouse(ORG_ID: number, limit: number, offset: number) {
+  //   const { orgId, ...rest } = getTableColumns(this.table.warehouses);
+  //   const res = await this.query()
+  //     .select({ ...rest })
+  //     .from(this.table.warehouses)
+  //     .where(eq(this.table.warehouses.orgId, ORG_ID))
+  //     .limit(limit)
+  //     .offset(offset);
+  //   return res;
+  // }
+  // async getTotalWarehouse(): Promise<number> {
+  //   const res = await this.query().$count(this.table.warehouses);
+  //   return res;
+  // }
+};
+
+// src/features/auth/auth.model.ts
+var AuthModel = class extends AbstractModels {
+  async createOrganization(name, tx) {
+    const org = await this.query(tx).insert(this.table.organization).values({ name }).returning().then((rows) => rows[0]);
+    return org;
+  }
+  async getDefaultAdminRole(tx) {
+    return await this.query(tx).select().from(this.table.roles).where(and(eq(this.table.roles.isAdmin, true), isNull(this.table.roles.orgId))).limit(1).then((rows) => rows[0]);
+  }
+  async createAdminUser(body, orgId, roleId, tx) {
+    const user = await this.query(tx).insert(this.table.users).values({
+      name: body.name,
+      email: body.email,
+      password: body.password,
+      type: "ADMIN",
+      orgId,
+      roleId
+    }).returning().then((rows) => rows[0]);
+    return user;
+  }
+  async checkExistingUser(email, tx) {
+    const result = await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).where(eq(this.table.users.email, email)).limit(1).then((rows) => rows[0]);
+    return result;
+  }
+  async insertSession(userID, refreshToken, expiresAt, tx) {
+    const result = await this.query(tx).insert(this.table.sessions).values({
+      userId: userID,
+      refreshToken,
+      expiresAt
+    });
+    return result;
+  }
+  async deleteSession(userID, tx) {
+    const result = await this.query(tx).delete(this.table.sessions).where(eq(this.table.sessions.userId, userID));
+    return result;
+  }
+  async checkSession(refreshToken) {
+    const result = await this.query().select().from(this.table.sessions).where(eq(this.table.sessions.refreshToken, refreshToken)).limit(1);
+    return result[0];
+  }
+  async createOTP(userId, code, type, expiresAt, tx) {
+    return await this.query(tx).insert(this.table.otpCodes).values({
+      userId,
+      code,
+      type,
+      expiresAt
+    }).returning().then((rows) => rows[0]);
+  }
+  async findOTP(userId, code, type, tx) {
+    return await this.query(tx).select().from(this.table.otpCodes).where(
+      and(
+        eq(this.table.otpCodes.userId, userId),
+        eq(this.table.otpCodes.code, code),
+        eq(this.table.otpCodes.type, type)
+      )
+    ).limit(1).then((rows) => rows[0]);
+  }
+  async deleteOTP(id, tx) {
+    return await this.query(tx).delete(this.table.otpCodes).where(eq(this.table.otpCodes.id, id));
+  }
+  async updatePassword(userId, password, tx) {
+    return await this.query(tx).update(this.table.users).set({ password }).where(eq(this.table.users.userId, userId));
+  }
+};
+
+// src/features/administration/administration.service.ts
+var administrationService = class {
+  db_conn = new administrationModel();
+  auth_conn = new AuthModel();
+  getPermission = async (c2) => {
+    const res = await this.db_conn.getPermission();
+    return c2.json({ count: res.length, result: res }, OK2);
+  };
+  createRole = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const body = c2.req.valid("json");
+    const res = await this.db_conn.createRole({
+      ...body,
+      orgId: org.orgId,
+      isAdmin: false
+    });
+    return c2.json({ roleName: res.roleName }, CREATED);
+  };
+  updateRole = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const body = c2.req.valid("json");
+    const { id } = c2.req.valid("param");
+    const data = await this.db_conn.roleIsAdmin(id);
+    if (data.isAdmin) {
+      return c2.json({ message: "You can't update admin role" }, BAD_REQUEST);
+    }
+    const res = await this.db_conn.updateRole(
+      {
+        ...body,
+        orgId: org.orgId,
+        isAdmin: false
+      },
+      id
+    );
+    return c2.json(
+      { roleName: res.roleName, message: "Role updated successfully" },
+      OK2
+    );
+  };
+  getRoleDetails = async (c2) => {
+    const { id } = c2.req.valid("param");
+    const res = await this.db_conn.getRoleDetails(id);
+    return c2.json(
+      {
+        result: {
+          name: res?.name,
+          roleId: res?.roleId,
+          permissions: res?.permissions
+        }
+      },
+      OK2
+    );
+  };
+  getRoles = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.getRoles(org.orgId);
+    return c2.json({ count: res.length, result: res }, OK2);
+  };
+  createUser = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const body = c2.req.valid("json");
+    const { password, ...ohters } = body;
+    const hashedPassword = await bcryptjs_default.hash(password, 10);
+    const user = await this.auth_conn.checkExistingUser(ohters.email);
+    if (user) {
+      return c2.json({ message: "User already exists" }, BAD_REQUEST);
+    }
+    const { type, ...rest } = await this.db_conn.createUser(
+      { ...ohters, password: hashedPassword },
+      org.orgId
+    );
+    return c2.json(rest, CREATED);
+  };
+  getUsers = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.getUsers(org.orgId);
+    return c2.json({ count: res.length, result: res }, OK2);
+  };
+  updateUser = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const body = c2.req.valid("json");
+    const { id } = c2.req.valid("param");
+    const { password, ...ohters } = body;
+    const user = await this.auth_conn.checkExistingUser(ohters?.email);
+    if (user) {
+      return c2.json({ message: "User already exists" }, BAD_REQUEST);
+    }
+    if (password) {
+      const hashedPassword = await bcryptjs_default.hash(password, 10);
+      const res2 = await this.db_conn.updateUser(
+        { ...ohters, password: hashedPassword },
+        org.orgId,
+        id
+      );
+      return c2.json(res2, OK2);
+    }
+    const res = await this.db_conn.updateUser(ohters, org.orgId, id);
+    return c2.json(res, OK2);
+  };
+  deleteUser = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const { id } = c2.req.valid("param");
+    await this.db_conn.deleteUser(org.orgId, id);
+    return c2.json({ message: "User deleted" }, OK2);
+  };
+};
+
+// src/features/administration/administration.router.ts
+var administrationRouter = class {
+  service = new administrationService();
+  schema = new administrationSchema();
+  routes = createRouter().openapi(this.schema.getPermission, this.service.getPermission).openapi(this.schema.createRole, this.service.createRole).openapi(this.schema.getRoleDetails, this.service.getRoleDetails).openapi(this.schema.getRoles, this.service.getRoles).openapi(this.schema.updateRole, this.service.updateRole).openapi(this.schema.createUser, this.service.createUser).openapi(this.schema.getUsers, this.service.getUsers).openapi(this.schema.updateUser, this.service.updateUser).openapi(this.schema.deleteUser, this.service.deleteUser);
+};
+
+// src/features/category/category.model.ts
+var CategoryModel = class extends AbstractModels {
+  async addCategory(body) {
+    const res = await this.query().insert(this.table.categories).values(body).returning();
+    return res;
+  }
+  async updateCategory(body, id) {
+    const res = await this.query().update(this.table.categories).set(body).where(eq(this.table.categories.catId, id)).returning();
+    return res;
+  }
+  async deleteCategory(id) {
+    const res = await this.query().delete(this.table.categories).where(eq(this.table.categories.catId, id)).returning();
+    return res;
+  }
+  async getCategory(ORG_ID, limit, offset) {
+    const { orgId, ...rest } = getTableColumns(this.table.categories);
+    const res = await this.query().select({ ...rest }).from(this.table.categories).where(eq(this.table.categories.orgId, ORG_ID)).limit(limit).offset(offset);
+    return res;
+  }
+  async getTotalCategory() {
+    const res = await this.query().$count(this.table.categories);
+    return res;
+  }
+};
+
+// src/features/category/category.service.ts
+var CategoryService = class {
+  db_conn = new CategoryModel();
+  addCategory = async (c2) => {
+    const body = c2.req.valid("json");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.addCategory({ ...body, orgId: org.orgId });
+    return c2.json({ ...res }, CREATED);
+  };
+  updateCategory = async (c2) => {
+    const body = c2.req.valid("json");
+    const { id } = c2.req.valid("param");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.updateCategory({ ...body, orgId: org.orgId }, id);
+    return c2.json({ ...res }, OK2);
+  };
+  deleteCategory = async (c2) => {
+    const { id } = c2.req.valid("param");
+    await this.db_conn.deleteCategory(id);
+    return c2.json({ message: "Category deleted" }, OK2);
+  };
+  getCategory = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const { limit, offset } = c2.req.valid("query");
+    const res = await this.db_conn.getCategory(org.orgId, limit, offset);
+    const count = await this.db_conn.getTotalCategory();
+    if (res.length === 0) {
+      return c2.json({ message: "No category found" }, NOT_FOUND);
+    }
+    return c2.json({ count, result: res, message: "Category found" }, OK2);
+  };
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/foreign-keys.js
+var ForeignKeyBuilder2 = class {
+  static [entityKind] = "MySqlForeignKeyBuilder";
+  /** @internal */
+  reference;
+  /** @internal */
+  _onUpdate;
+  /** @internal */
+  _onDelete;
+  constructor(config2, actions) {
+    this.reference = () => {
+      const { name, columns, foreignColumns } = config2();
+      return { name, columns, foreignTable: foreignColumns[0].table, foreignColumns };
+    };
+    if (actions) {
+      this._onUpdate = actions.onUpdate;
+      this._onDelete = actions.onDelete;
+    }
+  }
+  onUpdate(action) {
+    this._onUpdate = action;
+    return this;
+  }
+  onDelete(action) {
+    this._onDelete = action;
+    return this;
+  }
+  /** @internal */
+  build(table) {
+    return new ForeignKey2(table, this);
+  }
+};
+var ForeignKey2 = class {
+  constructor(table, builder) {
+    this.table = table;
+    this.reference = builder.reference;
+    this.onUpdate = builder._onUpdate;
+    this.onDelete = builder._onDelete;
+  }
+  static [entityKind] = "MySqlForeignKey";
+  reference;
+  onUpdate;
+  onDelete;
+  getName() {
+    const { name, columns, foreignColumns } = this.reference();
+    const columnNames = columns.map((column) => column.name);
+    const foreignColumnNames = foreignColumns.map((column) => column.name);
+    const chunks = [
+      this.table[TableName],
+      ...columnNames,
+      foreignColumns[0].table[TableName],
+      ...foreignColumnNames
+    ];
+    return name ?? `${chunks.join("_")}_fk`;
+  }
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/unique-constraint.js
+function uniqueKeyName2(table, columns) {
+  return `${table[TableName]}_${columns.join("_")}_unique`;
+}
+var UniqueConstraintBuilder2 = class {
+  constructor(columns, name) {
+    this.name = name;
+    this.columns = columns;
+  }
+  static [entityKind] = "MySqlUniqueConstraintBuilder";
+  /** @internal */
+  columns;
+  /** @internal */
+  build(table) {
+    return new UniqueConstraint2(table, this.columns, this.name);
+  }
+};
+var UniqueOnConstraintBuilder2 = class {
+  static [entityKind] = "MySqlUniqueOnConstraintBuilder";
+  /** @internal */
+  name;
+  constructor(name) {
+    this.name = name;
+  }
+  on(...columns) {
+    return new UniqueConstraintBuilder2(columns, this.name);
+  }
+};
+var UniqueConstraint2 = class {
+  constructor(table, columns, name) {
+    this.table = table;
+    this.columns = columns;
+    this.name = name ?? uniqueKeyName2(this.table, this.columns.map((column) => column.name));
+  }
+  static [entityKind] = "MySqlUniqueConstraint";
+  columns;
+  name;
+  nullsNotDistinct = false;
+  getName() {
+    return this.name;
+  }
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/common.js
+var MySqlColumnBuilder = class extends ColumnBuilder {
+  static [entityKind] = "MySqlColumnBuilder";
+  foreignKeyConfigs = [];
+  references(ref, actions = {}) {
+    this.foreignKeyConfigs.push({ ref, actions });
+    return this;
+  }
+  unique(name) {
+    this.config.isUnique = true;
+    this.config.uniqueName = name;
+    return this;
+  }
+  generatedAlwaysAs(as, config2) {
+    this.config.generated = {
+      as,
+      type: "always",
+      mode: config2?.mode ?? "virtual"
+    };
+    return this;
+  }
+  /** @internal */
+  buildForeignKeys(column, table) {
+    return this.foreignKeyConfigs.map(({ ref, actions }) => {
+      return ((ref2, actions2) => {
+        const builder = new ForeignKeyBuilder2(() => {
+          const foreignColumn = ref2();
+          return { columns: [column], foreignColumns: [foreignColumn] };
+        });
+        if (actions2.onUpdate) {
+          builder.onUpdate(actions2.onUpdate);
+        }
+        if (actions2.onDelete) {
+          builder.onDelete(actions2.onDelete);
+        }
+        return builder.build(table);
+      })(ref, actions);
+    });
+  }
+};
+var MySqlColumn = class extends Column {
+  constructor(table, config2) {
+    if (!config2.uniqueName) {
+      config2.uniqueName = uniqueKeyName2(table, [config2.name]);
+    }
+    super(table, config2);
+    this.table = table;
+  }
+  static [entityKind] = "MySqlColumn";
+};
+var MySqlColumnBuilderWithAutoIncrement = class extends MySqlColumnBuilder {
+  static [entityKind] = "MySqlColumnBuilderWithAutoIncrement";
+  constructor(name, dataType, columnType) {
+    super(name, dataType, columnType);
+    this.config.autoIncrement = false;
+  }
+  autoincrement() {
+    this.config.autoIncrement = true;
+    this.config.hasDefault = true;
+    return this;
+  }
+};
+var MySqlColumnWithAutoIncrement = class extends MySqlColumn {
+  static [entityKind] = "MySqlColumnWithAutoIncrement";
+  autoIncrement = this.config.autoIncrement;
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/char.js
+var MySqlCharBuilder = class extends MySqlColumnBuilder {
+  static [entityKind] = "MySqlCharBuilder";
+  constructor(name, config2) {
+    super(name, "string", "MySqlChar");
+    this.config.length = config2.length;
+    this.config.enum = config2.enum;
+  }
+  /** @internal */
+  build(table) {
+    return new MySqlChar(
+      table,
+      this.config
+    );
+  }
+};
+var MySqlChar = class extends MySqlColumn {
+  static [entityKind] = "MySqlChar";
+  length = this.config.length;
+  enumValues = this.config.enum;
+  getSQLType() {
+    return this.length === void 0 ? `char` : `char(${this.length})`;
+  }
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/varbinary.js
+var MySqlVarBinaryBuilder = class extends MySqlColumnBuilder {
+  static [entityKind] = "MySqlVarBinaryBuilder";
+  /** @internal */
+  constructor(name, config2) {
+    super(name, "string", "MySqlVarBinary");
+    this.config.length = config2?.length;
+  }
+  /** @internal */
+  build(table) {
+    return new MySqlVarBinary(
+      table,
+      this.config
+    );
+  }
+};
+var MySqlVarBinary = class extends MySqlColumn {
+  static [entityKind] = "MySqlVarBinary";
+  length = this.config.length;
+  mapFromDriverValue(value) {
+    if (typeof value === "string") return value;
+    if (Buffer.isBuffer(value)) return value.toString();
+    const str = [];
+    for (const v of value) {
+      str.push(v === 49 ? "1" : "0");
+    }
+    return str.join("");
+  }
+  getSQLType() {
+    return this.length === void 0 ? `varbinary` : `varbinary(${this.length})`;
+  }
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/varchar.js
+var MySqlVarCharBuilder = class extends MySqlColumnBuilder {
+  static [entityKind] = "MySqlVarCharBuilder";
+  /** @internal */
+  constructor(name, config2) {
+    super(name, "string", "MySqlVarChar");
+    this.config.length = config2.length;
+    this.config.enum = config2.enum;
+  }
+  /** @internal */
+  build(table) {
+    return new MySqlVarChar(
+      table,
+      this.config
+    );
+  }
+};
+var MySqlVarChar = class extends MySqlColumn {
+  static [entityKind] = "MySqlVarChar";
+  length = this.config.length;
+  enumValues = this.config.enum;
+  getSQLType() {
+    return this.length === void 0 ? `varchar` : `varchar(${this.length})`;
+  }
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/foreign-keys.js
+var ForeignKeyBuilder3 = class {
+  static [entityKind] = "SQLiteForeignKeyBuilder";
+  /** @internal */
+  reference;
+  /** @internal */
+  _onUpdate;
+  /** @internal */
+  _onDelete;
+  constructor(config2, actions) {
+    this.reference = () => {
+      const { name, columns, foreignColumns } = config2();
+      return { name, columns, foreignTable: foreignColumns[0].table, foreignColumns };
+    };
+    if (actions) {
+      this._onUpdate = actions.onUpdate;
+      this._onDelete = actions.onDelete;
+    }
+  }
+  onUpdate(action) {
+    this._onUpdate = action;
+    return this;
+  }
+  onDelete(action) {
+    this._onDelete = action;
+    return this;
+  }
+  /** @internal */
+  build(table) {
+    return new ForeignKey3(table, this);
+  }
+};
+var ForeignKey3 = class {
+  constructor(table, builder) {
+    this.table = table;
+    this.reference = builder.reference;
+    this.onUpdate = builder._onUpdate;
+    this.onDelete = builder._onDelete;
+  }
+  static [entityKind] = "SQLiteForeignKey";
+  reference;
+  onUpdate;
+  onDelete;
+  getName() {
+    const { name, columns, foreignColumns } = this.reference();
+    const columnNames = columns.map((column) => column.name);
+    const foreignColumnNames = foreignColumns.map((column) => column.name);
+    const chunks = [
+      this.table[TableName],
+      ...columnNames,
+      foreignColumns[0].table[TableName],
+      ...foreignColumnNames
+    ];
+    return name ?? `${chunks.join("_")}_fk`;
+  }
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/unique-constraint.js
+function uniqueKeyName3(table, columns) {
+  return `${table[TableName]}_${columns.join("_")}_unique`;
+}
+var UniqueConstraintBuilder3 = class {
+  constructor(columns, name) {
+    this.name = name;
+    this.columns = columns;
+  }
+  static [entityKind] = "SQLiteUniqueConstraintBuilder";
+  /** @internal */
+  columns;
+  /** @internal */
+  build(table) {
+    return new UniqueConstraint3(table, this.columns, this.name);
+  }
+};
+var UniqueOnConstraintBuilder3 = class {
+  static [entityKind] = "SQLiteUniqueOnConstraintBuilder";
+  /** @internal */
+  name;
+  constructor(name) {
+    this.name = name;
+  }
+  on(...columns) {
+    return new UniqueConstraintBuilder3(columns, this.name);
+  }
+};
+var UniqueConstraint3 = class {
+  constructor(table, columns, name) {
+    this.table = table;
+    this.columns = columns;
+    this.name = name ?? uniqueKeyName3(this.table, this.columns.map((column) => column.name));
+  }
+  static [entityKind] = "SQLiteUniqueConstraint";
+  columns;
+  name;
+  getName() {
+    return this.name;
+  }
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/columns/common.js
+var SQLiteColumnBuilder = class extends ColumnBuilder {
+  static [entityKind] = "SQLiteColumnBuilder";
+  foreignKeyConfigs = [];
+  references(ref, actions = {}) {
+    this.foreignKeyConfigs.push({ ref, actions });
+    return this;
+  }
+  unique(name) {
+    this.config.isUnique = true;
+    this.config.uniqueName = name;
+    return this;
+  }
+  generatedAlwaysAs(as, config2) {
+    this.config.generated = {
+      as,
+      type: "always",
+      mode: config2?.mode ?? "virtual"
+    };
+    return this;
+  }
+  /** @internal */
+  buildForeignKeys(column, table) {
+    return this.foreignKeyConfigs.map(({ ref, actions }) => {
+      return ((ref2, actions2) => {
+        const builder = new ForeignKeyBuilder3(() => {
+          const foreignColumn = ref2();
+          return { columns: [column], foreignColumns: [foreignColumn] };
+        });
+        if (actions2.onUpdate) {
+          builder.onUpdate(actions2.onUpdate);
+        }
+        if (actions2.onDelete) {
+          builder.onDelete(actions2.onDelete);
+        }
+        return builder.build(table);
+      })(ref, actions);
+    });
+  }
+};
+var SQLiteColumn = class extends Column {
+  constructor(table, config2) {
+    if (!config2.uniqueName) {
+      config2.uniqueName = uniqueKeyName3(table, [config2.name]);
+    }
+    super(table, config2);
+    this.table = table;
+  }
+  static [entityKind] = "SQLiteColumn";
+};
+
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/columns/text.js
+var SQLiteTextBuilder = class extends SQLiteColumnBuilder {
+  static [entityKind] = "SQLiteTextBuilder";
+  constructor(name, config2) {
+    super(name, "string", "SQLiteText");
+    this.config.enumValues = config2.enum;
+    this.config.length = config2.length;
+  }
+  /** @internal */
+  build(table) {
+    return new SQLiteText(
+      table,
+      this.config
+    );
+  }
+};
+var SQLiteText = class extends SQLiteColumn {
+  static [entityKind] = "SQLiteText";
+  enumValues = this.config.enumValues;
+  length = this.config.length;
+  constructor(table, config2) {
+    super(table, config2);
+  }
+  getSQLType() {
+    return `text${this.config.length ? `(${this.config.length})` : ""}`;
+  }
+};
+var SQLiteTextJsonBuilder = class extends SQLiteColumnBuilder {
+  static [entityKind] = "SQLiteTextJsonBuilder";
+  constructor(name) {
+    super(name, "json", "SQLiteTextJson");
+  }
+  /** @internal */
+  build(table) {
+    return new SQLiteTextJson(
+      table,
+      this.config
+    );
+  }
+};
+var SQLiteTextJson = class extends SQLiteColumn {
+  static [entityKind] = "SQLiteTextJson";
+  getSQLType() {
+    return "text";
+  }
+  mapFromDriverValue(value) {
+    return JSON.parse(value);
+  }
+  mapToDriverValue(value) {
+    return JSON.stringify(value);
+  }
+};
+
+// node_modules/.pnpm/drizzle-zod@0.5.1_drizzle-o_93a4a91ac346d4b719e222d9cf7f585d/node_modules/drizzle-zod/index.mjs
+var m = external_exports.union([external_exports.string(), external_exports.number(), external_exports.boolean(), external_exports.null()]);
+var f = external_exports.lazy((() => external_exports.union([m, external_exports.array(f), external_exports.record(f)])));
+function c(t, n) {
+  const r = getTableColumns(t), o = Object.entries(r);
+  let i = Object.fromEntries(o.map((([e, t2]) => [e, p(t2)])));
+  n && (i = Object.assign(i, Object.fromEntries(Object.entries(n).map((([e, t2]) => [e, "function" == typeof t2 ? t2(i) : t2])))));
+  for (const [e, t2] of o) t2.notNull ? t2.hasDefault && (i[e] = i[e].optional()) : i[e] = i[e].nullable().optional();
+  return external_exports.object(i);
+}
+function b(t, n) {
+  const r = getTableColumns(t), o = Object.entries(r);
+  let i = Object.fromEntries(o.map((([e, t2]) => [e, p(t2)])));
+  n && (i = Object.assign(i, Object.fromEntries(Object.entries(n).map((([e, t2]) => [e, "function" == typeof t2 ? t2(i) : t2])))));
+  for (const [e, t2] of o) t2.notNull || (i[e] = i[e].nullable());
+  return external_exports.object(i);
+}
+function p(e) {
+  let m2;
+  if ((function(e2) {
+    return "enumValues" in e2 && Array.isArray(e2.enumValues) && e2.enumValues.length > 0;
+  })(e) && (m2 = e.enumValues.length ? external_exports.enum(e.enumValues) : external_exports.string()), !m2) {
+    if (is(e, PgUUID)) m2 = external_exports.string().uuid();
+    else if ("custom" === e.dataType) m2 = external_exports.any();
+    else if ("json" === e.dataType) m2 = f;
+    else if ("array" === e.dataType) m2 = external_exports.array(p(e.baseColumn));
+    else if ("number" === e.dataType) m2 = external_exports.number();
+    else if ("bigint" === e.dataType) m2 = external_exports.bigint();
+    else if ("boolean" === e.dataType) m2 = external_exports.boolean();
+    else if ("date" === e.dataType) m2 = external_exports.date();
+    else if ("string" === e.dataType) {
+      let i = external_exports.string();
+      (is(e, PgChar) || is(e, PgVarchar) || is(e, MySqlVarChar) || is(e, MySqlVarBinary) || is(e, MySqlChar) || is(e, SQLiteText)) && "number" == typeof e.length && (i = i.max(e.length)), m2 = i;
+    }
+  }
+  return m2 || (m2 = external_exports.any()), m2;
+}
+
+// src/db/schema.type.ts
+var IHealthLog = b(healthLogs);
+var IUserCreate = c(users, {
+  name: (schema) => schema.name.min(1).max(50),
+  email: (schema) => schema.email.email({ message: "Provide a valid email" }),
+  password: (schema) => schema.password.min(6, { message: "Password too short" })
+}).extend({ agency_name: external_exports.string().optional() }).required({
+  name: true,
+  email: true,
+  password: true,
+  agency_name: true
+}).omit({
+  createdAt: true,
+  type: true,
+  userId: true,
+  orgId: true,
+  roleId: true
+});
+var ZSupplier = c(suppliers, {
+  name: (schema) => schema.name.min(1).max(50),
+  email: (schema) => schema.email.email({ message: "Provide a valid email" })
+}).omit({
+  createdAt: true,
+  supId: true,
+  orgId: true
+});
+var ZWarehouse = c(warehouses, {
+  name: (schema) => schema.name.min(1).max(50)
+}).omit({
+  createdAt: true,
+  whId: true,
+  orgId: true
+});
+var ZCategory = c(categories, {
+  name: (schema) => schema.name.min(1).max(50)
+}).omit({
+  createdAt: true,
+  catId: true,
+  orgId: true
+});
+var ZProduct = c(products, {
+  name: (schema) => schema.name.min(1).max(50)
+}).omit({
+  createdAt: true,
+  productId: true,
+  orgId: true
+});
+
+// src/config/types.ts
+var idParams = external_exports.object({
+  id: external_exports.preprocess(
+    (val) => typeof val === "string" ? Number(val) : val,
+    external_exports.number().int().positive()
+  )
+});
+
+// src/features/category/category.schema.ts
+var ZUpdateCategory = ZCategory.partial();
+var CategorySchema = class {
+  addCategory = createRoute({
+    path: "/",
+    method: "post",
+    tags: ["category"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { body: json_content_required_default(ZCategory, "create category") },
+    responses: {
+      [CREATED]: json_content_default(ZCategory, "Category created response")
+    }
+  });
+  getCategory = createRoute({
+    path: "/",
+    method: "get",
+    tags: ["category"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      query: external_exports.object({
+        limit: external_exports.string().default("10").transform((val) => val ? parseInt(val) : 10),
+        offset: external_exports.string().default("0").transform((val) => val ? parseInt(val) : 0)
+      })
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(ZCategory)
+        }),
+        "Category fetched"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "No category found"
+      )
+    }
+  });
+  updateCategory = createRoute({
+    path: "/:id",
+    method: "put",
+    tags: ["category"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      params: idParams,
+      body: json_content_required_default(ZUpdateCategory, "Update category")
+    },
+    responses: {
+      [OK2]: json_content_default(ZCategory, "Category updated")
+    }
+  });
+  deleteCategory = createRoute({
+    path: "/:id",
+    method: "delete",
+    tags: ["category"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { params: idParams },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Category deleted"
+      )
+    }
+  });
+};
+var instance2 = new CategorySchema();
+
+// src/features/category/category.router.ts
+var CategoryRouter = class {
+  service = new CategoryService();
+  schema = new CategorySchema();
+  routes = createRouter().openapi(this.schema.addCategory, this.service.addCategory).openapi(this.schema.updateCategory, this.service.updateCategory).openapi(this.schema.deleteCategory, this.service.deleteCategory).openapi(this.schema.getCategory, this.service.getCategory);
+};
+
+// src/features/health/health.schema.ts
+var HealthSchema = class {
+  createHealth = createRoute({
+    path: "/",
+    method: "get",
+    tags: ["health"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {},
+    responses: {
+      [OK2]: json_content_default(IHealthLog, "Insert to db for test purpose")
+    }
+  });
+};
+var instance3 = new HealthSchema();
+
+// src/features/health/health.model.ts
+var HealthModel = class extends AbstractModels {
+  async insertHealthLogDB() {
+    const [row] = await this.query().insert(this.table.healthLogs).values({}).returning();
+    return row;
+  }
+};
+
+// src/features/health/health.service.ts
+var HealthService = class {
+  db = new HealthModel();
+  healthCheck = async (c2) => {
+    const auth2 = c2.get("jwtPayload");
+    const result = await this.db.insertHealthLogDB();
+    return c2.json(result, OK2);
+  };
+};
+
+// src/features/health/health.router.ts
+var HealthRoute = class {
+  controller = new HealthService();
+  schema = new HealthSchema();
+  routes = createRouter().openapi(
+    this.schema.createHealth,
+    this.controller.healthCheck
+  );
+};
+
+// src/features/product/product.schema.ts
+var ZUpdateProduct = ZProduct.partial();
+var ProductSchema = class {
+  addProduct = createRoute({
+    path: "/",
+    method: "post",
+    tags: ["product"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { body: json_content_required_default(ZProduct, "create product") },
+    responses: {
+      [CREATED]: json_content_default(ZProduct, "Product created response")
+    }
+  });
+  getProduct = createRoute({
+    path: "/",
+    method: "get",
+    tags: ["product"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      query: external_exports.object({
+        limit: external_exports.string().default("10").transform((val) => val ? parseInt(val) : 10),
+        offset: external_exports.string().default("0").transform((val) => val ? parseInt(val) : 0)
+      })
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(ZProduct)
+        }),
+        "Product fetched"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "No product found"
+      )
+    }
+  });
+  updateProduct = createRoute({
+    path: "/:id",
+    method: "put",
+    tags: ["product"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      params: idParams,
+      body: json_content_required_default(ZUpdateProduct, "Update product")
+    },
+    responses: {
+      [OK2]: json_content_default(ZProduct, "Product updated")
+    }
+  });
+  deleteProduct = createRoute({
+    path: "/:id",
+    method: "delete",
+    tags: ["product"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { params: idParams },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Product deleted"
+      )
+    }
+  });
+};
+var instance4 = new ProductSchema();
+
+// src/features/product/product.model.ts
+var ProductModel = class extends AbstractModels {
+  async addProduct(body) {
+    const res = await this.query().insert(this.table.products).values(body).returning();
+    return res;
+  }
+  async updateProduct(body, id) {
+    const res = await this.query().update(this.table.products).set(body).where(eq(this.table.products.productId, id)).returning();
+    return res;
+  }
+  async deleteProduct(id) {
+    const res = await this.query().delete(this.table.products).where(eq(this.table.products.productId, id)).returning();
+    return res;
+  }
+  async getProduct(ORG_ID, limit, offset) {
+    const { orgId, ...rest } = getTableColumns(this.table.products);
+    const res = await this.query().select({ ...rest }).from(this.table.products).where(eq(this.table.products.orgId, ORG_ID)).limit(limit).offset(offset);
+    return res;
+  }
+  async getTotalProduct() {
+    const res = await this.query().$count(this.table.products);
+    return res;
+  }
+};
+
+// src/features/product/product.service.ts
+var ProductService = class {
+  db_conn = new ProductModel();
+  addProduct = async (c2) => {
+    const body = c2.req.valid("json");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.addProduct({ ...body, orgId: org.orgId });
+    return c2.json({ ...res }, CREATED);
+  };
+  updateProduct = async (c2) => {
+    const body = c2.req.valid("json");
+    const { id } = c2.req.valid("param");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.updateProduct({ ...body, orgId: org.orgId }, id);
+    return c2.json({ ...res }, OK2);
+  };
+  deleteProduct = async (c2) => {
+    const { id } = c2.req.valid("param");
+    const org = c2.get("jwtPayload");
+    console.log({ id });
+    await this.db_conn.deleteProduct(id);
+    return c2.json({ message: "Product deleted" }, OK2);
+  };
+  getProduct = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const { limit, offset } = c2.req.valid("query");
+    const res = await this.db_conn.getProduct(org.orgId, limit, offset);
+    const count = await this.db_conn.getTotalProduct();
+    if (res.length === 0) {
+      return c2.json({ message: "No product found" }, NOT_FOUND);
+    }
+    return c2.json({ count, result: res, message: "Product found" }, OK2);
+  };
+};
+
+// src/features/product/product.router.ts
+var ProductRouter = class {
+  service = new ProductService();
+  schema = new ProductSchema();
+  routes = createRouter().openapi(this.schema.addProduct, this.service.addProduct).openapi(this.schema.updateProduct, this.service.updateProduct).openapi(this.schema.deleteProduct, this.service.deleteProduct).openapi(this.schema.getProduct, this.service.getProduct);
+};
+
+// src/features/stock/stock.model.ts
+var StockModel = class extends AbstractModels {
+  async purchaseProductList(orgId) {
+    const { quantity, subtotal, unitCost, productId, id } = getTableColumns(
+      this.table.purchaseItems
+    );
+    const { name: product_name } = getTableColumns(this.table.products);
+    const result = await this.db.select({
+      stock_product_id: id,
+      productId,
+      product_name,
+      quantity,
+      unitCost,
+      subtotal
+    }).from(this.table.purchaseItems).leftJoin(
+      this.table.products,
+      eq(this.table.products.productId, this.table.purchaseItems.productId)
+    );
+    return result;
+  }
+  async purchaseList(orgId) {
+    const { supplierId, purchaseId, purchaseDate } = getTableColumns(this.table.purchases);
+    const { name } = getTableColumns(this.table.suppliers);
+    const { quantity, subtotal, unitCost, productId, id } = getTableColumns(
+      this.table.purchaseItems
+    );
+    const { name: product_name } = getTableColumns(this.table.products);
+    const result = await this.db.select({
+      purchaseId,
+      supplierId,
+      supplier_name: name,
+      purchaseDate,
+      sales_item_id: id,
+      productId,
+      product_name,
+      quantity,
+      unitCost,
+      subtotal
+    }).from(this.table.purchases).where(eq(purchases.orgId, orgId)).leftJoin(
+      this.table.suppliers,
+      eq(this.table.purchases.supplierId, this.table.suppliers.supId)
+    ).leftJoin(
+      this.table.purchaseItems,
+      eq(this.table.purchases.purchaseId, this.table.purchaseItems.purchaseId)
+    ).leftJoin(
+      this.table.products,
+      eq(this.table.products.productId, this.table.purchaseItems.productId)
+    );
+    return result;
+  }
+  async addPurchase(body) {
+    const { items, supplierId, orgId } = body;
+    return await this.db.transaction(async (tx) => {
+      const [purchase] = await tx.insert(purchases).values({
+        supplierId,
+        orgId
+      }).returning({ purchaseId: purchases.purchaseId });
+      for (const item of items) {
+        await tx.insert(purchaseItems).values({
+          purchaseId: purchase.purchaseId,
+          productId: item.productId,
+          quantity: item.quantity,
+          unitCost: item.unitCost,
+          subtotal: item.subtotal
+        });
+      }
+      return {
+        purchaseId: purchase.purchaseId,
+        message: "Purchase created and stock updated successfully"
+      };
+    });
+  }
+  async updatePurchase(id, body) {
+    const { items, supplierId } = body;
+    const sales_item_id = body.items[0].sales_item_id;
+    return await this.db.transaction(async (tx) => {
+      await tx.update(this.table.purchases).set({ supplierId }).where(eq(this.table.purchases.purchaseId, id));
+      await tx.delete(this.table.purchaseItems).where(eq(this.table.purchaseItems.id, sales_item_id));
+      for (const item of items) {
+        await tx.insert(purchaseItems).values({ purchaseId: id, ...item });
+      }
+      return { purchaseId: id, message: "Purchase updated" };
+    });
+  }
+  async deletePurchase(id) {
+    await this.query().delete(purchases).where(eq(purchases.purchaseId, id));
+    return { message: "Purchase deleted" };
+  }
+  async salesGetForEdit({ orgId, salesId }) {
+    const { saleDate, customerName, saleId } = getTableColumns(this.table.sales);
+    const { productId, quantity, unitPrice, subtotal, id } = getTableColumns(this.table.saleItems);
+    const result = await this.query().select({
+      saleId,
+      saleDate,
+      customerName,
+      productId,
+      quantity,
+      unitPrice,
+      subtotal,
+      sales_item_id: id
+    }).from(this.table.sales).where(and(eq(this.table.sales.saleId, salesId), eq(sales.orgId, orgId))).leftJoin(this.table.saleItems, eq(this.table.sales.saleId, this.table.saleItems.saleId));
+    return result;
+  }
+  async addSale(body) {
+    const { items, orgId, customerName, saleDate } = body;
+    return await this.db.transaction(async (tx) => {
+      const [sale] = await tx.insert(this.table.sales).values({ orgId, customerName, saleDate }).returning({ saleId: sales.saleId });
+      for (const item of items) {
+        await tx.insert(saleItems).values({
+          saleId: sale.saleId,
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          subtotal: item.subtotal
+        });
+        await tx.update(purchaseItems).set({
+          quantity: sql`${purchaseItems.quantity} - ${item.quantity}`
+        }).where(eq(purchaseItems.id, item.productId));
+      }
+      return { id: sale.saleId, message: "Sale created" };
+    });
+  }
+  async updateSale(body, saleId) {
+    const { items, orgId, customerName, saleDate } = body;
+    return await this.db.transaction(async (tx) => {
+      await tx.update(this.table.sales).set({ customerName, saleDate }).where(and(eq(this.table.sales.saleId, saleId), eq(sales.orgId, orgId)));
+      for (const item of items) {
+        if (item.isDeleted) {
+          await tx.update(purchaseItems).set({
+            quantity: sql`${purchaseItems.quantity} + ${item.quantity}`
+          }).where(eq(purchaseItems.id, item.productId));
+          await tx.delete(this.table.saleItems).where(eq(this.table.saleItems.id, item.purchase_item_id));
+        } else {
+          await tx.update(this.table.saleItems).set({
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            subtotal: item.subtotal
+          }).where(eq(this.table.saleItems.id, item.purchase_item_id));
+          await tx.update(purchaseItems).set({
+            quantity: item.stock
+          }).where(eq(purchaseItems.id, item.productId));
+        }
+      }
+      return { id: saleId, message: "Sale created" };
+    });
+  }
+  async salesList(orgId) {
+    const { saleDate, customerName, saleId } = getTableColumns(this.table.sales);
+    const { name: product_name } = getTableColumns(this.table.products);
+    const {
+      id: salesItemId,
+      subtotal,
+      unitPrice,
+      quantity
+    } = getTableColumns(this.table.saleItems);
+    const result = await this.db.select({
+      saleId,
+      salesItemId,
+      saleDate,
+      customerName,
+      product_name,
+      quantity,
+      unitPrice,
+      subtotal
+    }).from(this.table.sales).where(eq(this.table.sales.orgId, orgId)).leftJoin(this.table.saleItems, eq(this.table.sales.saleId, this.table.saleItems.saleId)).leftJoin(
+      this.table.purchaseItems,
+      eq(this.table.purchaseItems.id, this.table.saleItems.productId)
+    ).leftJoin(
+      this.table.products,
+      eq(this.table.products.productId, this.table.purchaseItems.productId)
+    );
+    return result;
+  }
+  async getStockReport(orgId) {
+    const products3 = this.table.products;
+    const pi = this.table.purchaseItems;
+    const si = this.table.saleItems;
+    const result = await this.db.select({
+      productId: products3.productId,
+      name: products3.name,
+      totalPurchased: sql`COALESCE(SUM(${pi.quantity}), 0)`,
+      totalSold: sql`COALESCE(SUM(${si.quantity}), 0)`,
+      currentStock: sql`
+        COALESCE(SUM(${pi.quantity}), 0)
+      - COALESCE(SUM(${si.quantity}), 0)
+    `
+    }).from(products3).where(eq(products3.orgId, orgId)).leftJoin(pi, eq(products3.productId, pi.productId)).leftJoin(si, eq(pi.id, si.productId)).groupBy(products3.productId, products3.name);
+    return result;
+  }
+  // 📈 Sales Report
+  async getSalesReport(orgId) {
+    const sales2 = this.table.sales;
+    const pi = this.table.purchaseItems;
+    const result = await this.db.select({
+      salesId: this.table.saleItems.saleId,
+      purchaseId: this.table.saleItems.productId,
+      saleDate: sales2.saleDate,
+      customerName: sales2.customerName,
+      salesQuantity: this.table.saleItems.quantity,
+      salesUnitPrice: this.table.saleItems.unitPrice,
+      purchaseUnitCost: pi.unitCost,
+      salesSubtotal: this.table.saleItems.subtotal
+    }).from(this.table.saleItems).where(eq(sales2.orgId, orgId)).leftJoin(pi, eq(this.table.saleItems.productId, pi.id)).leftJoin(sales2, eq(this.table.saleItems.saleId, sales2.saleId));
+    return result;
+  }
+};
+
+// src/features/stock/stock.service.ts
+var StockService = class {
+  db_conn = new StockModel();
+  purchaseProductList = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const result = await this.db_conn.purchaseProductList(org.orgId);
+    return c2.json({ count: result.length, result }, OK2);
+  };
+  purchaseList = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const result = await this.db_conn.purchaseList(org.orgId);
+    return c2.json({ count: result?.length, result }, OK2);
+  };
+  addPurchase = async (c2) => {
+    const body = c2.req.valid("json");
+    const org = c2.get("jwtPayload");
+    const result = await this.db_conn.addPurchase({
+      ...body,
+      orgId: org.orgId
+    });
+    return c2.json(result, CREATED);
+  };
+  updatePurchase = async (c2) => {
+    const id = Number(c2.req.param("id"));
+    const body = c2.req.valid("json");
+    const result = await this.db_conn.updatePurchase(id, body);
+    return c2.json(result, OK2);
+  };
+  deletePurchase = async (c2) => {
+    const id = Number(c2.req.param("id"));
+    const result = await this.db_conn.deletePurchase(id);
+    return c2.json(result, OK2);
+  };
+  saleList = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const result = await this.db_conn.salesList(org.orgId);
+    const grouped = result?.reduce((acc, item) => {
+      if (!acc[item.saleId]) {
+        acc[item.saleId] = {
+          saleId: item.saleId,
+          saleDate: item.saleDate,
+          customerName: item?.customerName,
+          totalPrice: 0,
+          totalQuantity: 0,
+          items: []
+        };
+      }
+      acc[item.saleId].items.push({
+        salesItemId: item.salesItemId,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        subtotal: item.subtotal
+      });
+      acc[item.saleId].totalPrice += item.subtotal ?? 0;
+      acc[item.saleId].totalQuantity += item.quantity ?? 0;
+      return acc;
+    }, {});
+    return c2.json({ count: result.length, result: Object.values(grouped) }, OK2);
+  };
+  getForEditSale = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const id = Number(c2.req.param("id"));
+    const result = await this.db_conn.salesGetForEdit({ orgId: org.orgId, salesId: id });
+    const sale = {
+      saleId: result?.[0]?.saleId,
+      saleDate: result?.[0]?.saleDate,
+      customerName: result?.[0]?.customerName,
+      items: result?.map((row) => ({
+        sales_item_id: row?.sales_item_id,
+        productId: row?.productId,
+        quantity: row?.quantity,
+        unitPrice: row?.unitPrice,
+        subtotal: row?.subtotal
+      }))
+    };
+    return c2.json({ result: sale }, OK2);
+  };
+  addSale = async (c2) => {
+    const body = c2.req.valid("json");
+    const org = c2.get("jwtPayload");
+    const result = await this.db_conn.addSale({ ...body, orgId: org.orgId });
+    return c2.json(result, CREATED);
+  };
+  updateSale = async (c2) => {
+    const body = c2.req.valid("json");
+    const org = c2.get("jwtPayload");
+    const id = Number(c2.req.param("id"));
+    const result = await this.db_conn.updateSale({ ...body, orgId: org.orgId }, id);
+    return c2.json(result, OK2);
+  };
+  stockReport = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const data = await this.db_conn.getStockReport(org.orgId);
+    return c2.json({ count: data.length, result: data });
+  };
+  salesReport = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const data = await this.db_conn.getSalesReport(org.orgId);
+    return c2.json({ count: data.length, result: data });
+  };
+};
+
+// src/features/stock/stock.schema.ts
+var PurchaseProduct = external_exports.object({
+  stock_product_id: external_exports.number().optional(),
+  productId: external_exports.number().int().positive(),
+  quantity: external_exports.number().int().positive(),
+  unitCost: external_exports.number().min(0),
+  subtotal: external_exports.number().min(0),
+  product_name: external_exports.string().nullable()
+});
+var PurchaseItem = external_exports.object({
+  sales_item_id: external_exports.number().optional(),
+  productId: external_exports.number().int().positive(),
+  quantity: external_exports.number().int().positive(),
+  unitCost: external_exports.number().min(0),
+  subtotal: external_exports.number().min(0)
+});
+var PurchaseListSchema = external_exports.object({
+  purchaseId: external_exports.number(),
+  supplierId: external_exports.number().nullable(),
+  supplier_name: external_exports.string().nullable(),
+  sales_item_id: external_exports.number().nullable(),
+  purchaseDate: external_exports.string(),
+  productId: external_exports.number().nullable(),
+  product_name: external_exports.string().nullable(),
+  quantity: external_exports.number().nullable(),
+  unitCost: external_exports.number().nullable(),
+  subtotal: external_exports.number().nullable()
+});
+var AddPurchaseBody = external_exports.object({
+  supplierId: external_exports.number().int().positive().optional(),
+  purchaseDate: external_exports.string().datetime().nonempty(),
+  items: external_exports.array(PurchaseItem).nonempty()
+});
+var AddSaleBody = external_exports.object({
+  customerName: external_exports.string().optional(),
+  saleDate: external_exports.string().datetime().optional(),
+  items: external_exports.array(
+    external_exports.object({
+      productId: external_exports.number().int().positive(),
+      quantity: external_exports.number().int().positive(),
+      unitPrice: external_exports.number().min(0),
+      subtotal: external_exports.number().min(0)
+    })
+  ).nonempty()
+});
+var UpdateSaleBody = external_exports.object({
+  customerName: external_exports.string().optional(),
+  saleDate: external_exports.string().datetime().optional(),
+  items: external_exports.array(
+    external_exports.object({
+      productId: external_exports.number().int().positive(),
+      purchase_item_id: external_exports.number().int().positive(),
+      quantity: external_exports.number().int().positive(),
+      unitPrice: external_exports.number().min(0),
+      subtotal: external_exports.number().min(0),
+      stock: external_exports.number().min(0),
+      isDeleted: external_exports.boolean().optional()
+    })
+  ).nonempty()
+});
+var SaleList = external_exports.object({
+  saleId: external_exports.number(),
+  saleDate: external_exports.string(),
+  customerName: external_exports.string().nullable().optional(),
+  totalQuantity: external_exports.number(),
+  totalPrice: external_exports.number(),
+  items: external_exports.array(
+    external_exports.object({
+      salesItemId: external_exports.number().nullable(),
+      product_name: external_exports.string().nullable(),
+      quantity: external_exports.number().nullable(),
+      unitPrice: external_exports.number().nullable(),
+      subtotal: external_exports.number().nullable()
+    })
+  )
+});
+var StockReportItem = external_exports.object({
+  productId: external_exports.number(),
+  name: external_exports.string(),
+  totalPurchased: external_exports.number(),
+  totalSold: external_exports.number(),
+  currentStock: external_exports.number()
+});
+var SalesReport = external_exports.object({
+  salesId: external_exports.number(),
+  purchaseId: external_exports.number(),
+  saleDate: external_exports.string().nullable(),
+  customerName: external_exports.string().nullable(),
+  salesQuantity: external_exports.number().int().positive(),
+  salesUnitPrice: external_exports.number().min(0),
+  purchaseUnitCost: external_exports.number().nullable(),
+  salesSubtotal: external_exports.number().min(0)
+});
+var BasicResponse = external_exports.object({
+  purchaseId: external_exports.number().optional(),
+  message: external_exports.string()
+});
+var StockSchema = class {
+  purchaseProductList = createRoute({
+    path: "/product",
+    method: "get",
+    tags: ["stock"],
+    security: [{ bearerAuth: [] }],
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(PurchaseProduct)
+        }),
+        "Purchase Lists"
+      )
+    }
+  });
+  purchaseList = createRoute({
+    path: "/purchase",
+    method: "get",
+    tags: ["stock"],
+    security: [{ bearerAuth: [] }],
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(PurchaseListSchema)
+        }),
+        "Purchase Lists"
+      )
+    }
+  });
+  addPurchase = createRoute({
+    path: "/purchase",
+    method: "post",
+    tags: ["stock"],
+    security: [{ bearerAuth: [] }],
+    request: {
+      body: json_content_required_default(AddPurchaseBody, "Create a purchase")
+    },
+    responses: {
+      [CREATED]: json_content_default(BasicResponse, "Purchase created successfully")
+    }
+  });
+  updatePurchase = createRoute({
+    path: "/purchase/{id}",
+    method: "put",
+    tags: ["stock"],
+    request: {
+      params: external_exports.object({ id: external_exports.string() }),
+      body: json_content_required_default(AddPurchaseBody, "Update purchase")
+    },
+    responses: {
+      [OK2]: json_content_default(BasicResponse, "Purchase updated")
+    }
+  });
+  deletePurchase = createRoute({
+    path: "/purchase/{id}",
+    method: "delete",
+    tags: ["stock"],
+    request: { params: external_exports.object({ id: external_exports.string() }) },
+    responses: {
+      [OK2]: json_content_default(BasicResponse, "Purchase deleted")
+    }
+  });
+  salesList = createRoute({
+    path: "/sale",
+    method: "get",
+    tags: ["stock"],
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(SaleList)
+        }),
+        "Sale list"
+      )
+    }
+  });
+  addSale = createRoute({
+    path: "/sale",
+    method: "post",
+    tags: ["stock"],
+    request: { body: json_content_required_default(AddSaleBody, "Create sale") },
+    responses: {
+      [CREATED]: json_content_default(BasicResponse, "Sale created")
+    }
+  });
+  updateSale = createRoute({
+    path: "/sale/{id}",
+    method: "put",
+    tags: ["stock"],
+    request: {
+      params: external_exports.object({ id: external_exports.string() }),
+      body: json_content_required_default(UpdateSaleBody, "Update sale")
+    },
+    responses: {
+      [OK2]: json_content_default(BasicResponse, "Sale updated")
+    }
+  });
+  getForEditSale = createRoute({
+    path: "/sale/get-for-edit/{id}",
+    method: "get",
+    tags: ["stock"],
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          result: AddSaleBody
+        }),
+        "Get for edit"
+      )
+    }
+  });
+  stockReport = createRoute({
+    path: "/report/stock",
+    method: "get",
+    tags: ["stock"],
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(StockReportItem)
+        }),
+        "Stock report"
+      )
+    }
+  });
+  salesReport = createRoute({
+    path: "/report/sales",
+    method: "get",
+    tags: ["stock"],
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(SalesReport)
+        }),
+        "Summary report"
+      )
+    }
+  });
+};
+var instance5 = new StockSchema();
+
+// src/features/stock/stock.router.ts
+var StockRouter = class {
+  service = new StockService();
+  schema = new StockSchema();
+  routes = createRouter().openapi(this.schema.purchaseProductList, this.service.purchaseProductList).openapi(this.schema.purchaseList, this.service.purchaseList).openapi(this.schema.addPurchase, this.service.addPurchase).openapi(this.schema.addPurchase, this.service.addPurchase).openapi(this.schema.updatePurchase, this.service.updatePurchase).openapi(this.schema.deletePurchase, this.service.deletePurchase).openapi(this.schema.salesList, this.service.saleList).openapi(this.schema.getForEditSale, this.service.getForEditSale).openapi(this.schema.addSale, this.service.addSale).openapi(this.schema.updateSale, this.service.updateSale).openapi(this.schema.stockReport, this.service.stockReport).openapi(this.schema.salesReport, this.service.salesReport);
+};
+
+// src/features/supplier/supplier.schema.ts
+var ZUpdateSupplier = ZSupplier.partial();
+var SupplierSchema = class {
+  addSupplier = createRoute({
+    path: "/",
+    method: "post",
+    tags: ["supplier"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { body: json_content_required_default(ZSupplier, "create supplier") },
+    responses: {
+      [CREATED]: json_content_default(ZSupplier, "Supplier created response")
+    }
+  });
+  getSupplier = createRoute({
+    path: "/",
+    method: "get",
+    tags: ["supplier"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      query: external_exports.object({
+        limit: external_exports.string().default("10").transform((val) => val ? parseInt(val) : 10),
+        offset: external_exports.string().default("0").transform((val) => val ? parseInt(val) : 0)
+      })
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(ZSupplier)
+        }),
+        "Supplier fetched"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "No supplier found"
+      )
+    }
+  });
+  updateSupplier = createRoute({
+    path: "/:id",
+    method: "put",
+    tags: ["supplier"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      params: idParams,
+      body: json_content_required_default(ZUpdateSupplier, "Update supplier")
+    },
+    responses: {
+      [OK2]: json_content_default(ZSupplier, "Supplier updated")
+    }
+  });
+  deleteSupplier = createRoute({
+    path: "/:id",
+    method: "delete",
+    tags: ["supplier"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { params: idParams },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Supplier deleted"
+      )
+    }
+  });
+};
+var instance6 = new SupplierSchema();
+
+// src/features/supplier/supplier.model.ts
+var SupplierModel = class extends AbstractModels {
+  async addSupplier(body) {
+    const res = await this.query().insert(this.table.suppliers).values(body).returning();
+    return res;
+  }
+  async updateSupplier(body, id) {
+    const res = await this.query().update(this.table.suppliers).set(body).where(eq(this.table.suppliers.supId, id)).returning();
+    return res;
+  }
+  async deleteSupplier(id) {
+    const res = await this.query().delete(this.table.suppliers).where(eq(this.table.suppliers.supId, id)).returning();
+    return res;
+  }
+  async getSupplier(ORG_ID, limit, offset) {
+    const { orgId, ...rest } = getTableColumns(this.table.suppliers);
+    const res = await this.query().select({ ...rest }).from(this.table.suppliers).where(eq(this.table.suppliers.orgId, ORG_ID)).limit(limit).offset(offset);
+    return res;
+  }
+  async getTotalSupplier() {
+    const res = await this.query().$count(this.table.suppliers);
+    return res;
+  }
+};
+
+// src/features/supplier/supplier.service.ts
+var SupplierService = class {
+  db_conn = new SupplierModel();
+  addSupplier = async (c2) => {
+    const body = c2.req.valid("json");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.addSupplier({ ...body, orgId: org.orgId });
+    return c2.json({ ...res }, CREATED);
+  };
+  updateSupplier = async (c2) => {
+    const body = c2.req.valid("json");
+    const { id } = c2.req.valid("param");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.updateSupplier({ ...body, orgId: org.orgId }, id);
+    return c2.json({ ...res }, OK2);
+  };
+  deleteSupplier = async (c2) => {
+    const { id } = c2.req.valid("param");
+    await this.db_conn.deleteSupplier(id);
+    return c2.json({ message: "Supplier deleted" }, OK2);
+  };
+  getSupplier = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const { limit, offset } = c2.req.valid("query");
+    const res = await this.db_conn.getSupplier(org.orgId, limit, offset);
+    const count = await this.db_conn.getTotalSupplier();
+    if (res.length === 0) {
+      return c2.json({ message: "No supplier found" }, NOT_FOUND);
+    }
+    return c2.json({ count, result: res, message: "Supplier fetched" }, OK2);
+  };
+};
+
+// src/features/supplier/supplier.router.ts
+var SupplierRouter = class {
+  service = new SupplierService();
+  schema = new SupplierSchema();
+  routes = createRouter().openapi(this.schema.addSupplier, this.service.addSupplier).openapi(this.schema.updateSupplier, this.service.updateSupplier).openapi(this.schema.deleteSupplier, this.service.deleteSupplier).openapi(this.schema.getSupplier, this.service.getSupplier);
+};
+
 // node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/jwt/jwa.js
 var AlgorithmTypes = /* @__PURE__ */ ((AlgorithmTypes2) => {
   AlgorithmTypes2["HS256"] = "HS256";
@@ -35842,74 +37223,6 @@ var verify2 = Jwt.verify;
 var decode2 = Jwt.decode;
 var sign2 = Jwt.sign;
 
-// src/features/auth/auth.service.ts
-var import_nodemailer = __toESM(require_nodemailer(), 1);
-
-// src/features/auth/auth.model.ts
-var AuthModel = class extends AbstractModels {
-  async createOrganization(name, tx) {
-    const org = await this.query(tx).insert(this.table.organization).values({ name }).returning().then((rows) => rows[0]);
-    return org;
-  }
-  async getDefaultAdminRole(tx) {
-    return await this.query(tx).select().from(this.table.roles).where(and(eq(this.table.roles.isAdmin, true), isNull(this.table.roles.orgId))).limit(1).then((rows) => rows[0]);
-  }
-  async createAdminUser(body, orgId, roleId, tx) {
-    const user = await this.query(tx).insert(this.table.users).values({
-      name: body.name,
-      email: body.email,
-      password: body.password,
-      type: "ADMIN",
-      orgId,
-      roleId
-    }).returning().then((rows) => rows[0]);
-    return user;
-  }
-  async checkExistingUser(email, tx) {
-    const result = await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).where(eq(this.table.users.email, email)).limit(1).then((rows) => rows[0]);
-    return result;
-  }
-  async insertSession(userID, refreshToken, expiresAt, tx) {
-    const result = await this.query(tx).insert(this.table.sessions).values({
-      userId: userID,
-      refreshToken,
-      expiresAt
-    });
-    return result;
-  }
-  async deleteSession(userID, tx) {
-    const result = await this.query(tx).delete(this.table.sessions).where(eq(this.table.sessions.userId, userID));
-    return result;
-  }
-  async checkSession(refreshToken) {
-    const result = await this.query().select().from(this.table.sessions).where(eq(this.table.sessions.refreshToken, refreshToken)).limit(1);
-    return result[0];
-  }
-  async createOTP(userId, code, type, expiresAt, tx) {
-    return await this.query(tx).insert(this.table.otpCodes).values({
-      userId,
-      code,
-      type,
-      expiresAt
-    }).returning().then((rows) => rows[0]);
-  }
-  async findOTP(userId, code, type, tx) {
-    return await this.query(tx).select().from(this.table.otpCodes).where(
-      and(
-        eq(this.table.otpCodes.userId, userId),
-        eq(this.table.otpCodes.code, code),
-        eq(this.table.otpCodes.type, type)
-      )
-    ).limit(1).then((rows) => rows[0]);
-  }
-  async deleteOTP(id, tx) {
-    return await this.query(tx).delete(this.table.otpCodes).where(eq(this.table.otpCodes.id, id));
-  }
-  async updatePassword(userId, password, tx) {
-    return await this.query(tx).update(this.table.users).set({ password }).where(eq(this.table.users.userId, userId));
-  }
-};
-
 // src/env.ts
 var import_dotenv = __toESM(require_main(), 1);
 var import_dotenv_expand = __toESM(require_main2(), 1);
@@ -35945,7 +37258,353 @@ if (error) {
 }
 var env_default = env;
 
+// src/middlewares/authMiddleware.ts
+var authMiddleware = () => {
+  return async (c2, next) => {
+    const authHeader = c2.req.header("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
+      return c2.json({ message: "Unauthorized: Missing or invalid token" }, 401);
+    }
+    const token = authHeader.split(" ")[1];
+    try {
+      const payload = await verify2(token, env_default.JWT_SECRET);
+      c2.set("jwtPayload", payload);
+      await next();
+    } catch (err) {
+      return c2.json({ message: "Unauthorized: Invalid token", err }, 401);
+    }
+  };
+};
+
+// src/features/warehouse/warehouse.schema.ts
+var ZUpdateWarehouses = ZWarehouse.partial();
+var WarehousesSchema = class {
+  addWarehouse = createRoute({
+    path: "/",
+    method: "post",
+    tags: ["warehouse"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { body: json_content_required_default(ZWarehouse, "create warehouses") },
+    responses: {
+      [CREATED]: json_content_default(ZWarehouse, "Warehouses created response")
+    }
+  });
+  getWarehouse = createRoute({
+    path: "/",
+    method: "get",
+    tags: ["warehouse"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      query: external_exports.object({
+        limit: external_exports.string().default("10").transform((val) => val ? parseInt(val) : 10),
+        offset: external_exports.string().default("0").transform((val) => val ? parseInt(val) : 0)
+      })
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(ZWarehouse)
+        }),
+        "Warehouses fetched"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "No warehouses found"
+      )
+    }
+  });
+  updateWarehouse = createRoute({
+    path: "/:id",
+    method: "put",
+    tags: ["warehouse"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      params: idParams,
+      body: json_content_required_default(ZUpdateWarehouses, "Update warehouses")
+    },
+    responses: {
+      [OK2]: json_content_default(ZWarehouse, "Warehouses updated")
+    }
+  });
+  deleteWarehouse = createRoute({
+    path: "/:id",
+    method: "delete",
+    tags: ["warehouse"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { params: idParams },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Warehouses deleted"
+      )
+    }
+  });
+};
+var instance7 = new WarehousesSchema();
+
+// src/features/warehouse/warehouse.model.ts
+var WarehouseModel = class extends AbstractModels {
+  async addWarehouse(body) {
+    const res = await this.query().insert(this.table.warehouses).values(body).returning();
+    return res;
+  }
+  async updateWarehouse(body, id) {
+    const res = await this.query().update(this.table.warehouses).set(body).where(eq(this.table.warehouses.whId, id)).returning();
+    return res;
+  }
+  async deleteWarehouse(id) {
+    const res = await this.query().delete(this.table.warehouses).where(eq(this.table.warehouses.whId, id)).returning();
+    return res;
+  }
+  async getWarehouse(ORG_ID, limit, offset) {
+    const { orgId, ...rest } = getTableColumns(this.table.warehouses);
+    const res = await this.query().select({ ...rest }).from(this.table.warehouses).where(eq(this.table.warehouses.orgId, ORG_ID)).limit(limit).offset(offset);
+    return res;
+  }
+  async getTotalWarehouse() {
+    const res = await this.query().$count(this.table.warehouses);
+    return res;
+  }
+};
+
+// src/features/warehouse/warehouse.service.ts
+var WarehouseService = class {
+  db_conn = new WarehouseModel();
+  addWarehouse = async (c2) => {
+    const body = c2.req.valid("json");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.addWarehouse({ ...body, orgId: org.orgId });
+    return c2.json({ ...res }, CREATED);
+  };
+  updateWarehouse = async (c2) => {
+    const body = c2.req.valid("json");
+    const { id } = c2.req.valid("param");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.updateWarehouse({ ...body, orgId: org.orgId }, id);
+    return c2.json({ ...res }, OK2);
+  };
+  deleteWarehouse = async (c2) => {
+    const { id } = c2.req.valid("param");
+    await this.db_conn.deleteWarehouse(id);
+    return c2.json({ message: "Warehouse deleted" }, OK2);
+  };
+  getWarehouse = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const { limit, offset } = c2.req.valid("query");
+    const res = await this.db_conn.getWarehouse(org.orgId, limit, offset);
+    const count = await this.db_conn.getTotalWarehouse();
+    if (res.length === 0) {
+      return c2.json({ message: "No warehouse found" }, NOT_FOUND);
+    }
+    return c2.json({ count, result: res, message: "Warehouse found" }, OK2);
+  };
+};
+
+// src/features/warehouse/warehouse.router.ts
+var WarehouseRouter = class {
+  service = new WarehouseService();
+  schema = new WarehousesSchema();
+  routes = createRouter().openapi(this.schema.addWarehouse, this.service.addWarehouse).openapi(this.schema.updateWarehouse, this.service.updateWarehouse).openapi(this.schema.deleteWarehouse, this.service.deleteWarehouse).openapi(this.schema.getWarehouse, this.service.getWarehouse);
+};
+
+// src/routes/private.routes.ts
+var privateRoutes = createRouter();
+privateRoutes.use("*", authMiddleware());
+privateRoutes.route("/health", new HealthRoute().routes);
+privateRoutes.route("/supplier", new SupplierRouter().routes);
+privateRoutes.route("/warehouse", new WarehouseRouter().routes);
+privateRoutes.route("/category", new CategoryRouter().routes);
+privateRoutes.route("/product", new ProductRouter().routes);
+privateRoutes.route("/stock", new StockRouter().routes);
+privateRoutes.route("/administration", new administrationRouter().routes);
+
+// src/features/auth/auth.schema.ts
+var AuthSchema = class {
+  signUp = createRoute({
+    path: "/signup",
+    method: "post",
+    tags: ["auth"],
+    request: {
+      body: json_content_required_default(IUserCreate, "signup users")
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          id: external_exports.number(),
+          name: external_exports.string(),
+          email: external_exports.string()
+        }),
+        "User created response"
+      ),
+      [CONFLICT]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Email already exists"
+      )
+    }
+  });
+  signIn = createRoute({
+    path: "/login",
+    method: "post",
+    tags: ["auth"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          email: external_exports.string().nonempty().default("fahim@gmail.com"),
+          password: external_exports.string().nonempty().default("12345678")
+        }),
+        "login user"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          id: external_exports.number(),
+          name: external_exports.string(),
+          company_name: external_exports.string(),
+          email: external_exports.string(),
+          type: external_exports.string(),
+          accessToken: external_exports.string()
+        }),
+        "User login response"
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Wrong credential"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "No user found"
+      )
+    }
+  });
+  refreshToken = createRoute({
+    path: "/refresh-token",
+    method: "get",
+    tags: ["auth"],
+    request: {},
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          accessToken: external_exports.string()
+        }),
+        "New refresh token generated"
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Invalid or expired refresh token"
+      )
+    }
+  });
+  logout = createRoute({
+    path: "/logout",
+    method: "get",
+    tags: ["auth"],
+    request: {},
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Logged out"
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Invalid or expired refresh token"
+      )
+    }
+  });
+  forgotPassword = createRoute({
+    path: "/forgot-password",
+    method: "post",
+    tags: ["auth"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          email: external_exports.string().email()
+        }),
+        "Forgot password request"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "OTP sent successfully"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "User not found"
+      )
+    }
+  });
+  resetPassword = createRoute({
+    path: "/reset-password",
+    method: "post",
+    tags: ["auth"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          email: external_exports.string().email(),
+          code: external_exports.string().length(6),
+          newPassword: external_exports.string().min(6)
+        }),
+        "Reset password request"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Password reset successfully"
+      ),
+      [BAD_REQUEST]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Invalid or expired OTP"
+      )
+    }
+  });
+};
+var instance8 = new AuthSchema();
+
 // src/features/auth/auth.service.ts
+var import_nodemailer = __toESM(require_nodemailer(), 1);
 var getAuditInfo = (c2) => {
   const userAgent = c2.req.header("User-Agent") || "";
   const ip = c2.req.header("X-Forwarded-For") || c2.req.header("X-Real-IP") || "127.0.0.1";
@@ -36160,27 +37819,18 @@ var publicRoutes = createRouter();
 var auth = new AuthRoutes();
 publicRoutes.route("/auth", auth.routes);
 
+// src/routes/index.ts
+var v1Routes = createRouter();
+v1Routes.route("/public", publicRoutes);
+v1Routes.route("/", privateRoutes);
+
 // src/index.ts
 var app = createApp();
 configureOpenAPI(app);
 app.get("/", (c2) => {
   return c2.text("Hello Hono aws lambda awsss!");
 });
-var abcRoutes = createRouter();
-abcRoutes.openapi(
-  {
-    method: "get",
-    path: "/abc",
-    responses: {
-      200: { description: "abc" }
-    }
-  },
-  (c2) => c2.text("ABC")
-);
-var health = new HealthRoute();
-app.route("/", abcRoutes);
-app.route("/health", health.routes);
-app.route("/api/v1", publicRoutes);
+app.route("/api/v1", v1Routes);
 app.get("/api/rbac/seed", async (c2) => {
   await seedRBAC();
   return c2.text("RBAC seeded successfully");
@@ -36192,6 +37842,5 @@ app.onError((err, c2) => {
 var handler = handle(app);
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  abcRoutes,
   handler
 });

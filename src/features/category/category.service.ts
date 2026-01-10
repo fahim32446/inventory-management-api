@@ -1,4 +1,3 @@
-import type { AppRouteHandler } from "config/types";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { CategoryModel } from "./category.model";
 import {
@@ -7,6 +6,7 @@ import {
   type IRGetCategoryRoute,
   type IRUpdateCategoryRoute,
 } from "./category.schema";
+import { AppRouteHandler } from "../../config/types";
 
 export class CategoryService {
   private db_conn = new CategoryModel();
@@ -49,6 +49,6 @@ export class CategoryService {
       return c.json({ message: "No category found" }, HttpStatusCodes.NOT_FOUND);
     }
 
-    return c.json({ count, result: res }, HttpStatusCodes.OK);
+    return c.json({ count, result: res, message: "Category found" }, HttpStatusCodes.OK);
   };
 }

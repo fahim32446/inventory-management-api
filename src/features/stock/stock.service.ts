@@ -1,6 +1,5 @@
-import type { AppRouteHandler } from '@/config/types';
-import * as HttpStatusCodes from 'stoker/http-status-codes';
-import { StockModel } from './stock.model';
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import { StockModel } from "./stock.model";
 import type {
   IRAddPurchaseRoute,
   IRAddSalesRoute,
@@ -14,13 +13,14 @@ import type {
   IRUpdatePurchaseRoute,
   IRUpdateSalesRoute,
   ISaleList,
-} from './stock.schema';
+} from "./stock.schema";
+import { AppRouteHandler } from "../../config/types";
 
 export class StockService {
   private db_conn = new StockModel();
 
   purchaseProductList: AppRouteHandler<IRPurchaseProductListRoute> = async (c) => {
-    const org = c.get('jwtPayload');
+    const org = c.get("jwtPayload");
 
     const result = await this.db_conn.purchaseProductList(org.orgId);
 
@@ -28,15 +28,15 @@ export class StockService {
   };
 
   purchaseList: AppRouteHandler<IRPurchaseListRoute> = async (c) => {
-    const org = c.get('jwtPayload');
+    const org = c.get("jwtPayload");
 
     const result = await this.db_conn.purchaseList(org.orgId);
 
     return c.json({ count: result?.length, result: result }, HttpStatusCodes.OK);
   };
   addPurchase: AppRouteHandler<IRAddPurchaseRoute> = async (c) => {
-    const body = c.req.valid('json');
-    const org = c.get('jwtPayload');
+    const body = c.req.valid("json");
+    const org = c.get("jwtPayload");
 
     const result = await this.db_conn.addPurchase({
       ...body,
@@ -47,21 +47,21 @@ export class StockService {
   };
 
   updatePurchase: AppRouteHandler<IRUpdatePurchaseRoute> = async (c) => {
-    const id = Number(c.req.param('id'));
-    const body = c.req.valid('json');
+    const id = Number(c.req.param("id"));
+    const body = c.req.valid("json");
 
     const result = await this.db_conn.updatePurchase(id, body);
     return c.json(result, HttpStatusCodes.OK);
   };
 
   deletePurchase: AppRouteHandler<IRDeletePurchaseRoute> = async (c) => {
-    const id = Number(c.req.param('id'));
+    const id = Number(c.req.param("id"));
     const result = await this.db_conn.deletePurchase(id);
     return c.json(result, HttpStatusCodes.OK);
   };
 
   saleList: AppRouteHandler<IRSaleListRoute> = async (c) => {
-    const org = c.get('jwtPayload');
+    const org = c.get("jwtPayload");
 
     const result = await this.db_conn.salesList(org.orgId);
 
@@ -94,8 +94,8 @@ export class StockService {
   };
 
   getForEditSale: AppRouteHandler<IRGetForEditSalesRoute> = async (c) => {
-    const org = c.get('jwtPayload');
-    const id = Number(c.req.param('id'));
+    const org = c.get("jwtPayload");
+    const id = Number(c.req.param("id"));
 
     const result = await this.db_conn.salesGetForEdit({ orgId: org.orgId, salesId: id });
 
@@ -103,7 +103,7 @@ export class StockService {
       saleId: result?.[0]?.saleId,
       saleDate: result?.[0]?.saleDate,
       customerName: result?.[0]?.customerName,
-      items: result?.map((row) => ({
+      items: result?.map((row: any) => ({
         sales_item_id: row?.sales_item_id,
         productId: row?.productId,
         quantity: row?.quantity,
@@ -115,29 +115,29 @@ export class StockService {
   };
 
   addSale: AppRouteHandler<IRAddSalesRoute> = async (c) => {
-    const body = c.req.valid('json');
-    const org = c.get('jwtPayload');
+    const body = c.req.valid("json");
+    const org = c.get("jwtPayload");
 
     const result = await this.db_conn.addSale({ ...body, orgId: org.orgId });
     return c.json(result, HttpStatusCodes.CREATED);
   };
 
   updateSale: AppRouteHandler<IRUpdateSalesRoute> = async (c) => {
-    const body = c.req.valid('json');
-    const org = c.get('jwtPayload');
-    const id = Number(c.req.param('id'));
+    const body = c.req.valid("json");
+    const org = c.get("jwtPayload");
+    const id = Number(c.req.param("id"));
     const result = await this.db_conn.updateSale({ ...body, orgId: org.orgId }, id);
     return c.json(result, HttpStatusCodes.OK);
   };
 
   stockReport: AppRouteHandler<IRStockReportRoute> = async (c) => {
-    const org = c.get('jwtPayload');
+    const org = c.get("jwtPayload");
     const data = await this.db_conn.getStockReport(org.orgId);
     return c.json({ count: data.length, result: data });
   };
 
   salesReport: AppRouteHandler<IRSalesReportRoute> = async (c) => {
-    const org = c.get('jwtPayload');
+    const org = c.get("jwtPayload");
     const data = await this.db_conn.getSalesReport(org.orgId);
 
     return c.json({ count: data.length, result: data });

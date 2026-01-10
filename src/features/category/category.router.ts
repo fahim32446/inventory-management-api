@@ -1,6 +1,6 @@
-import { createRouter } from "config/create-app";
 import { CategoryService } from "./category.service";
 import { CategorySchema } from "./category.schema";
+import { createRouter } from "../../config/create-app";
 
 export class CategoryRouter {
   private service = new CategoryService();

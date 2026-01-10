@@ -1,8 +1,8 @@
-import { idParams } from "@/config/types";
-import { ZWarehouse } from "@/db/schema.type";
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+import { ZWarehouse } from "../../db/schema.type";
+import { idParams } from "../../config/types";
 
 export const ZUpdateWarehouses = ZWarehouse.partial();
 
@@ -21,10 +21,7 @@ export class WarehousesSchema {
     ],
     request: { body: jsonContentRequired(ZWarehouse, "create warehouses") },
     responses: {
-      [HttpStatusCodes.CREATED]: jsonContent(
-        ZWarehouse,
-        "Warehouses created response"
-      ),
+      [HttpStatusCodes.CREATED]: jsonContent(ZWarehouse, "Warehouses created response"),
     },
   });
 

@@ -1,24 +1,24 @@
-import env from '@/env';
-import type { MiddlewareHandler } from 'hono';
-import { verify } from 'hono/jwt';
+import type { MiddlewareHandler } from "hono";
+import { verify } from "hono/jwt";
+import env from "../env";
 
 export const authMiddleware = (): MiddlewareHandler => {
   return async (c, next) => {
-    const authHeader = c.req.header('Authorization');
+    const authHeader = c.req.header("Authorization");
 
-    if (!authHeader || !authHeader.startsWith('Bearer')) {
-      return c.json({ message: 'Unauthorized: Missing or invalid token' }, 401);
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
+      return c.json({ message: "Unauthorized: Missing or invalid token" }, 401);
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
 
     try {
-      const payload = await verify(token, env.JWT_SECRET);
+      const payload = await verify(token, env.JWT_SECRET!);
 
-      c.set('jwtPayload', payload);
+      c.set("jwtPayload", payload);
       await next();
     } catch (err) {
-      return c.json({ message: 'Unauthorized: Invalid token', err }, 401);
+      return c.json({ message: "Unauthorized: Invalid token", err }, 401);
     }
   };
 };

@@ -1,4 +1,4 @@
-import { createRouter } from "config/create-app";
+import { createRouter } from "../../config/create-app";
 import { ProductSchema } from "./product.schema";
 import { ProductService } from "./product.service";
 

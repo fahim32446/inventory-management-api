@@ -1,8 +1,8 @@
-import { idParams } from "config/types";
-import { ZCategory } from "db/schema.type";
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+import { ZCategory } from "../../db/schema.type";
+import { idParams } from "../../config/types";
 
 export const ZUpdateCategory = ZCategory.partial();
 

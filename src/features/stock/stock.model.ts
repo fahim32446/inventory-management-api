@@ -1,7 +1,7 @@
-import { AbstractModels } from '@/abstract/abstract.model';
-import { products, purchaseItems, purchases, saleItems, sales } from '@/db/schema';
-import { and, eq, getTableColumns, sql } from 'drizzle-orm';
-import type { IAddPurchaseBody, IAddSaleBody, IUpdateSaleBody } from './stock.schema';
+import { and, eq, getTableColumns, sql } from "drizzle-orm";
+import type { IAddPurchaseBody, IAddSaleBody, IUpdateSaleBody } from "./stock.schema";
+import { AbstractModels } from "../../abstract/abstract.model";
+import { products, purchaseItems, purchases, saleItems, sales } from "../../db/schema";
 
 export class StockModel extends AbstractModels {
   async purchaseProductList(orgId: number) {
@@ -90,7 +90,7 @@ export class StockModel extends AbstractModels {
 
       return {
         purchaseId: purchase.purchaseId,
-        message: 'Purchase created and stock updated successfully',
+        message: "Purchase created and stock updated successfully",
       };
     });
   }
@@ -111,13 +111,13 @@ export class StockModel extends AbstractModels {
       for (const item of items) {
         await tx.insert(purchaseItems).values({ purchaseId: id, ...item });
       }
-      return { purchaseId: id, message: 'Purchase updated' };
+      return { purchaseId: id, message: "Purchase updated" };
     });
   }
 
   async deletePurchase(id: number) {
     await this.query().delete(purchases).where(eq(purchases.purchaseId, id));
-    return { message: 'Purchase deleted' };
+    return { message: "Purchase deleted" };
   }
 
   async salesGetForEdit({ orgId, salesId }: { orgId: number; salesId: number }) {
@@ -165,7 +165,7 @@ export class StockModel extends AbstractModels {
           .where(eq(purchaseItems.id, item.productId));
       }
 
-      return { id: sale.saleId, message: 'Sale created' };
+      return { id: sale.saleId, message: "Sale created" };
     });
   }
 
@@ -208,7 +208,7 @@ export class StockModel extends AbstractModels {
         }
       }
 
-      return { id: saleId, message: 'Sale created' };
+      return { id: saleId, message: "Sale created" };
     });
   }
 

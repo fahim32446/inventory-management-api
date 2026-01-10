@@ -1,7 +1,6 @@
-import { createRoute, z } from '@hono/zod-openapi';
-import { count } from 'node:console';
-import * as HttpStatusCodes from 'stoker/http-status-codes';
-import { jsonContent, jsonContentRequired } from 'stoker/openapi/helpers';
+import { createRoute, z } from "@hono/zod-openapi";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
 export const PurchaseProduct = z.object({
   stock_product_id: z.number().optional(),
@@ -119,9 +118,9 @@ export const BasicResponse = z.object({
 
 export class StockSchema {
   readonly purchaseProductList = createRoute({
-    path: '/product',
-    method: 'get',
-    tags: ['stock'],
+    path: "/product",
+    method: "get",
+    tags: ["stock"],
     security: [{ bearerAuth: [] }],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
@@ -129,14 +128,14 @@ export class StockSchema {
           count: z.number(),
           result: z.array(PurchaseProduct),
         }),
-        'Purchase Lists'
+        "Purchase Lists"
       ),
     },
   });
   readonly purchaseList = createRoute({
-    path: '/purchase',
-    method: 'get',
-    tags: ['stock'],
+    path: "/purchase",
+    method: "get",
+    tags: ["stock"],
     security: [{ bearerAuth: [] }],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
@@ -144,102 +143,102 @@ export class StockSchema {
           count: z.number(),
           result: z.array(PurchaseListSchema),
         }),
-        'Purchase Lists'
+        "Purchase Lists"
       ),
     },
   });
   readonly addPurchase = createRoute({
-    path: '/purchase',
-    method: 'post',
-    tags: ['stock'],
+    path: "/purchase",
+    method: "post",
+    tags: ["stock"],
     security: [{ bearerAuth: [] }],
     request: {
-      body: jsonContentRequired(AddPurchaseBody, 'Create a purchase'),
+      body: jsonContentRequired(AddPurchaseBody, "Create a purchase"),
     },
     responses: {
-      [HttpStatusCodes.CREATED]: jsonContent(BasicResponse, 'Purchase created successfully'),
+      [HttpStatusCodes.CREATED]: jsonContent(BasicResponse, "Purchase created successfully"),
     },
   });
 
   readonly updatePurchase = createRoute({
-    path: '/purchase/{id}',
-    method: 'put',
-    tags: ['stock'],
+    path: "/purchase/{id}",
+    method: "put",
+    tags: ["stock"],
     request: {
       params: z.object({ id: z.string() }),
-      body: jsonContentRequired(AddPurchaseBody, 'Update purchase'),
+      body: jsonContentRequired(AddPurchaseBody, "Update purchase"),
     },
     responses: {
-      [HttpStatusCodes.OK]: jsonContent(BasicResponse, 'Purchase updated'),
+      [HttpStatusCodes.OK]: jsonContent(BasicResponse, "Purchase updated"),
     },
   });
 
   readonly deletePurchase = createRoute({
-    path: '/purchase/{id}',
-    method: 'delete',
-    tags: ['stock'],
+    path: "/purchase/{id}",
+    method: "delete",
+    tags: ["stock"],
     request: { params: z.object({ id: z.string() }) },
     responses: {
-      [HttpStatusCodes.OK]: jsonContent(BasicResponse, 'Purchase deleted'),
+      [HttpStatusCodes.OK]: jsonContent(BasicResponse, "Purchase deleted"),
     },
   });
 
   readonly salesList = createRoute({
-    path: '/sale',
-    method: 'get',
-    tags: ['stock'],
+    path: "/sale",
+    method: "get",
+    tags: ["stock"],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
         z.object({
           count: z.number(),
           result: z.array(SaleList),
         }),
-        'Sale list'
+        "Sale list"
       ),
     },
   });
   readonly addSale = createRoute({
-    path: '/sale',
-    method: 'post',
-    tags: ['stock'],
-    request: { body: jsonContentRequired(AddSaleBody, 'Create sale') },
+    path: "/sale",
+    method: "post",
+    tags: ["stock"],
+    request: { body: jsonContentRequired(AddSaleBody, "Create sale") },
     responses: {
-      [HttpStatusCodes.CREATED]: jsonContent(BasicResponse, 'Sale created'),
+      [HttpStatusCodes.CREATED]: jsonContent(BasicResponse, "Sale created"),
     },
   });
 
   readonly updateSale = createRoute({
-    path: '/sale/{id}',
-    method: 'put',
-    tags: ['stock'],
+    path: "/sale/{id}",
+    method: "put",
+    tags: ["stock"],
     request: {
       params: z.object({ id: z.string() }),
-      body: jsonContentRequired(UpdateSaleBody, 'Update sale'),
+      body: jsonContentRequired(UpdateSaleBody, "Update sale"),
     },
     responses: {
-      [HttpStatusCodes.OK]: jsonContent(BasicResponse, 'Sale updated'),
+      [HttpStatusCodes.OK]: jsonContent(BasicResponse, "Sale updated"),
     },
   });
 
   readonly getForEditSale = createRoute({
-    path: '/sale/get-for-edit/{id}',
-    method: 'get',
-    tags: ['stock'],
+    path: "/sale/get-for-edit/{id}",
+    method: "get",
+    tags: ["stock"],
 
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
         z.object({
           result: AddSaleBody,
         }),
-        'Get for edit'
+        "Get for edit"
       ),
     },
   });
 
   readonly stockReport = createRoute({
-    path: '/report/stock',
-    method: 'get',
-    tags: ['stock'],
+    path: "/report/stock",
+    method: "get",
+    tags: ["stock"],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
         z.object({
@@ -247,22 +246,22 @@ export class StockSchema {
           result: z.array(StockReportItem),
         }),
 
-        'Stock report'
+        "Stock report"
       ),
     },
   });
 
   readonly salesReport = createRoute({
-    path: '/report/sales',
-    method: 'get',
-    tags: ['stock'],
+    path: "/report/sales",
+    method: "get",
+    tags: ["stock"],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
         z.object({
           count: z.number(),
           result: z.array(SalesReport),
         }),
-        'Summary report'
+        "Summary report"
       ),
     },
   });

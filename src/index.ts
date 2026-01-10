@@ -1,9 +1,8 @@
 import { handle } from "hono/aws-lambda";
 import configureOpenAPI from "./config/configure-open-api";
-import createApp, { createRouter } from "./config/create-app";
+import createApp from "./config/create-app";
 import { seedRBAC } from "./db/seed-rbac";
-import { HealthRoute } from "./features/health/health.router";
-import { publicRoutes } from "./routes/public.routes";
+import { v1Routes } from "./routes";
 
 const app = createApp();
 
@@ -13,24 +12,24 @@ app.get("/", (c) => {
   return c.text("Hello Hono aws lambda awsss!");
 });
 
-export const abcRoutes = createRouter();
+// export const abcRoutes = createRouter();
 
-abcRoutes.openapi(
-  {
-    method: "get",
-    path: "/abc",
-    responses: {
-      200: { description: "abc" },
-    },
-  },
-  (c) => c.text("ABC")
-);
+// abcRoutes.openapi(
+//   {
+//     method: "get",
+//     path: "/abc",
+//     responses: {
+//       200: { description: "abc" },
+//     },
+//   },
+//   (c) => c.text("ABC")
+// );
 
-const health = new HealthRoute();
+// const health = new HealthRoute();
 
-app.route("/", abcRoutes);
-app.route("/health", health.routes);
-app.route("/api/v1", publicRoutes);
+// app.route("/", abcRoutes);
+// app.route("/health", health.routes);
+app.route("/api/v1", v1Routes);
 
 app.get("/api/rbac/seed", async (c) => {
   await seedRBAC();

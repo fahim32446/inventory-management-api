@@ -1,6 +1,6 @@
-import { createRouter } from '@/config/create-app';
-import { WarehousesSchema } from './warehouse.schema';
-import { WarehouseService } from './warehouse.service';
+import { createRouter } from "../../config/create-app";
+import { WarehousesSchema } from "./warehouse.schema";
+import { WarehouseService } from "./warehouse.service";
 
 export class WarehouseRouter {
   private service = new WarehouseService();

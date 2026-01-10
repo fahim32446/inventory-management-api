@@ -1,4 +1,3 @@
-import type { AppRouteHandler } from "config/types";
 import bcrypt from "bcryptjs";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { administrationModel } from "./administration.model";
@@ -14,6 +13,7 @@ import type {
   IRgetRoleDetails,
 } from "./administration.schema";
 import { AuthModel } from "../auth/auth.model";
+import { AppRouteHandler } from "../../config/types";
 
 export class administrationService {
   private db_conn = new administrationModel();

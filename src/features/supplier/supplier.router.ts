@@ -1,6 +1,6 @@
-import { createRouter } from '@/config/create-app';
-import { SupplierSchema } from './supplier.schema';
-import { SupplierService } from './supplier.service';
+import { createRouter } from "../../config/create-app";
+import { SupplierSchema } from "./supplier.schema";
+import { SupplierService } from "./supplier.service";
 
 export class SupplierRouter {
   private service = new SupplierService();

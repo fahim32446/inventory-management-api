@@ -1,14 +1,10 @@
-import { AbstractModels } from '@/abstract/abstract.model';
-import type { ISupplierType, IUpdateSupplierType } from './supplier.schema';
-import { eq, getTableColumns } from 'drizzle-orm';
+import { AbstractModels } from "../../abstract/abstract.model";
+import type { ISupplierType, IUpdateSupplierType } from "./supplier.schema";
+import { eq, getTableColumns } from "drizzle-orm";
 
 export class SupplierModel extends AbstractModels {
   async addSupplier(body: ISupplierType & { orgId?: number }) {
-    const res = await this.query()
-      .insert(this.table.suppliers)
-      .values(body)
-      .returning()
-      .then((rows) => rows[0]);
+    const res = await this.query().insert(this.table.suppliers).values(body).returning();
 
     return res;
   }
@@ -18,8 +14,7 @@ export class SupplierModel extends AbstractModels {
       .update(this.table.suppliers)
       .set(body)
       .where(eq(this.table.suppliers.supId, id))
-      .returning()
-      .then((rows) => rows[0]);
+      .returning();
 
     return res;
   }
@@ -28,8 +23,7 @@ export class SupplierModel extends AbstractModels {
     const res = await this.query()
       .delete(this.table.suppliers)
       .where(eq(this.table.suppliers.supId, id))
-      .returning()
-      .then((rows) => rows[0]);
+      .returning();
 
     return res;
   }

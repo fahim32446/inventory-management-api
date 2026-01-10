@@ -1,4 +1,4 @@
-import { createRouter } from "config/create-app";
+import { createRouter } from "../../config/create-app";
 import { administrationSchema } from "./administration.schema";
 import { administrationService } from "./administration.service";
 

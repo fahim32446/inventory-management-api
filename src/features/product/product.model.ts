@@ -1,7 +1,6 @@
-import { AbstractModels } from "abstract/abstract.model";
-
 import { eq, getTableColumns } from "drizzle-orm";
 import type { IProductType, IUpdateProductType } from "./product.schema";
+import { AbstractModels } from "../../abstract/abstract.model";
 
 export class ProductModel extends AbstractModels {
   async addProduct(body: IProductType & { orgId: number }) {
@@ -9,10 +8,7 @@ export class ProductModel extends AbstractModels {
       .insert(this.table.products)
       .values(body)
       .returning()
-      .then((rows) => {
-        const { orgId, ...rest } = rows[0];
-        return rest;
-      });
+      
 
     return res;
   }
@@ -23,10 +19,7 @@ export class ProductModel extends AbstractModels {
       .set(body)
       .where(eq(this.table.products.productId, id))
       .returning()
-      .then((rows) => {
-        const { orgId, ...rest } = rows[0];
-        return rest;
-      });
+     
 
     return res;
   }
@@ -36,11 +29,7 @@ export class ProductModel extends AbstractModels {
       .delete(this.table.products)
       .where(eq(this.table.products.productId, id))
       .returning()
-      .then((rows) => {
-        const { orgId, ...rest } = rows[0];
-        return rest;
-      });
-
+     
     return res;
   }
   async getProduct(ORG_ID: number, limit: number, offset: number) {

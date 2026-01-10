@@ -1,6 +1,6 @@
-import { AbstractModels } from "abstract/abstract.model";
 import { and, eq, isNull, or } from "drizzle-orm";
 import type { IZRole, IZUpdateUser, IZUser } from "./administration.schema";
+import { AbstractModels } from "../../abstract/abstract.model";
 
 export class administrationModel extends AbstractModels {
   async getPermission() {
@@ -158,8 +158,7 @@ export class administrationModel extends AbstractModels {
       .update(this.table.users)
       .set(body)
       .where(and(eq(this.table.users.userId, id), eq(this.table.users.orgId, orgId)))
-      .returning()
-      .then((rows) => rows[0]);
+      .returning();
 
     return user;
   }
@@ -168,8 +167,7 @@ export class administrationModel extends AbstractModels {
     const user = await this.query()
       .delete(this.table.users)
       .where(eq(this.table.users.userId, id) && eq(this.table.users.orgId, orgId))
-      .returning()
-      .then((rows) => rows[0]);
+      .returning();
 
     return user;
   }

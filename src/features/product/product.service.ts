@@ -44,8 +44,6 @@ export class ProductService {
     const org = c.get("jwtPayload");
     const { limit, offset } = c.req.valid("query");
 
-    console.log(org);
-
     const res = await this.db_conn.getProduct(org.orgId, limit, offset);
     const count = await this.db_conn.getTotalProduct();
 
@@ -53,6 +51,6 @@ export class ProductService {
       return c.json({ message: "No product found" }, HttpStatusCodes.NOT_FOUND);
     }
 
-    return c.json({ count, result: res }, HttpStatusCodes.OK);
+    return c.json({ count, result: res, message: "Product found" }, HttpStatusCodes.OK);
   };
 }

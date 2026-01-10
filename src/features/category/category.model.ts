@@ -1,18 +1,10 @@
-import { AbstractModels } from "abstract/abstract.model";
-
 import { eq, getTableColumns } from "drizzle-orm";
 import type { ICategoryType, IUpdateCategoryType } from "./category.schema";
+import { AbstractModels } from "../../abstract/abstract.model";
 
 export class CategoryModel extends AbstractModels {
   async addCategory(body: ICategoryType & { orgId: number }) {
-    const res = await this.query()
-      .insert(this.table.categories)
-      .values(body)
-      .returning()
-      .then((rows) => {
-        const { orgId, ...rest } = rows[0];
-        return rest;
-      });
+    const res = await this.query().insert(this.table.categories).values(body).returning();
 
     return res;
   }
@@ -22,11 +14,7 @@ export class CategoryModel extends AbstractModels {
       .update(this.table.categories)
       .set(body)
       .where(eq(this.table.categories.catId, id))
-      .returning()
-      .then((rows) => {
-        const { orgId, ...rest } = rows[0];
-        return rest;
-      });
+      .returning();
 
     return res;
   }
@@ -35,11 +23,7 @@ export class CategoryModel extends AbstractModels {
     const res = await this.query()
       .delete(this.table.categories)
       .where(eq(this.table.categories.catId, id))
-      .returning()
-      .then((rows) => {
-        const { orgId, ...rest } = rows[0];
-        return rest;
-      });
+      .returning();
 
     return res;
   }
