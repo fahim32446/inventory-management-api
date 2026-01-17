@@ -1,4 +1,4 @@
-import { eq, and, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { AbstractModels } from "../../abstract/abstract.model";
 import { Transaction } from "../../config/types";
 import { IUserCreateType } from "../../db/schema.type";
