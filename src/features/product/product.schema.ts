@@ -52,14 +52,14 @@ export class ProductSchema {
           count: z.number(),
           result: z.array(ZProduct),
         }),
-        "Product fetched"
+        "Product fetched",
       ),
 
       [HttpStatusCodes.NOT_FOUND]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "No product found"
+        "No product found",
       ),
     },
   });
@@ -97,7 +97,7 @@ export class ProductSchema {
         z.object({
           message: z.string(),
         }),
-        "Product deleted"
+        "Product deleted",
       ),
     },
   });

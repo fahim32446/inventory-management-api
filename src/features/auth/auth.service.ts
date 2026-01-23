@@ -48,9 +48,8 @@ export class AuthService {
 
     return await db.transaction(async (tx) => {
       const existingUser = await this.db_conn.checkExistingUser(email);
-      console.log({ existingUser });
 
-      if (existingUser?.length) {
+      if (existingUser?.users?.email) {
         return c.json({ message: "Email already in use" }, HttpStatusCodes.CONFLICT);
       }
 
@@ -68,7 +67,7 @@ export class AuthService {
         { name, email, password: hashedPassword, agency_name: agency_name },
         org.orgId,
         defaultRole.roleId,
-        tx
+        tx,
       );
 
       const auditInfo = getAuditInfo(c);
@@ -80,7 +79,7 @@ export class AuthService {
           details: "User registered successfully",
           ...auditInfo,
         },
-        tx
+        tx,
       );
 
       return c.json({ id: user.userId, email: user.email, name: user.name }, HttpStatusCodes.OK);
@@ -111,7 +110,7 @@ export class AuthService {
         userId: user.userId,
         orgId: org?.orgId!,
         email: user.email,
-        exp: Math.floor(Date.now() / 1000) * 60 * 15,
+        exp: Math.floor(Date.now() / 1000) + 60, // 1 minute
       };
 
       const accessToken = await sign(accessPayload, env.JWT_SECRET);
@@ -140,7 +139,7 @@ export class AuthService {
           details: "User logged in successfully",
           ...auditInfo,
         },
-        trx
+        trx,
       );
 
       return c.json(
@@ -152,7 +151,7 @@ export class AuthService {
           type: user.type ?? "N/A",
           accessToken: accessToken,
         },
-        HttpStatusCodes.OK
+        HttpStatusCodes.OK,
       );
     });
   };
@@ -171,7 +170,7 @@ export class AuthService {
 
     const accessToken = await sign(
       { userId: session.userId, exp: Math.floor(Date.now() / 1000) * 60 * 15 },
-      env.JWT_SECRET!
+      env.JWT_SECRET!,
     );
 
     return c.json({ accessToken }, HttpStatusCodes.OK);
@@ -254,7 +253,7 @@ export class AuthService {
         existingUser.users.userId,
         code,
         "FORGOT_PASSWORD",
-        tx
+        tx,
       );
 
       if (!otpRecord || otpRecord.expiresAt < new Date()) {
@@ -274,7 +273,7 @@ export class AuthService {
           details: "Password reset successfully using OTP",
           ...auditInfo,
         },
-        tx
+        tx,
       );
 
       return c.json({ message: "Password reset successfully" }, HttpStatusCodes.OK);

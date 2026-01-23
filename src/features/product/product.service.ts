@@ -15,7 +15,7 @@ export class ProductService {
     const body = c.req.valid("json");
     const org = c.get("jwtPayload");
 
-    const res = await this.db_conn.addProduct({ ...body, orgId: org.orgId });
+    const res = (await this.db_conn.addProduct({ ...body, orgId: org.orgId })) as any;
 
     return c.json({ ...res }, HttpStatusCodes.CREATED);
   };
@@ -25,7 +25,7 @@ export class ProductService {
     const { id } = c.req.valid("param");
     const org = c.get("jwtPayload");
 
-    const res = await this.db_conn.updateProduct({ ...body, orgId: org.orgId }, id);
+    const res = (await this.db_conn.updateProduct({ ...body, orgId: org.orgId }, id)) as any;
 
     return c.json({ ...res }, HttpStatusCodes.OK);
   };

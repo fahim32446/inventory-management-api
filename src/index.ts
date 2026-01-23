@@ -12,23 +12,6 @@ app.get("/", (c) => {
   return c.text("Hello Hono aws lambda awsss!");
 });
 
-// export const abcRoutes = createRouter();
-
-// abcRoutes.openapi(
-//   {
-//     method: "get",
-//     path: "/abc",
-//     responses: {
-//       200: { description: "abc" },
-//     },
-//   },
-//   (c) => c.text("ABC")
-// );
-
-// const health = new HealthRoute();
-
-// app.route("/", abcRoutes);
-// app.route("/health", health.routes);
 app.route("/api/v1", v1Routes);
 
 app.get("/api/rbac/seed", async (c) => {

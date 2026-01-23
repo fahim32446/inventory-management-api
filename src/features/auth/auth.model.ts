@@ -5,7 +5,7 @@ import { IUserCreateType } from "../../db/schema.type";
 
 export class AuthModel extends AbstractModels {
   async createOrganization(name: string, tx?: Transaction) {
-    const org = await this.query(tx)
+    const org = this.query(tx)
       .insert(this.table.organization)
       .values({ name })
       .returning()
@@ -83,7 +83,7 @@ export class AuthModel extends AbstractModels {
     code: string,
     type: "FORGOT_PASSWORD",
     expiresAt: Date,
-    tx?: Transaction
+    tx?: Transaction,
   ) {
     return await this.query(tx)
       .insert(this.table.otpCodes)
@@ -105,8 +105,8 @@ export class AuthModel extends AbstractModels {
         and(
           eq(this.table.otpCodes.userId, userId),
           eq(this.table.otpCodes.code, code),
-          eq(this.table.otpCodes.type, type)
-        )
+          eq(this.table.otpCodes.type, type),
+        ),
       )
       .limit(1)
       .then((rows) => rows[0]);

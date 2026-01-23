@@ -1,16 +1,18 @@
-// import { db } from "db/db";
-// import * as table from "db/schema";
-// import type { Transaction } from "config/types";
-
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Transaction } from "../config/types";
 import { db } from "../db/db";
 import * as table from "../db/schema";
+import { Pool } from "pg";
+
+type DB = NodePgDatabase<Record<string, never>> & {
+  $client: Pool;
+};
 
 export abstract class AbstractModels {
   protected readonly db = db;
   protected readonly table: typeof table = table;
 
-  protected query(tx?: Transaction) {
+  protected query(tx?: Transaction): DB {
     return tx ?? this.db;
   }
 
@@ -26,7 +28,7 @@ export abstract class AbstractModels {
       device?: string;
       os?: string;
     },
-    tx?: Transaction
+    tx?: Transaction,
   ) {
     return await this.query(tx).insert(this.table.auditLog).values({
       userId: data.userId,

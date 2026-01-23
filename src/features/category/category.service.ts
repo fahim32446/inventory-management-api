@@ -15,7 +15,7 @@ export class CategoryService {
     const body = c.req.valid("json");
     const org = c.get("jwtPayload");
 
-    const res = await this.db_conn.addCategory({ ...body, orgId: org.orgId });
+    const res = (await this.db_conn.addCategory({ ...body, orgId: org.orgId })) as any;
 
     return c.json({ ...res }, HttpStatusCodes.CREATED);
   };
@@ -25,7 +25,7 @@ export class CategoryService {
     const { id } = c.req.valid("param");
     const org = c.get("jwtPayload");
 
-    const res = await this.db_conn.updateCategory({ ...body, orgId: org.orgId }, id);
+    const res = (await this.db_conn.updateCategory({ ...body, orgId: org.orgId }, id)) as any;
 
     return c.json({ ...res }, HttpStatusCodes.OK);
   };
