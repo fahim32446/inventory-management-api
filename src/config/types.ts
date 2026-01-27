@@ -1,7 +1,7 @@
 import { z, type OpenAPIHono, type RouteConfig, type RouteHandler } from "@hono/zod-openapi";
-import type { db } from "db/db";
 import type { Schema } from "hono";
 import type { PinoLogger } from "hono-pino";
+import { db } from "../db/db";
 
 export interface AppBindings {
   Variables: {
@@ -21,6 +21,13 @@ export type Transaction = Parameters<typeof db.transaction>[0] extends (tx: infe
 export const idParams = z.object({
   id: z.preprocess(
     (val) => (typeof val === "string" ? Number(val) : val),
-    z.number().int().positive()
+    z.number().int().positive(),
   ),
 });
+
+export const ApiResponse = <T extends z.ZodTypeAny>(dataSchema: T) =>
+  z.object({
+    success: z.boolean(),
+    message: z.string().optional(),
+    data: dataSchema,
+  });

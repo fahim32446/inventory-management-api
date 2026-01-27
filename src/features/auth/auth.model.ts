@@ -51,6 +51,17 @@ export class AuthModel extends AbstractModels {
 
     return result;
   }
+  async checkUserById(id: number, tx?: Transaction) {
+    const result = await this.query(tx)
+      .select()
+      .from(this.table.users)
+      .leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId))
+      .where(eq(this.table.users.userId, id))
+      .limit(1)
+      .then((rows) => rows[0]);
+
+    return result;
+  }
 
   async insertSession(userID: number, refreshToken: any, expiresAt: Date, tx?: Transaction) {
     const result = await this.query(tx).insert(this.table.sessions).values({

@@ -19,11 +19,11 @@ export default function createApp() {
   app.use(
     "*",
     cors({
-      origin: ["http://localhost:5173"],
+      origin: ["http://localhost:5173", "http://localhost:6565"],
       allowHeaders: ["Content-Type", "Authorization", "X-Custom-Header"],
       allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
-    })
+    }),
   );
 
   app.use(logger());

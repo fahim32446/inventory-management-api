@@ -2,6 +2,7 @@ import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { IUserCreate } from "../../db/schema.type";
+import { ApiResponse } from "../../config/types";
 
 export class AuthSchema {
   public readonly signUp = createRoute({
@@ -19,13 +20,13 @@ export class AuthSchema {
           email: z.string(),
         }),
 
-        "User created response"
+        "User created response",
       ),
       [HttpStatusCodes.CONFLICT]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "Email already exists"
+        "Email already exists",
       ),
     },
   });
@@ -40,34 +41,36 @@ export class AuthSchema {
           email: z.string().nonempty().default("azmir.ahx@gmail.com"),
           password: z.string().nonempty().default("12345678"),
         }),
-        "login user"
+        "login user",
       ),
     },
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
-        z.object({
-          id: z.number(),
-          name: z.string(),
-          company_name: z.string(),
-          email: z.string(),
-          type: z.string(),
-          accessToken: z.string(),
-        }),
+        ApiResponse(
+          z.object({
+            id: z.number(),
+            name: z.string(),
+            company_name: z.string(),
+            email: z.string(),
+            type: z.string(),
+            accessToken: z.string(),
+          }),
+        ),
 
-        "User login response"
+        "User login response",
       ),
       [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "Wrong credential"
+        "Wrong credential",
       ),
 
       [HttpStatusCodes.NOT_FOUND]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "No user found"
+        "No user found",
       ),
     },
   });
@@ -79,24 +82,31 @@ export class AuthSchema {
     request: {},
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
-        z.object({
-          accessToken: z.string(),
-        }),
+        ApiResponse(
+          z.object({
+            id: z.number(),
+            name: z.string(),
+            company_name: z.string(),
+            email: z.string(),
+            type: z.string(),
+            accessToken: z.string(),
+          }),
+        ),
 
-        "New refresh token generated"
+        "New refresh token generated",
       ),
       [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "Invalid or expired refresh token"
+        "Invalid or expired refresh token",
       ),
     },
   });
 
   public readonly logout = createRoute({
     path: "/logout",
-    method: "get",
+    method: "post",
     tags: ["auth"],
     request: {},
     responses: {
@@ -105,13 +115,13 @@ export class AuthSchema {
           message: z.string(),
         }),
 
-        "Logged out"
+        "Logged out",
       ),
       [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "Invalid or expired refresh token"
+        "Invalid or expired refresh token",
       ),
     },
   });
@@ -125,7 +135,7 @@ export class AuthSchema {
         z.object({
           email: z.string().email(),
         }),
-        "Forgot password request"
+        "Forgot password request",
       ),
     },
     responses: {
@@ -133,13 +143,13 @@ export class AuthSchema {
         z.object({
           message: z.string(),
         }),
-        "OTP sent successfully"
+        "OTP sent successfully",
       ),
       [HttpStatusCodes.NOT_FOUND]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "User not found"
+        "User not found",
       ),
     },
   });
@@ -155,7 +165,7 @@ export class AuthSchema {
           code: z.string().length(6),
           newPassword: z.string().min(6),
         }),
-        "Reset password request"
+        "Reset password request",
       ),
     },
     responses: {
@@ -163,13 +173,13 @@ export class AuthSchema {
         z.object({
           message: z.string(),
         }),
-        "Password reset successfully"
+        "Password reset successfully",
       ),
       [HttpStatusCodes.BAD_REQUEST]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "Invalid or expired OTP"
+        "Invalid or expired OTP",
       ),
     },
   });

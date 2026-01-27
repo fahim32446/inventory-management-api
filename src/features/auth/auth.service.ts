@@ -110,7 +110,7 @@ export class AuthService {
         userId: user.userId,
         orgId: org?.orgId!,
         email: user.email,
-        exp: Math.floor(Date.now() / 1000) + 60, // 1 minute
+        exp: Math.floor(Date.now() / 1000) + 5, // 1 minute
       };
 
       const accessToken = await sign(accessPayload, env.JWT_SECRET);
@@ -144,12 +144,16 @@ export class AuthService {
 
       return c.json(
         {
-          id: user.userId,
-          name: user.name,
-          company_name: org?.name!,
-          email: user.email,
-          type: user.type ?? "N/A",
-          accessToken: accessToken,
+          success: true,
+          message: "User logged in successfully",
+          data: {
+            id: user.userId,
+            name: user.name,
+            company_name: org?.name!,
+            email: user.email,
+            type: user.type ?? "N/A",
+            accessToken: accessToken,
+          },
         },
         HttpStatusCodes.OK,
       );
@@ -168,12 +172,33 @@ export class AuthService {
       return c.json({ message: "Invalid or expired refresh token" }, HttpStatusCodes.UNAUTHORIZED);
     }
 
+    const { users, organization } = await this.db_conn.checkUserById(session.userId);
+
     const accessToken = await sign(
-      { userId: session.userId, exp: Math.floor(Date.now() / 1000) * 60 * 15 },
+      {
+        userId: users?.userId,
+        orgId: organization?.orgId!,
+        email: users?.email,
+        exp: Math.floor(Date.now() / 1000) + 5,
+      },
       env.JWT_SECRET!,
     );
 
-    return c.json({ accessToken }, HttpStatusCodes.OK);
+    return c.json(
+      {
+        success: true,
+        message: "Refresh token generated successfully",
+        data: {
+          id: users?.userId,
+          name: users?.name,
+          company_name: organization?.name!,
+          email: users?.email,
+          type: users?.type ?? "N/A",
+          accessToken: accessToken,
+        },
+      },
+      HttpStatusCodes.OK,
+    );
   };
 
   logout: AppRouteHandler<ILogout> = async (c) => {

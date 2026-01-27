@@ -2174,15 +2174,20 @@ var require_pg_types = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/defaults.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/defaults.js
 var require_defaults = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/defaults.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/defaults.js"(exports2, module2) {
     "use strict";
+    var user;
+    try {
+      user = process.platform === "win32" ? process.env.USERNAME : process.env.USER;
+    } catch {
+    }
     module2.exports = {
       // database host. defaults to localhost
       host: "localhost",
       // database user's name
-      user: process.platform === "win32" ? process.env.USERNAME : process.env.USER,
+      user,
       // name of database to connect
       database: void 0,
       // database user's password
@@ -2236,9 +2241,9 @@ var require_defaults = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/utils.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/utils.js
 var require_utils = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/utils.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/utils.js"(exports2, module2) {
     "use strict";
     var defaults2 = require_defaults();
     var util2 = require("util");
@@ -2394,9 +2399,9 @@ var require_utils = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/utils-legacy.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/utils-legacy.js
 var require_utils_legacy = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/utils-legacy.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/utils-legacy.js"(exports2, module2) {
     "use strict";
     var nodeCrypto2 = require("crypto");
     function md5(string) {
@@ -2432,9 +2437,9 @@ var require_utils_legacy = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/utils-webcrypto.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/utils-webcrypto.js
 var require_utils_webcrypto = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/utils-webcrypto.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/utils-webcrypto.js"(exports2, module2) {
     var nodeCrypto2 = require("crypto");
     module2.exports = {
       postgresMd5PasswordHash,
@@ -2483,9 +2488,9 @@ var require_utils_webcrypto = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/utils.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/utils.js
 var require_utils2 = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/utils.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/utils.js"(exports2, module2) {
     "use strict";
     var useLegacyCrypto = parseInt(process.versions && process.versions.node && process.versions.node.split(".")[0]) < 15;
     if (useLegacyCrypto) {
@@ -2496,9 +2501,9 @@ var require_utils2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/cert-signatures.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/cert-signatures.js
 var require_cert_signatures = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/cert-signatures.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/cert-signatures.js"(exports2, module2) {
     function x509Error(msg, cert) {
       return new Error("SASL channel binding: " + msg + " when parsing public certificate " + cert.toString("base64"));
     }
@@ -2609,9 +2614,9 @@ var require_cert_signatures = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/sasl.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/sasl.js
 var require_sasl = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/crypto/sasl.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/crypto/sasl.js"(exports2, module2) {
     "use strict";
     var crypto2 = require_utils2();
     var { signatureAlgorithmHashFromCertificate } = require_cert_signatures();
@@ -2776,9 +2781,9 @@ var require_sasl = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/type-overrides.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/type-overrides.js
 var require_type_overrides = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/type-overrides.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/type-overrides.js"(exports2, module2) {
     "use strict";
     var types3 = require_pg_types();
     function TypeOverrides2(userTypes) {
@@ -2811,10 +2816,11 @@ var require_type_overrides = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg-connection-string@2.9.1/node_modules/pg-connection-string/index.js
+// node_modules/.pnpm/pg-connection-string@2.10.0/node_modules/pg-connection-string/index.js
 var require_pg_connection_string = __commonJS({
-  "node_modules/.pnpm/pg-connection-string@2.9.1/node_modules/pg-connection-string/index.js"(exports2, module2) {
+  "node_modules/.pnpm/pg-connection-string@2.10.0/node_modules/pg-connection-string/index.js"(exports2, module2) {
     "use strict";
+    var { emitWarning } = require("node:process");
     function parse2(str, options = {}) {
       if (str.charAt(0) === "/") {
         const config3 = str.split(" ");
@@ -2835,6 +2841,7 @@ var require_pg_connection_string = __commonJS({
         }
       } catch (err) {
         err.input && (err.input = "*****REDACTED*****");
+        throw err;
       }
       for (const entry of result.searchParams.entries()) {
         config2[entry[0]] = entry[1];
@@ -2923,6 +2930,9 @@ var require_pg_connection_string = __commonJS({
           case "require":
           case "verify-ca":
           case "verify-full": {
+            if (config2.sslmode !== "verify-full") {
+              deprecatedSslModeWarning(config2.sslmode);
+            }
             break;
           }
           case "no-verify": {
@@ -2972,6 +2982,19 @@ var require_pg_connection_string = __commonJS({
     function parseIntoClientConfig(str) {
       return toClientConfig(parse2(str));
     }
+    function deprecatedSslModeWarning(sslmode) {
+      if (!deprecatedSslModeWarning.warned) {
+        deprecatedSslModeWarning.warned = true;
+        emitWarning(`SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=${sslmode}'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.`);
+      }
+    }
     module2.exports = parse2;
     parse2.parse = parse2;
     parse2.toClientConfig = toClientConfig;
@@ -2979,21 +3002,24 @@ var require_pg_connection_string = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/connection-parameters.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/connection-parameters.js
 var require_connection_parameters = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/connection-parameters.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/connection-parameters.js"(exports2, module2) {
     "use strict";
     var dns = require("dns");
     var defaults2 = require_defaults();
     var parse2 = require_pg_connection_string().parse;
     var val = function(key, config2, envVar) {
+      if (config2[key]) {
+        return config2[key];
+      }
       if (envVar === void 0) {
         envVar = process.env["PG" + key.toUpperCase()];
       } else if (envVar === false) {
       } else {
         envVar = process.env[envVar];
       }
-      return config2[key] || envVar || defaults2[key];
+      return envVar || defaults2[key];
     };
     var readSSLConfigFromEnvironment = function() {
       switch (process.env.PGSSLMODE) {
@@ -3117,9 +3143,9 @@ var require_connection_parameters = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/result.js
 var require_result = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/result.js"(exports2, module2) {
     "use strict";
     var types3 = require_pg_types();
     var matchRegexp = /^([A-Za-z]+)(?: (\d+))?(?: (\d+))?/;
@@ -3208,9 +3234,9 @@ var require_result = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/query.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/query.js
 var require_query = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/query.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/query.js"(exports2, module2) {
     "use strict";
     var { EventEmitter } = require("events");
     var Result2 = require_result();
@@ -3405,9 +3431,9 @@ var require_query = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/messages.js
+// node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/messages.js
 var require_messages = __commonJS({
-  "node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/messages.js"(exports2) {
+  "node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/messages.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NoticeMessage = exports2.DataRowMessage = exports2.CommandCompleteMessage = exports2.ReadyForQueryMessage = exports2.NotificationResponseMessage = exports2.BackendKeyDataMessage = exports2.AuthenticationMD5Password = exports2.ParameterStatusMessage = exports2.ParameterDescriptionMessage = exports2.RowDescriptionMessage = exports2.Field = exports2.CopyResponse = exports2.CopyDataMessage = exports2.DatabaseError = exports2.copyDone = exports2.emptyQuery = exports2.replicationStart = exports2.portalSuspended = exports2.noData = exports2.closeComplete = exports2.bindComplete = exports2.parseComplete = void 0;
@@ -3570,9 +3596,9 @@ var require_messages = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/buffer-writer.js
+// node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/buffer-writer.js
 var require_buffer_writer = __commonJS({
-  "node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/buffer-writer.js"(exports2) {
+  "node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/buffer-writer.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.Writer = void 0;
@@ -3651,9 +3677,9 @@ var require_buffer_writer = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/serializer.js
+// node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/serializer.js
 var require_serializer = __commonJS({
-  "node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/serializer.js"(exports2) {
+  "node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/serializer.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.serialize = void 0;
@@ -3868,9 +3894,9 @@ var require_serializer = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/buffer-reader.js
+// node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/buffer-reader.js
 var require_buffer_reader = __commonJS({
-  "node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/buffer-reader.js"(exports2) {
+  "node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/buffer-reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.BufferReader = void 0;
@@ -3928,9 +3954,9 @@ var require_buffer_reader = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/parser.js
+// node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/parser.js
 var require_parser = __commonJS({
-  "node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/parser.js"(exports2) {
+  "node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/parser.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.Parser = void 0;
@@ -3939,6 +3965,7 @@ var require_parser = __commonJS({
     var CODE_LENGTH = 1;
     var LEN_LENGTH = 4;
     var HEADER_LENGTH = CODE_LENGTH + LEN_LENGTH;
+    var LATEINIT_LENGTH = -1;
     var emptyBuffer = Buffer.allocUnsafe(0);
     var Parser = class {
       constructor(opts) {
@@ -4004,226 +4031,239 @@ var require_parser = __commonJS({
         }
       }
       handlePacket(offset, code, length, bytes) {
+        const { reader } = this;
+        reader.setBuffer(offset, bytes);
+        let message;
         switch (code) {
           case 50:
-            return messages_1.bindComplete;
+            message = messages_1.bindComplete;
+            break;
           case 49:
-            return messages_1.parseComplete;
+            message = messages_1.parseComplete;
+            break;
           case 51:
-            return messages_1.closeComplete;
+            message = messages_1.closeComplete;
+            break;
           case 110:
-            return messages_1.noData;
+            message = messages_1.noData;
+            break;
           case 115:
-            return messages_1.portalSuspended;
+            message = messages_1.portalSuspended;
+            break;
           case 99:
-            return messages_1.copyDone;
+            message = messages_1.copyDone;
+            break;
           case 87:
-            return messages_1.replicationStart;
+            message = messages_1.replicationStart;
+            break;
           case 73:
-            return messages_1.emptyQuery;
+            message = messages_1.emptyQuery;
+            break;
           case 68:
-            return this.parseDataRowMessage(offset, length, bytes);
+            message = parseDataRowMessage(reader);
+            break;
           case 67:
-            return this.parseCommandCompleteMessage(offset, length, bytes);
+            message = parseCommandCompleteMessage(reader);
+            break;
           case 90:
-            return this.parseReadyForQueryMessage(offset, length, bytes);
+            message = parseReadyForQueryMessage(reader);
+            break;
           case 65:
-            return this.parseNotificationMessage(offset, length, bytes);
+            message = parseNotificationMessage(reader);
+            break;
           case 82:
-            return this.parseAuthenticationResponse(offset, length, bytes);
+            message = parseAuthenticationResponse(reader, length);
+            break;
           case 83:
-            return this.parseParameterStatusMessage(offset, length, bytes);
+            message = parseParameterStatusMessage(reader);
+            break;
           case 75:
-            return this.parseBackendKeyData(offset, length, bytes);
+            message = parseBackendKeyData(reader);
+            break;
           case 69:
-            return this.parseErrorMessage(offset, length, bytes, "error");
+            message = parseErrorMessage(reader, "error");
+            break;
           case 78:
-            return this.parseErrorMessage(offset, length, bytes, "notice");
+            message = parseErrorMessage(reader, "notice");
+            break;
           case 84:
-            return this.parseRowDescriptionMessage(offset, length, bytes);
+            message = parseRowDescriptionMessage(reader);
+            break;
           case 116:
-            return this.parseParameterDescriptionMessage(offset, length, bytes);
+            message = parseParameterDescriptionMessage(reader);
+            break;
           case 71:
-            return this.parseCopyInMessage(offset, length, bytes);
+            message = parseCopyInMessage(reader);
+            break;
           case 72:
-            return this.parseCopyOutMessage(offset, length, bytes);
+            message = parseCopyOutMessage(reader);
+            break;
           case 100:
-            return this.parseCopyData(offset, length, bytes);
+            message = parseCopyData(reader, length);
+            break;
           default:
             return new messages_1.DatabaseError("received invalid response: " + code.toString(16), length, "error");
         }
-      }
-      parseReadyForQueryMessage(offset, length, bytes) {
-        this.reader.setBuffer(offset, bytes);
-        const status = this.reader.string(1);
-        return new messages_1.ReadyForQueryMessage(length, status);
-      }
-      parseCommandCompleteMessage(offset, length, bytes) {
-        this.reader.setBuffer(offset, bytes);
-        const text2 = this.reader.cstring();
-        return new messages_1.CommandCompleteMessage(length, text2);
-      }
-      parseCopyData(offset, length, bytes) {
-        const chunk = bytes.slice(offset, offset + (length - 4));
-        return new messages_1.CopyDataMessage(length, chunk);
-      }
-      parseCopyInMessage(offset, length, bytes) {
-        return this.parseCopyMessage(offset, length, bytes, "copyInResponse");
-      }
-      parseCopyOutMessage(offset, length, bytes) {
-        return this.parseCopyMessage(offset, length, bytes, "copyOutResponse");
-      }
-      parseCopyMessage(offset, length, bytes, messageName) {
-        this.reader.setBuffer(offset, bytes);
-        const isBinary = this.reader.byte() !== 0;
-        const columnCount = this.reader.int16();
-        const message = new messages_1.CopyResponse(length, messageName, isBinary, columnCount);
-        for (let i = 0; i < columnCount; i++) {
-          message.columnTypes[i] = this.reader.int16();
-        }
-        return message;
-      }
-      parseNotificationMessage(offset, length, bytes) {
-        this.reader.setBuffer(offset, bytes);
-        const processId = this.reader.int32();
-        const channel = this.reader.cstring();
-        const payload = this.reader.cstring();
-        return new messages_1.NotificationResponseMessage(length, processId, channel, payload);
-      }
-      parseRowDescriptionMessage(offset, length, bytes) {
-        this.reader.setBuffer(offset, bytes);
-        const fieldCount = this.reader.int16();
-        const message = new messages_1.RowDescriptionMessage(length, fieldCount);
-        for (let i = 0; i < fieldCount; i++) {
-          message.fields[i] = this.parseField();
-        }
-        return message;
-      }
-      parseField() {
-        const name = this.reader.cstring();
-        const tableID = this.reader.uint32();
-        const columnID = this.reader.int16();
-        const dataTypeID = this.reader.uint32();
-        const dataTypeSize = this.reader.int16();
-        const dataTypeModifier = this.reader.int32();
-        const mode = this.reader.int16() === 0 ? "text" : "binary";
-        return new messages_1.Field(name, tableID, columnID, dataTypeID, dataTypeSize, dataTypeModifier, mode);
-      }
-      parseParameterDescriptionMessage(offset, length, bytes) {
-        this.reader.setBuffer(offset, bytes);
-        const parameterCount = this.reader.int16();
-        const message = new messages_1.ParameterDescriptionMessage(length, parameterCount);
-        for (let i = 0; i < parameterCount; i++) {
-          message.dataTypeIDs[i] = this.reader.int32();
-        }
-        return message;
-      }
-      parseDataRowMessage(offset, length, bytes) {
-        this.reader.setBuffer(offset, bytes);
-        const fieldCount = this.reader.int16();
-        const fields = new Array(fieldCount);
-        for (let i = 0; i < fieldCount; i++) {
-          const len = this.reader.int32();
-          fields[i] = len === -1 ? null : this.reader.string(len);
-        }
-        return new messages_1.DataRowMessage(length, fields);
-      }
-      parseParameterStatusMessage(offset, length, bytes) {
-        this.reader.setBuffer(offset, bytes);
-        const name = this.reader.cstring();
-        const value = this.reader.cstring();
-        return new messages_1.ParameterStatusMessage(length, name, value);
-      }
-      parseBackendKeyData(offset, length, bytes) {
-        this.reader.setBuffer(offset, bytes);
-        const processID = this.reader.int32();
-        const secretKey = this.reader.int32();
-        return new messages_1.BackendKeyDataMessage(length, processID, secretKey);
-      }
-      parseAuthenticationResponse(offset, length, bytes) {
-        this.reader.setBuffer(offset, bytes);
-        const code = this.reader.int32();
-        const message = {
-          name: "authenticationOk",
-          length
-        };
-        switch (code) {
-          case 0:
-            break;
-          case 3:
-            if (message.length === 8) {
-              message.name = "authenticationCleartextPassword";
-            }
-            break;
-          case 5:
-            if (message.length === 12) {
-              message.name = "authenticationMD5Password";
-              const salt = this.reader.bytes(4);
-              return new messages_1.AuthenticationMD5Password(length, salt);
-            }
-            break;
-          case 10:
-            {
-              message.name = "authenticationSASL";
-              message.mechanisms = [];
-              let mechanism;
-              do {
-                mechanism = this.reader.cstring();
-                if (mechanism) {
-                  message.mechanisms.push(mechanism);
-                }
-              } while (mechanism);
-            }
-            break;
-          case 11:
-            message.name = "authenticationSASLContinue";
-            message.data = this.reader.string(length - 8);
-            break;
-          case 12:
-            message.name = "authenticationSASLFinal";
-            message.data = this.reader.string(length - 8);
-            break;
-          default:
-            throw new Error("Unknown authenticationOk message type " + code);
-        }
-        return message;
-      }
-      parseErrorMessage(offset, length, bytes, name) {
-        this.reader.setBuffer(offset, bytes);
-        const fields = {};
-        let fieldType = this.reader.string(1);
-        while (fieldType !== "\0") {
-          fields[fieldType] = this.reader.cstring();
-          fieldType = this.reader.string(1);
-        }
-        const messageValue = fields.M;
-        const message = name === "notice" ? new messages_1.NoticeMessage(length, messageValue) : new messages_1.DatabaseError(messageValue, length, name);
-        message.severity = fields.S;
-        message.code = fields.C;
-        message.detail = fields.D;
-        message.hint = fields.H;
-        message.position = fields.P;
-        message.internalPosition = fields.p;
-        message.internalQuery = fields.q;
-        message.where = fields.W;
-        message.schema = fields.s;
-        message.table = fields.t;
-        message.column = fields.c;
-        message.dataType = fields.d;
-        message.constraint = fields.n;
-        message.file = fields.F;
-        message.line = fields.L;
-        message.routine = fields.R;
+        reader.setBuffer(0, emptyBuffer);
+        message.length = length;
         return message;
       }
     };
     exports2.Parser = Parser;
+    var parseReadyForQueryMessage = (reader) => {
+      const status = reader.string(1);
+      return new messages_1.ReadyForQueryMessage(LATEINIT_LENGTH, status);
+    };
+    var parseCommandCompleteMessage = (reader) => {
+      const text2 = reader.cstring();
+      return new messages_1.CommandCompleteMessage(LATEINIT_LENGTH, text2);
+    };
+    var parseCopyData = (reader, length) => {
+      const chunk = reader.bytes(length - 4);
+      return new messages_1.CopyDataMessage(LATEINIT_LENGTH, chunk);
+    };
+    var parseCopyInMessage = (reader) => parseCopyMessage(reader, "copyInResponse");
+    var parseCopyOutMessage = (reader) => parseCopyMessage(reader, "copyOutResponse");
+    var parseCopyMessage = (reader, messageName) => {
+      const isBinary = reader.byte() !== 0;
+      const columnCount = reader.int16();
+      const message = new messages_1.CopyResponse(LATEINIT_LENGTH, messageName, isBinary, columnCount);
+      for (let i = 0; i < columnCount; i++) {
+        message.columnTypes[i] = reader.int16();
+      }
+      return message;
+    };
+    var parseNotificationMessage = (reader) => {
+      const processId = reader.int32();
+      const channel = reader.cstring();
+      const payload = reader.cstring();
+      return new messages_1.NotificationResponseMessage(LATEINIT_LENGTH, processId, channel, payload);
+    };
+    var parseRowDescriptionMessage = (reader) => {
+      const fieldCount = reader.int16();
+      const message = new messages_1.RowDescriptionMessage(LATEINIT_LENGTH, fieldCount);
+      for (let i = 0; i < fieldCount; i++) {
+        message.fields[i] = parseField(reader);
+      }
+      return message;
+    };
+    var parseField = (reader) => {
+      const name = reader.cstring();
+      const tableID = reader.uint32();
+      const columnID = reader.int16();
+      const dataTypeID = reader.uint32();
+      const dataTypeSize = reader.int16();
+      const dataTypeModifier = reader.int32();
+      const mode = reader.int16() === 0 ? "text" : "binary";
+      return new messages_1.Field(name, tableID, columnID, dataTypeID, dataTypeSize, dataTypeModifier, mode);
+    };
+    var parseParameterDescriptionMessage = (reader) => {
+      const parameterCount = reader.int16();
+      const message = new messages_1.ParameterDescriptionMessage(LATEINIT_LENGTH, parameterCount);
+      for (let i = 0; i < parameterCount; i++) {
+        message.dataTypeIDs[i] = reader.int32();
+      }
+      return message;
+    };
+    var parseDataRowMessage = (reader) => {
+      const fieldCount = reader.int16();
+      const fields = new Array(fieldCount);
+      for (let i = 0; i < fieldCount; i++) {
+        const len = reader.int32();
+        fields[i] = len === -1 ? null : reader.string(len);
+      }
+      return new messages_1.DataRowMessage(LATEINIT_LENGTH, fields);
+    };
+    var parseParameterStatusMessage = (reader) => {
+      const name = reader.cstring();
+      const value = reader.cstring();
+      return new messages_1.ParameterStatusMessage(LATEINIT_LENGTH, name, value);
+    };
+    var parseBackendKeyData = (reader) => {
+      const processID = reader.int32();
+      const secretKey = reader.int32();
+      return new messages_1.BackendKeyDataMessage(LATEINIT_LENGTH, processID, secretKey);
+    };
+    var parseAuthenticationResponse = (reader, length) => {
+      const code = reader.int32();
+      const message = {
+        name: "authenticationOk",
+        length
+      };
+      switch (code) {
+        case 0:
+          break;
+        case 3:
+          if (message.length === 8) {
+            message.name = "authenticationCleartextPassword";
+          }
+          break;
+        case 5:
+          if (message.length === 12) {
+            message.name = "authenticationMD5Password";
+            const salt = reader.bytes(4);
+            return new messages_1.AuthenticationMD5Password(LATEINIT_LENGTH, salt);
+          }
+          break;
+        case 10:
+          {
+            message.name = "authenticationSASL";
+            message.mechanisms = [];
+            let mechanism;
+            do {
+              mechanism = reader.cstring();
+              if (mechanism) {
+                message.mechanisms.push(mechanism);
+              }
+            } while (mechanism);
+          }
+          break;
+        case 11:
+          message.name = "authenticationSASLContinue";
+          message.data = reader.string(length - 8);
+          break;
+        case 12:
+          message.name = "authenticationSASLFinal";
+          message.data = reader.string(length - 8);
+          break;
+        default:
+          throw new Error("Unknown authenticationOk message type " + code);
+      }
+      return message;
+    };
+    var parseErrorMessage = (reader, name) => {
+      const fields = {};
+      let fieldType = reader.string(1);
+      while (fieldType !== "\0") {
+        fields[fieldType] = reader.cstring();
+        fieldType = reader.string(1);
+      }
+      const messageValue = fields.M;
+      const message = name === "notice" ? new messages_1.NoticeMessage(LATEINIT_LENGTH, messageValue) : new messages_1.DatabaseError(messageValue, LATEINIT_LENGTH, name);
+      message.severity = fields.S;
+      message.code = fields.C;
+      message.detail = fields.D;
+      message.hint = fields.H;
+      message.position = fields.P;
+      message.internalPosition = fields.p;
+      message.internalQuery = fields.q;
+      message.where = fields.W;
+      message.schema = fields.s;
+      message.table = fields.t;
+      message.column = fields.c;
+      message.dataType = fields.d;
+      message.constraint = fields.n;
+      message.file = fields.F;
+      message.line = fields.L;
+      message.routine = fields.R;
+      return message;
+    };
   }
 });
 
-// node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/index.js
+// node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/index.js
 var require_dist2 = __commonJS({
-  "node_modules/.pnpm/pg-protocol@1.10.3/node_modules/pg-protocol/dist/index.js"(exports2) {
+  "node_modules/.pnpm/pg-protocol@1.11.0/node_modules/pg-protocol/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DatabaseError = exports2.serialize = exports2.parse = void 0;
@@ -4245,18 +4285,18 @@ var require_dist2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg-cloudflare@1.2.7/node_modules/pg-cloudflare/dist/empty.js
+// node_modules/.pnpm/pg-cloudflare@1.3.0/node_modules/pg-cloudflare/dist/empty.js
 var require_empty = __commonJS({
-  "node_modules/.pnpm/pg-cloudflare@1.2.7/node_modules/pg-cloudflare/dist/empty.js"(exports2) {
+  "node_modules/.pnpm/pg-cloudflare@1.3.0/node_modules/pg-cloudflare/dist/empty.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.default = {};
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/stream.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/stream.js
 var require_stream = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/stream.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/stream.js"(exports2, module2) {
     var { getStream, getSecureStream } = getStreamFuncs();
     module2.exports = {
       /**
@@ -4320,9 +4360,9 @@ var require_stream = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/connection.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/connection.js
 var require_connection = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/connection.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/connection.js"(exports2, module2) {
     "use strict";
     var EventEmitter = require("events").EventEmitter;
     var { parse: parse2, serialize: serialize2 } = require_dist2();
@@ -4797,12 +4837,13 @@ var require_lib = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/client.js
 var require_client = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/client.js"(exports2, module2) {
     "use strict";
     var EventEmitter = require("events").EventEmitter;
     var utils = require_utils();
+    var nodeUtils = require("util");
     var sasl = require_sasl();
     var TypeOverrides2 = require_type_overrides();
     var ConnectionParameters = require_connection_parameters();
@@ -4810,6 +4851,26 @@ var require_client = __commonJS({
     var defaults2 = require_defaults();
     var Connection2 = require_connection();
     var crypto2 = require_utils2();
+    var activeQueryDeprecationNotice = nodeUtils.deprecate(
+      () => {
+      },
+      "Client.activeQuery is deprecated and will be removed in a future version."
+    );
+    var queryQueueDeprecationNotice = nodeUtils.deprecate(
+      () => {
+      },
+      "Client.queryQueue is deprecated and will be removed in a future version."
+    );
+    var pgPassDeprecationNotice = nodeUtils.deprecate(
+      () => {
+      },
+      "pgpass support is deprecated and will be removed in a future version. You can provide an async function as the password property to the Client/Pool constructor that returns a password instead. Within this funciton you can call the pgpass module in your own code."
+    );
+    var byoPromiseDeprecationNotice = nodeUtils.deprecate(
+      () => {
+      },
+      "Passing a custom Promise implementation to the Client/Pool constructor is deprecated and will be removed in a future version."
+    );
     var Client2 = class extends EventEmitter {
       constructor(config2) {
         super();
@@ -4826,6 +4887,9 @@ var require_client = __commonJS({
         });
         this.replication = this.connectionParameters.replication;
         const c2 = config2 || {};
+        if (c2.Promise) {
+          byoPromiseDeprecationNotice();
+        }
         this._Promise = c2.Promise || global.Promise;
         this._types = new TypeOverrides2(c2.types);
         this._ending = false;
@@ -4834,6 +4898,7 @@ var require_client = __commonJS({
         this._connected = false;
         this._connectionError = false;
         this._queryable = true;
+        this._activeQuery = null;
         this.enableChannelBinding = Boolean(c2.enableChannelBinding);
         this.connection = c2.connection || new Connection2({
           stream: c2.stream,
@@ -4842,7 +4907,7 @@ var require_client = __commonJS({
           keepAliveInitialDelayMillis: c2.keepAliveInitialDelayMillis || 0,
           encoding: this.connectionParameters.client_encoding || "utf8"
         });
-        this.queryQueue = [];
+        this._queryQueue = [];
         this.binary = c2.binary || defaults2.binary;
         this.processID = null;
         this.secretKey = null;
@@ -4854,18 +4919,30 @@ var require_client = __commonJS({
         }
         this._connectionTimeoutMillis = c2.connectionTimeoutMillis || 0;
       }
+      get activeQuery() {
+        activeQueryDeprecationNotice();
+        return this._activeQuery;
+      }
+      set activeQuery(val) {
+        activeQueryDeprecationNotice();
+        this._activeQuery = val;
+      }
+      _getActiveQuery() {
+        return this._activeQuery;
+      }
       _errorAllQueries(err) {
         const enqueueError = (query) => {
           process.nextTick(() => {
             query.handleError(err, this.connection);
           });
         };
-        if (this.activeQuery) {
-          enqueueError(this.activeQuery);
-          this.activeQuery = null;
+        const activeQuery = this._getActiveQuery();
+        if (activeQuery) {
+          enqueueError(activeQuery);
+          this._activeQuery = null;
         }
-        this.queryQueue.forEach(enqueueError);
-        this.queryQueue.length = 0;
+        this._queryQueue.forEach(enqueueError);
+        this._queryQueue.length = 0;
       }
       _connect(callback) {
         const self = this;
@@ -4961,9 +5038,7 @@ var require_client = __commonJS({
         con.on("copyData", this._handleCopyData.bind(this));
         con.on("notification", this._handleNotification.bind(this));
       }
-      // TODO(bmc): deprecate pgpass "built in" integration since this.password can be a function
-      // it can be supplied by the user if required - this is a breaking change!
-      _checkPgPass(cb) {
+      _getPassword(cb) {
         const con = this.connection;
         if (typeof this.password === "function") {
           this._Promise.resolve().then(() => this.password()).then((pass) => {
@@ -4987,6 +5062,7 @@ var require_client = __commonJS({
             const pgPass = require_lib();
             pgPass(this.connectionParameters, (pass) => {
               if (void 0 !== pass) {
+                pgPassDeprecationNotice();
                 this.connectionParameters.password = this.password = pass;
               }
               cb();
@@ -4997,12 +5073,12 @@ var require_client = __commonJS({
         }
       }
       _handleAuthCleartextPassword(msg) {
-        this._checkPgPass(() => {
+        this._getPassword(() => {
           this.connection.password(this.password);
         });
       }
       _handleAuthMD5Password(msg) {
-        this._checkPgPass(async () => {
+        this._getPassword(async () => {
           try {
             const hashedPassword = await crypto2.postgresMd5PasswordHash(this.user, this.password, msg.salt);
             this.connection.password(hashedPassword);
@@ -5012,7 +5088,7 @@ var require_client = __commonJS({
         });
       }
       _handleAuthSASL(msg) {
-        this._checkPgPass(() => {
+        this._getPassword(() => {
           try {
             this.saslSession = sasl.startSession(msg.mechanisms, this.enableChannelBinding && this.connection.stream);
             this.connection.sendSASLInitialResponseMessage(this.saslSession.mechanism, this.saslSession.response);
@@ -5057,8 +5133,8 @@ var require_client = __commonJS({
           }
           this.emit("connect");
         }
-        const { activeQuery } = this;
-        this.activeQuery = null;
+        const activeQuery = this._getActiveQuery();
+        this._activeQuery = null;
         this.readyForQuery = true;
         if (activeQuery) {
           activeQuery.handleReadyForQuery(this.connection);
@@ -5094,49 +5170,51 @@ var require_client = __commonJS({
         if (this._connecting) {
           return this._handleErrorWhileConnecting(msg);
         }
-        const activeQuery = this.activeQuery;
+        const activeQuery = this._getActiveQuery();
         if (!activeQuery) {
           this._handleErrorEvent(msg);
           return;
         }
-        this.activeQuery = null;
+        this._activeQuery = null;
         activeQuery.handleError(msg, this.connection);
       }
       _handleRowDescription(msg) {
-        this.activeQuery.handleRowDescription(msg);
+        this._getActiveQuery().handleRowDescription(msg);
       }
       _handleDataRow(msg) {
-        this.activeQuery.handleDataRow(msg);
+        this._getActiveQuery().handleDataRow(msg);
       }
       _handlePortalSuspended(msg) {
-        this.activeQuery.handlePortalSuspended(this.connection);
+        this._getActiveQuery().handlePortalSuspended(this.connection);
       }
       _handleEmptyQuery(msg) {
-        this.activeQuery.handleEmptyQuery(this.connection);
+        this._getActiveQuery().handleEmptyQuery(this.connection);
       }
       _handleCommandComplete(msg) {
-        if (this.activeQuery == null) {
+        const activeQuery = this._getActiveQuery();
+        if (activeQuery == null) {
           const error = new Error("Received unexpected commandComplete message from backend.");
           this._handleErrorEvent(error);
           return;
         }
-        this.activeQuery.handleCommandComplete(msg, this.connection);
+        activeQuery.handleCommandComplete(msg, this.connection);
       }
       _handleParseComplete() {
-        if (this.activeQuery == null) {
+        const activeQuery = this._getActiveQuery();
+        if (activeQuery == null) {
           const error = new Error("Received unexpected parseComplete message from backend.");
           this._handleErrorEvent(error);
           return;
         }
-        if (this.activeQuery.name) {
-          this.connection.parsedStatements[this.activeQuery.name] = this.activeQuery.text;
+        if (activeQuery.name) {
+          this.connection.parsedStatements[activeQuery.name] = activeQuery.text;
         }
       }
       _handleCopyInResponse(msg) {
-        this.activeQuery.handleCopyInResponse(this.connection);
+        this._getActiveQuery().handleCopyInResponse(this.connection);
       }
       _handleCopyData(msg) {
-        this.activeQuery.handleCopyData(msg, this.connection);
+        this._getActiveQuery().handleCopyData(msg, this.connection);
       }
       _handleNotification(msg) {
         this.emit("notification", msg);
@@ -5182,8 +5260,8 @@ var require_client = __commonJS({
           con.on("connect", function() {
             con.cancel(client.processID, client.secretKey);
           });
-        } else if (client.queryQueue.indexOf(query) !== -1) {
-          client.queryQueue.splice(client.queryQueue.indexOf(query), 1);
+        } else if (client._queryQueue.indexOf(query) !== -1) {
+          client._queryQueue.splice(client._queryQueue.indexOf(query), 1);
         }
       }
       setTypeParser(oid, format, parseFn) {
@@ -5203,20 +5281,21 @@ var require_client = __commonJS({
       }
       _pulseQueryQueue() {
         if (this.readyForQuery === true) {
-          this.activeQuery = this.queryQueue.shift();
-          if (this.activeQuery) {
+          this._activeQuery = this._queryQueue.shift();
+          const activeQuery = this._getActiveQuery();
+          if (activeQuery) {
             this.readyForQuery = false;
             this.hasExecuted = true;
-            const queryError = this.activeQuery.submit(this.connection);
+            const queryError = activeQuery.submit(this.connection);
             if (queryError) {
               process.nextTick(() => {
-                this.activeQuery.handleError(queryError, this.connection);
+                activeQuery.handleError(queryError, this.connection);
                 this.readyForQuery = true;
                 this._pulseQueryQueue();
               });
             }
           } else if (this.hasExecuted) {
-            this.activeQuery = null;
+            this._activeQuery = null;
             this.emit("drain");
           }
         }
@@ -5257,9 +5336,9 @@ var require_client = __commonJS({
             queryCallback(error);
             query.callback = () => {
             };
-            const index = this.queryQueue.indexOf(query);
+            const index = this._queryQueue.indexOf(query);
             if (index > -1) {
-              this.queryQueue.splice(index, 1);
+              this._queryQueue.splice(index, 1);
             }
             this._pulseQueryQueue();
           }, readTimeout);
@@ -5286,7 +5365,7 @@ var require_client = __commonJS({
           });
           return result;
         }
-        this.queryQueue.push(query);
+        this._queryQueue.push(query);
         this._pulseQueryQueue();
         return result;
       }
@@ -5305,7 +5384,7 @@ var require_client = __commonJS({
             return this._Promise.resolve();
           }
         }
-        if (this.activeQuery || !this._queryable) {
+        if (this._getActiveQuery() || !this._queryable) {
           this.connection.stream.destroy();
         } else {
           this.connection.end();
@@ -5318,15 +5397,19 @@ var require_client = __commonJS({
           });
         }
       }
+      get queryQueue() {
+        queryQueueDeprecationNotice();
+        return this._queryQueue;
+      }
     };
     Client2.Query = Query2;
     module2.exports = Client2;
   }
 });
 
-// node_modules/.pnpm/pg-pool@3.10.1_pg@8.16.3/node_modules/pg-pool/index.js
+// node_modules/.pnpm/pg-pool@3.11.0_pg@8.17.1/node_modules/pg-pool/index.js
 var require_pg_pool = __commonJS({
-  "node_modules/.pnpm/pg-pool@3.10.1_pg@8.16.3/node_modules/pg-pool/index.js"(exports2, module2) {
+  "node_modules/.pnpm/pg-pool@3.11.0_pg@8.17.1/node_modules/pg-pool/index.js"(exports2, module2) {
     "use strict";
     var EventEmitter = require("events").EventEmitter;
     var NOOP = function() {
@@ -5623,8 +5706,10 @@ var require_pg_pool = __commonJS({
         let tid;
         if (this.options.idleTimeoutMillis && this._isAboveMin()) {
           tid = setTimeout(() => {
-            this.log("remove idle client");
-            this._remove(client, this._pulseQueue.bind(this));
+            if (this._isAboveMin()) {
+              this.log("remove idle client");
+              this._remove(client, this._pulseQueue.bind(this));
+            }
           }, this.options.idleTimeoutMillis);
           if (this.options.allowExitOnIdle) {
             tid.unref();
@@ -5715,9 +5800,9 @@ var require_pg_pool = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/native/query.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/native/query.js
 var require_query2 = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/native/query.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/native/query.js"(exports2, module2) {
     "use strict";
     var EventEmitter = require("events").EventEmitter;
     var util2 = require("util");
@@ -5856,9 +5941,9 @@ var require_query2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/native/client.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/native/client.js
 var require_client2 = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/native/client.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/native/client.js"(exports2, module2) {
     "use strict";
     var Native;
     try {
@@ -6096,17 +6181,17 @@ var require_client2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/native/index.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/native/index.js
 var require_native = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/native/index.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/native/index.js"(exports2, module2) {
     "use strict";
     module2.exports = require_client2();
   }
 });
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/index.js
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/index.js
 var require_lib2 = __commonJS({
-  "node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/index.js"(exports2, module2) {
+  "node_modules/.pnpm/pg@8.17.1/node_modules/pg/lib/index.js"(exports2, module2) {
     "use strict";
     var Client2 = require_client();
     var defaults2 = require_defaults();
@@ -6124,9 +6209,9 @@ var require_lib2 = __commonJS({
         }
       };
     };
-    var PG = function(clientConstructor) {
+    var PG = function(clientConstructor2) {
       this.defaults = defaults2;
-      this.Client = clientConstructor;
+      this.Client = clientConstructor2;
       this.Query = this.Client.Query;
       this.Pool = poolFactory(this.Client);
       this._pools = [];
@@ -6139,29 +6224,34 @@ var require_lib2 = __commonJS({
       this.Result = Result2;
       this.utils = utils;
     };
-    if (typeof process.env.NODE_PG_FORCE_NATIVE !== "undefined") {
-      module2.exports = new PG(require_native());
-    } else {
-      module2.exports = new PG(Client2);
-      Object.defineProperty(module2.exports, "native", {
-        configurable: true,
-        enumerable: false,
-        get() {
-          let native = null;
-          try {
-            native = new PG(require_native());
-          } catch (err) {
-            if (err.code !== "MODULE_NOT_FOUND") {
-              throw err;
-            }
-          }
-          Object.defineProperty(module2.exports, "native", {
-            value: native
-          });
-          return native;
-        }
-      });
+    var clientConstructor = Client2;
+    var forceNative = false;
+    try {
+      forceNative = !!process.env.NODE_PG_FORCE_NATIVE;
+    } catch {
     }
+    if (forceNative) {
+      clientConstructor = require_native();
+    }
+    module2.exports = new PG(clientConstructor);
+    Object.defineProperty(module2.exports, "native", {
+      configurable: true,
+      enumerable: false,
+      get() {
+        let native = null;
+        try {
+          native = new PG(require_native());
+        } catch (err) {
+          if (err.code !== "MODULE_NOT_FOUND") {
+            throw err;
+          }
+        }
+        Object.defineProperty(module2.exports, "native", {
+          value: native
+        });
+        return native;
+      }
+    });
   }
 });
 
@@ -18154,7 +18244,7 @@ __export(index_exports, {
 });
 module.exports = __toCommonJS(index_exports);
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/encode.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/encode.js
 var decodeBase64Url = (str) => {
   return decodeBase64(str.replace(/_|-/g, (m2) => ({ _: "/", "-": "+" })[m2] ?? m2));
 };
@@ -18178,7 +18268,7 @@ var decodeBase64 = (str) => {
   return bytes;
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/adapter/aws-lambda/handler.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/adapter/aws-lambda/handler.js
 function sanitizeHeaderValue(value) {
   const hasNonAscii = /[^\x00-\x7F]/.test(value);
   if (!hasNonAscii) {
@@ -18483,7 +18573,7 @@ var isContentEncodingBinary = (contentEncoding) => {
   return /^(gzip|deflate|compress|br)/.test(contentEncoding);
 };
 
-// node_modules/.pnpm/@scalar+core@0.3.30/node_modules/@scalar/core/dist/libs/html-rendering/html-rendering.js
+// node_modules/.pnpm/@scalar+core@0.3.32/node_modules/@scalar/core/dist/libs/html-rendering/html-rendering.js
 var addIndent = (str, spaces = 2, initialIndent = false) => {
   const indent = " ".repeat(spaces);
   const lines = str.split("\n");
@@ -18575,7 +18665,7 @@ var getConfiguration = (givenConfiguration) => {
   return configuration;
 };
 
-// node_modules/.pnpm/@scalar+hono-api-reference@0.9.32_hono@4.11.3/node_modules/@scalar/hono-api-reference/dist/scalar.js
+// node_modules/.pnpm/@scalar+hono-api-reference@0.9.34_hono@4.11.4/node_modules/@scalar/hono-api-reference/dist/scalar.js
 var DEFAULT_CONFIGURATION = {
   _integration: "hono"
 };
@@ -18741,10 +18831,10 @@ function configureOpenAPI(app2) {
   );
 }
 
-// node_modules/.pnpm/@hono+zod-openapi@0.19.10_hono@4.11.3_zod@3.25.76/node_modules/@hono/zod-openapi/dist/index.js
+// node_modules/.pnpm/@hono+zod-openapi@0.19.10_hono@4.11.4_zod@3.25.76/node_modules/@hono/zod-openapi/dist/index.js
 var import_zod_to_openapi = __toESM(require_dist(), 1);
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/url.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/url.js
 var splitPath = (path2) => {
   const paths = path2.split("/");
   if (paths[0] === "") {
@@ -18946,7 +19036,7 @@ var getQueryParams = (url, key) => {
 };
 var decodeURIComponent_ = decodeURIComponent;
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/cookie.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/cookie.js
 var validCookieNameRegEx = /^[\w!#$%&'*.^`|~+-]+$/;
 var validCookieValueRegEx = /^[ !#-:<-[\]-~]*$/;
 var parse = (cookie, name) => {
@@ -19041,7 +19131,7 @@ var serialize = (name, value, opt) => {
   return _serialize(name, value, opt);
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/helper/cookie/index.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/helper/cookie/index.js
 var getCookie = (c2, key, prefix) => {
   const cookie = c2.req.raw.headers.get("Cookie");
   if (typeof key === "string") {
@@ -19089,7 +19179,7 @@ var deleteCookie = (c2, name, opt) => {
   return deletedCookie;
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/http-exception.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/http-exception.js
 var HTTPException = class extends Error {
   res;
   status;
@@ -19122,7 +19212,7 @@ var HTTPException = class extends Error {
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/buffer.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/buffer.js
 var bufferToFormData = (arrayBuffer, contentType) => {
   const response = new Response(arrayBuffer, {
     headers: {
@@ -19132,7 +19222,7 @@ var bufferToFormData = (arrayBuffer, contentType) => {
   return response.formData();
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/validator/validator.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/validator/validator.js
 var jsonRegex = /^application\/([a-z-\.]+\+)?json(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/;
 var multipartRegex = /^multipart\/form-data(;\s?boundary=[a-zA-Z0-9'"()+_,\-./:=?]+)?$/;
 var urlencodedRegex = /^application\/x-www-form-urlencoded(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/;
@@ -19213,7 +19303,7 @@ var validator = (target, validationFunc) => {
   };
 };
 
-// node_modules/.pnpm/@hono+zod-validator@0.7.6_hono@4.11.3_zod@3.25.76/node_modules/@hono/zod-validator/dist/index.js
+// node_modules/.pnpm/@hono+zod-validator@0.7.6_hono@4.11.4_zod@3.25.76/node_modules/@hono/zod-validator/dist/index.js
 function zValidatorFunction(target, schema, hook, options) {
   return validator(target, async (value, c2) => {
     let validatorValue = value;
@@ -19240,7 +19330,7 @@ function zValidatorFunction(target, schema, hook, options) {
 }
 var zValidator = zValidatorFunction;
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/compose.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/compose.js
 var compose = (middleware, onError2, onNotFound) => {
   return (context, next) => {
     let index = -1;
@@ -19284,10 +19374,10 @@ var compose = (middleware, onError2, onNotFound) => {
   };
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/request/constants.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/request/constants.js
 var GET_MATCH_RESULT = /* @__PURE__ */ Symbol();
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/body.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/body.js
 var parseBody = async (request, options = /* @__PURE__ */ Object.create(null)) => {
   const { all = false, dot = false } = options;
   const headers = request instanceof HonoRequest ? request.raw.headers : request.headers;
@@ -19356,7 +19446,7 @@ var handleParsingNestedValues = (form, key, value) => {
   });
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/request.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/request.js
 var tryDecodeURIComponent = (str) => tryDecode(str, decodeURIComponent_);
 var HonoRequest = class {
   /**
@@ -19624,7 +19714,7 @@ var HonoRequest = class {
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/html.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/html.js
 var HtmlEscapedCallbackPhase = {
   Stringify: 1,
   BeforeStream: 2,
@@ -19666,7 +19756,7 @@ var resolveCallback = async (str, phase, preserveCallbacks, context, buffer) => 
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/context.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/context.js
 var TEXT_PLAIN = "text/plain; charset=UTF-8";
 var setDefaultContentType = (contentType, headers) => {
   return {
@@ -20072,7 +20162,7 @@ var Context = class {
   };
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/router.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/router.js
 var METHOD_NAME_ALL = "ALL";
 var METHOD_NAME_ALL_LOWERCASE = "all";
 var METHODS = ["get", "post", "put", "delete", "options", "patch"];
@@ -20080,10 +20170,10 @@ var MESSAGE_MATCHER_IS_ALREADY_BUILT = "Can not add a route since the matcher is
 var UnsupportedPathError = class extends Error {
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/constants.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/constants.js
 var COMPOSED_HANDLER = "__COMPOSED_HANDLER";
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/hono-base.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/hono-base.js
 var notFoundHandler = (c2) => {
   return c2.text("404 Not Found", 404);
 };
@@ -20454,7 +20544,7 @@ var Hono = class _Hono {
   };
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/router/reg-exp-router/matcher.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/router/reg-exp-router/matcher.js
 var emptyParam = [];
 function match(method, path2) {
   const matchers = this.buildAllMatchers();
@@ -20475,7 +20565,7 @@ function match(method, path2) {
   return match2(method, path2);
 }
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/router/reg-exp-router/node.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/router/reg-exp-router/node.js
 var LABEL_REG_EXP_STR = "[^/]+";
 var ONLY_WILDCARD_REG_EXP_STR = ".*";
 var TAIL_WILDCARD_REG_EXP_STR = "(?:|/.*)";
@@ -20583,7 +20673,7 @@ var Node = class _Node {
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/router/reg-exp-router/trie.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/router/reg-exp-router/trie.js
 var Trie = class {
   #context = { varIndex: 0 };
   #root = new Node();
@@ -20639,7 +20729,7 @@ var Trie = class {
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/router/reg-exp-router/router.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/router/reg-exp-router/router.js
 var nullMatcher = [/^$/, [], /* @__PURE__ */ Object.create(null)];
 var wildcardRegExpCache = /* @__PURE__ */ Object.create(null);
 function buildWildcardRegExp(path2) {
@@ -20818,7 +20908,7 @@ var RegExpRouter = class {
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/router/smart-router/router.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/router/smart-router/router.js
 var SmartRouter = class {
   name = "SmartRouter";
   #routers = [];
@@ -20873,7 +20963,7 @@ var SmartRouter = class {
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/router/trie-router/node.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/router/trie-router/node.js
 var emptyParams = /* @__PURE__ */ Object.create(null);
 var Node2 = class _Node2 {
   #methods;
@@ -21031,7 +21121,7 @@ var Node2 = class _Node2 {
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/router/trie-router/router.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/router/trie-router/router.js
 var TrieRouter = class {
   name = "TrieRouter";
   #node;
@@ -21053,7 +21143,7 @@ var TrieRouter = class {
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/hono.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/hono.js
 var Hono2 = class extends Hono {
   /**
    * Creates an instance of the Hono class.
@@ -25109,7 +25199,7 @@ var coerce = {
 };
 var NEVER = INVALID;
 
-// node_modules/.pnpm/@hono+zod-openapi@0.19.10_hono@4.11.3_zod@3.25.76/node_modules/@hono/zod-openapi/dist/index.js
+// node_modules/.pnpm/@hono+zod-openapi@0.19.10_hono@4.11.4_zod@3.25.76/node_modules/@hono/zod-openapi/dist/index.js
 var OpenAPIHono = class _OpenAPIHono extends Hono2 {
   openAPIRegistry;
   defaultHook;
@@ -25338,7 +25428,7 @@ function isFormContentType(contentType) {
   return contentType.startsWith("multipart/form-data") || contentType.startsWith("application/x-www-form-urlencoded");
 }
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/middleware/cors/index.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/middleware/cors/index.js
 var cors = (options) => {
   const defaults2 = {
     origin: "*",
@@ -25423,7 +25513,7 @@ var cors = (options) => {
   };
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/color.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/color.js
 function getColorEnabled() {
   const { process: process2, Deno: Deno2 } = globalThis;
   const isNoColor = typeof Deno2?.noColor === "boolean" ? Deno2.noColor : process2 !== void 0 ? (
@@ -25445,7 +25535,7 @@ async function getColorEnabledAsync() {
   return !isNoColor;
 }
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/middleware/logger/index.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/middleware/logger/index.js
 var humanize = (times) => {
   const [delimiter, separator] = [",", "."];
   const orderTimes = times.map((v) => v.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1" + delimiter));
@@ -25486,7 +25576,7 @@ var logger = (fn = console.log) => {
   };
 };
 
-// node_modules/.pnpm/stoker@1.4.3_@asteasolution_a3c80c252ae1b5d252ed7311a0869f6a/node_modules/stoker/dist/esm/http-status-codes.js
+// node_modules/.pnpm/stoker@1.4.3_@asteasolution_3f118f048c16dc6b92fd03bf03ebf64e/node_modules/stoker/dist/esm/http-status-codes.js
 var BAD_REQUEST = 400;
 var CONFLICT = 409;
 var CREATED = 201;
@@ -25496,10 +25586,10 @@ var OK2 = 200;
 var UNAUTHORIZED = 401;
 var UNPROCESSABLE_ENTITY = 422;
 
-// node_modules/.pnpm/stoker@1.4.3_@asteasolution_a3c80c252ae1b5d252ed7311a0869f6a/node_modules/stoker/dist/esm/http-status-phrases.js
+// node_modules/.pnpm/stoker@1.4.3_@asteasolution_3f118f048c16dc6b92fd03bf03ebf64e/node_modules/stoker/dist/esm/http-status-phrases.js
 var NOT_FOUND2 = "Not Found";
 
-// node_modules/.pnpm/stoker@1.4.3_@asteasolution_a3c80c252ae1b5d252ed7311a0869f6a/node_modules/stoker/dist/esm/middlewares/not-found.js
+// node_modules/.pnpm/stoker@1.4.3_@asteasolution_3f118f048c16dc6b92fd03bf03ebf64e/node_modules/stoker/dist/esm/middlewares/not-found.js
 var notFound = (c2) => {
   return c2.json({
     message: `${NOT_FOUND2} - ${c2.req.path}`
@@ -25507,7 +25597,7 @@ var notFound = (c2) => {
 };
 var not_found_default = notFound;
 
-// node_modules/.pnpm/stoker@1.4.3_@asteasolution_a3c80c252ae1b5d252ed7311a0869f6a/node_modules/stoker/dist/esm/middlewares/on-error.js
+// node_modules/.pnpm/stoker@1.4.3_@asteasolution_3f118f048c16dc6b92fd03bf03ebf64e/node_modules/stoker/dist/esm/middlewares/on-error.js
 var onError = (err, c2) => {
   const currentStatus = "status" in err ? err.status : c2.newResponse(null).status;
   const statusCode = currentStatus !== OK2 ? currentStatus : INTERNAL_SERVER_ERROR;
@@ -25522,7 +25612,7 @@ var onError = (err, c2) => {
 };
 var on_error_default = onError;
 
-// node_modules/.pnpm/stoker@1.4.3_@asteasolution_a3c80c252ae1b5d252ed7311a0869f6a/node_modules/stoker/dist/esm/openapi/default-hook.js
+// node_modules/.pnpm/stoker@1.4.3_@asteasolution_3f118f048c16dc6b92fd03bf03ebf64e/node_modules/stoker/dist/esm/openapi/default-hook.js
 var defaultHook = (result, c2) => {
   if (!result.success) {
     return c2.json(
@@ -25536,7 +25626,7 @@ var defaultHook = (result, c2) => {
 };
 var default_hook_default = defaultHook;
 
-// node_modules/.pnpm/stoker@1.4.3_@asteasolution_a3c80c252ae1b5d252ed7311a0869f6a/node_modules/stoker/dist/esm/openapi/helpers/json-content.js
+// node_modules/.pnpm/stoker@1.4.3_@asteasolution_3f118f048c16dc6b92fd03bf03ebf64e/node_modules/stoker/dist/esm/openapi/helpers/json-content.js
 var jsonContent = (schema, description) => {
   return {
     content: {
@@ -25549,7 +25639,7 @@ var jsonContent = (schema, description) => {
 };
 var json_content_default = jsonContent;
 
-// node_modules/.pnpm/stoker@1.4.3_@asteasolution_a3c80c252ae1b5d252ed7311a0869f6a/node_modules/stoker/dist/esm/openapi/helpers/json-content-required.js
+// node_modules/.pnpm/stoker@1.4.3_@asteasolution_3f118f048c16dc6b92fd03bf03ebf64e/node_modules/stoker/dist/esm/openapi/helpers/json-content-required.js
 var jsonContentRequired = (schema, description) => {
   return {
     ...json_content_default(schema, description),
@@ -25585,7 +25675,7 @@ function createApp() {
   return app2;
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/entity.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/entity.js
 var entityKind = Symbol.for("drizzle:entityKind");
 var hasOwnEntityKind = Symbol.for("drizzle:hasOwnEntityKind");
 function is(value, type) {
@@ -25612,7 +25702,7 @@ function is(value, type) {
   return false;
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/column.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/column.js
 var Column = class {
   constructor(table, config2) {
     this.table = table;
@@ -25663,7 +25753,7 @@ var Column = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/column-builder.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/column-builder.js
 var ColumnBuilder = class {
   static [entityKind] = "ColumnBuilder";
   config;
@@ -25766,10 +25856,10 @@ var ColumnBuilder = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/table.utils.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/table.utils.js
 var TableName = Symbol.for("drizzle:Name");
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/foreign-keys.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/foreign-keys.js
 var ForeignKeyBuilder = class {
   static [entityKind] = "PgForeignKeyBuilder";
   /** @internal */
@@ -25826,12 +25916,12 @@ var ForeignKey = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/tracing-utils.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/tracing-utils.js
 function iife(fn, ...args) {
   return fn(...args);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/unique-constraint.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/unique-constraint.js
 function uniqueKeyName(table, columns) {
   return `${table[TableName]}_${columns.join("_")}_unique`;
 }
@@ -25881,7 +25971,7 @@ var UniqueConstraint = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/utils/array.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/utils/array.js
 function parsePgArrayValue(arrayString, startFrom, inQuotes) {
   for (let i = startFrom; i < arrayString.length; i++) {
     const char2 = arrayString[i];
@@ -25957,7 +26047,7 @@ function makePgArray(array) {
   }).join(",")}}`;
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/common.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/common.js
 var PgColumnBuilder = class extends ColumnBuilder {
   foreignKeyConfigs = [];
   static [entityKind] = "PgColumnBuilder";
@@ -26141,7 +26231,7 @@ var PgArray = class _PgArray extends PgColumn {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/enum.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/enum.js
 var PgEnumObjectColumnBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgEnumObjectColumnBuilder";
   constructor(name, enumInstance) {
@@ -26226,7 +26316,7 @@ function pgEnumObjectWithSchema(enumName, values, schema) {
   return enumInstance;
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/subquery.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/subquery.js
 var Subquery = class {
   static [entityKind] = "Subquery";
   constructor(sql2, fields, alias, isWith = false, usedTables = []) {
@@ -26247,10 +26337,10 @@ var WithSubquery = class extends Subquery {
   static [entityKind] = "WithSubquery";
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/version.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/version.js
 var version = "0.44.7";
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/tracing.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/tracing.js
 var otel;
 var rawTracer;
 var tracer = {
@@ -26285,10 +26375,10 @@ var tracer = {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/view-common.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/view-common.js
 var ViewBaseConfig = Symbol.for("drizzle:ViewBaseConfig");
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/table.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/table.js
 var Schema = Symbol.for("drizzle:Schema");
 var Columns = Symbol.for("drizzle:Columns");
 var ExtraConfigColumns = Symbol.for("drizzle:ExtraConfigColumns");
@@ -26350,7 +26440,7 @@ function getTableUniqueName(table) {
   return `${table[Schema] ?? "public"}.${table[TableName]}`;
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sql/sql.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/sql/sql.js
 var FakePrimitiveParam = class {
   static [entityKind] = "FakePrimitiveParam";
 };
@@ -26744,7 +26834,7 @@ Subquery.prototype.getSQL = function() {
   return new SQL([this]);
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/alias.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/alias.js
 var ColumnAliasProxyHandler = class {
   constructor(table) {
     this.table = table;
@@ -26840,7 +26930,7 @@ function mapColumnsInSQLToAlias(query, alias) {
   }));
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/errors.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/errors.js
 var DrizzleError = class extends Error {
   static [entityKind] = "DrizzleError";
   constructor({ message, cause }) {
@@ -26867,7 +26957,7 @@ var TransactionRollbackError = class extends DrizzleError {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/logger.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/logger.js
 var ConsoleLogWriter = class {
   static [entityKind] = "ConsoleLogWriter";
   write(message) {
@@ -26898,7 +26988,7 @@ var NoopLogger = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/query-promise.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/query-promise.js
 var QueryPromise = class {
   static [entityKind] = "QueryPromise";
   [Symbol.toStringTag] = "QueryPromise";
@@ -26922,7 +27012,7 @@ var QueryPromise = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/utils.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/utils.js
 function mapResultRow(columns, row, joinsNotNullableMap) {
   const nullifyMap = {};
   const result = columns.reduce(
@@ -27071,7 +27161,7 @@ function isConfig(data) {
 }
 var textDecoder = typeof TextDecoder === "undefined" ? null : new TextDecoder();
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/int.common.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/int.common.js
 var PgIntColumnBaseBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgIntColumnBaseBuilder";
   generatedAlwaysAsIdentity(sequence) {
@@ -27110,7 +27200,7 @@ var PgIntColumnBaseBuilder = class extends PgColumnBuilder {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/bigint.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/bigint.js
 var PgBigInt53Builder = class extends PgIntColumnBaseBuilder {
   static [entityKind] = "PgBigInt53Builder";
   constructor(name) {
@@ -27164,7 +27254,7 @@ function bigint(a, b2) {
   return new PgBigInt64Builder(name);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/bigserial.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/bigserial.js
 var PgBigSerial53Builder = class extends PgColumnBuilder {
   static [entityKind] = "PgBigSerial53Builder";
   constructor(name) {
@@ -27224,7 +27314,7 @@ function bigserial(a, b2) {
   return new PgBigSerial64Builder(name);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/boolean.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/boolean.js
 var PgBooleanBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgBooleanBuilder";
   constructor(name) {
@@ -27245,7 +27335,7 @@ function boolean(name) {
   return new PgBooleanBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/char.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/char.js
 var PgCharBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgCharBuilder";
   constructor(name, config2) {
@@ -27274,7 +27364,7 @@ function char(a, b2 = {}) {
   return new PgCharBuilder(name, config2);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/cidr.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/cidr.js
 var PgCidrBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgCidrBuilder";
   constructor(name) {
@@ -27295,7 +27385,7 @@ function cidr(name) {
   return new PgCidrBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/custom.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/custom.js
 var PgCustomColumnBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgCustomColumnBuilder";
   constructor(name, fieldConfig, customTypeParams) {
@@ -27339,7 +27429,7 @@ function customType(customTypeParams) {
   };
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/date.common.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/date.common.js
 var PgDateColumnBaseBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgDateColumnBaseBuilder";
   defaultNow() {
@@ -27347,7 +27437,7 @@ var PgDateColumnBaseBuilder = class extends PgColumnBuilder {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/date.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/date.js
 var PgDateBuilder = class extends PgDateColumnBaseBuilder {
   static [entityKind] = "PgDateBuilder";
   constructor(name) {
@@ -27397,7 +27487,7 @@ function date(a, b2) {
   return new PgDateStringBuilder(name);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/double-precision.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/double-precision.js
 var PgDoublePrecisionBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgDoublePrecisionBuilder";
   constructor(name) {
@@ -27427,7 +27517,7 @@ function doublePrecision(name) {
   return new PgDoublePrecisionBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/inet.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/inet.js
 var PgInetBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgInetBuilder";
   constructor(name) {
@@ -27448,7 +27538,7 @@ function inet(name) {
   return new PgInetBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/integer.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/integer.js
 var PgIntegerBuilder = class extends PgIntColumnBaseBuilder {
   static [entityKind] = "PgIntegerBuilder";
   constructor(name) {
@@ -27475,7 +27565,7 @@ function integer(name) {
   return new PgIntegerBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/interval.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/interval.js
 var PgIntervalBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgIntervalBuilder";
   constructor(name, intervalConfig) {
@@ -27502,7 +27592,7 @@ function interval(a, b2 = {}) {
   return new PgIntervalBuilder(name, config2);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/json.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/json.js
 var PgJsonBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgJsonBuilder";
   constructor(name) {
@@ -27539,7 +27629,7 @@ function json(name) {
   return new PgJsonBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/jsonb.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/jsonb.js
 var PgJsonbBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgJsonbBuilder";
   constructor(name) {
@@ -27576,7 +27666,7 @@ function jsonb(name) {
   return new PgJsonbBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/line.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/line.js
 var PgLineBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgLineBuilder";
   constructor(name) {
@@ -27637,7 +27727,7 @@ function line(a, b2) {
   return new PgLineABCBuilder(name);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/macaddr.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/macaddr.js
 var PgMacaddrBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgMacaddrBuilder";
   constructor(name) {
@@ -27658,7 +27748,7 @@ function macaddr(name) {
   return new PgMacaddrBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/macaddr8.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/macaddr8.js
 var PgMacaddr8Builder = class extends PgColumnBuilder {
   static [entityKind] = "PgMacaddr8Builder";
   constructor(name) {
@@ -27679,7 +27769,7 @@ function macaddr8(name) {
   return new PgMacaddr8Builder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/numeric.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/numeric.js
 var PgNumericBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgNumericBuilder";
   constructor(name, precision, scale) {
@@ -27796,7 +27886,7 @@ function numeric(a, b2) {
   return mode === "number" ? new PgNumericNumberBuilder(name, config2?.precision, config2?.scale) : mode === "bigint" ? new PgNumericBigIntBuilder(name, config2?.precision, config2?.scale) : new PgNumericBuilder(name, config2?.precision, config2?.scale);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/point.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/point.js
 var PgPointTupleBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgPointTupleBuilder";
   constructor(name) {
@@ -27863,7 +27953,7 @@ function point(a, b2) {
   return new PgPointObjectBuilder(name);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/postgis_extension/utils.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/postgis_extension/utils.js
 function hexToBytes(hex) {
   const bytes = [];
   for (let c2 = 0; c2 < hex.length; c2 += 2) {
@@ -27902,7 +27992,7 @@ function parseEWKB(hex) {
   throw new Error("Unsupported geometry type");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/postgis_extension/geometry.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/postgis_extension/geometry.js
 var PgGeometryBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgGeometryBuilder";
   constructor(name) {
@@ -27962,7 +28052,7 @@ function geometry(a, b2) {
   return new PgGeometryObjectBuilder(name);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/real.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/real.js
 var PgRealBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgRealBuilder";
   constructor(name, length) {
@@ -27993,7 +28083,7 @@ function real(name) {
   return new PgRealBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/serial.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/serial.js
 var PgSerialBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgSerialBuilder";
   constructor(name) {
@@ -28016,7 +28106,7 @@ function serial(name) {
   return new PgSerialBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/smallint.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/smallint.js
 var PgSmallIntBuilder = class extends PgIntColumnBaseBuilder {
   static [entityKind] = "PgSmallIntBuilder";
   constructor(name) {
@@ -28043,7 +28133,7 @@ function smallint(name) {
   return new PgSmallIntBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/smallserial.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/smallserial.js
 var PgSmallSerialBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgSmallSerialBuilder";
   constructor(name) {
@@ -28069,7 +28159,7 @@ function smallserial(name) {
   return new PgSmallSerialBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/text.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/text.js
 var PgTextBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgTextBuilder";
   constructor(name, config2) {
@@ -28093,7 +28183,7 @@ function text(a, b2 = {}) {
   return new PgTextBuilder(name, config2);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/time.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/time.js
 var PgTimeBuilder = class extends PgDateColumnBaseBuilder {
   constructor(name, withTimezone, precision) {
     super(name, "string", "PgTime");
@@ -28127,7 +28217,7 @@ function time2(a, b2 = {}) {
   return new PgTimeBuilder(name, config2.withTimezone ?? false, config2.precision);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/timestamp.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/timestamp.js
 var PgTimestampBuilder = class extends PgDateColumnBaseBuilder {
   static [entityKind] = "PgTimestampBuilder";
   constructor(name, withTimezone, precision) {
@@ -28197,7 +28287,7 @@ function timestamp(a, b2 = {}) {
   return new PgTimestampBuilder(name, config2?.withTimezone ?? false, config2?.precision);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/uuid.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/uuid.js
 var PgUUIDBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgUUIDBuilder";
   constructor(name) {
@@ -28224,7 +28314,7 @@ function uuid(name) {
   return new PgUUIDBuilder(name ?? "");
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/varchar.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/varchar.js
 var PgVarcharBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgVarcharBuilder";
   constructor(name, config2) {
@@ -28253,7 +28343,7 @@ function varchar(a, b2 = {}) {
   return new PgVarcharBuilder(name, config2);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/vector_extension/bit.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/vector_extension/bit.js
 var PgBinaryVectorBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgBinaryVectorBuilder";
   constructor(name, config2) {
@@ -28280,7 +28370,7 @@ function bit(a, b2) {
   return new PgBinaryVectorBuilder(name, config2);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/vector_extension/halfvec.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/vector_extension/halfvec.js
 var PgHalfVectorBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgHalfVectorBuilder";
   constructor(name, config2) {
@@ -28313,7 +28403,7 @@ function halfvec(a, b2) {
   return new PgHalfVectorBuilder(name, config2);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/vector_extension/sparsevec.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/vector_extension/sparsevec.js
 var PgSparseVectorBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgSparseVectorBuilder";
   constructor(name, config2) {
@@ -28340,7 +28430,7 @@ function sparsevec(a, b2) {
   return new PgSparseVectorBuilder(name, config2);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/vector_extension/vector.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/vector_extension/vector.js
 var PgVectorBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgVectorBuilder";
   constructor(name, config2) {
@@ -28373,7 +28463,7 @@ function vector(a, b2) {
   return new PgVectorBuilder(name, config2);
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/columns/all.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/columns/all.js
 function getPgColumnBuilders() {
   return {
     bigint,
@@ -28411,7 +28501,7 @@ function getPgColumnBuilders() {
   };
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/table.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/table.js
 var InlineForeignKeys = Symbol.for("drizzle:PgInlineForeignKeys");
 var EnableRLS = Symbol.for("drizzle:EnableRLS");
 var PgTable = class extends Table {
@@ -28467,7 +28557,7 @@ var pgTable = (name, columns, extraConfig) => {
   return pgTableWithSchema(name, columns, extraConfig, void 0);
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/primary-keys.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/primary-keys.js
 function primaryKey(...config2) {
   if (config2[0].columns) {
     return new PrimaryKeyBuilder(config2[0].columns, config2[0].name);
@@ -28503,7 +28593,7 @@ var PrimaryKey = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sql/expressions/conditions.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/sql/expressions/conditions.js
 function bindIfParam(value, column) {
   if (isDriverValueEncoder(column) && !isSQLWrapper(value) && !is(value, Param) && !is(value, Placeholder) && !is(value, Column) && !is(value, Table) && !is(value, View)) {
     return new Param(value, column);
@@ -28618,7 +28708,7 @@ function notIlike(column, value) {
   return sql`${column} not ilike ${value}`;
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sql/expressions/select.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/sql/expressions/select.js
 function asc(column) {
   return sql`${column} asc`;
 }
@@ -28626,7 +28716,7 @@ function desc(column) {
   return sql`${column} desc`;
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/relations.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/relations.js
 var Relation = class {
   constructor(sourceTable, referencedTable, relationName) {
     this.sourceTable = sourceTable;
@@ -28887,7 +28977,7 @@ function mapRelationalRow(tablesConfig, tableConfig, row, buildQueryResultSelect
   return result;
 }
 
-// node_modules/.pnpm/pg@8.16.3/node_modules/pg/esm/index.mjs
+// node_modules/.pnpm/pg@8.17.1/node_modules/pg/esm/index.mjs
 var import_lib = __toESM(require_lib2(), 1);
 var Client = import_lib.default.Client;
 var Pool = import_lib.default.Pool;
@@ -28902,7 +28992,7 @@ var TypeOverrides = import_lib.default.TypeOverrides;
 var defaults = import_lib.default.defaults;
 var esm_default = import_lib.default;
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/selection-proxy.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/selection-proxy.js
 var SelectionProxyHandler = class _SelectionProxyHandler {
   static [entityKind] = "SelectionProxyHandler";
   config;
@@ -28970,7 +29060,7 @@ var SelectionProxyHandler = class _SelectionProxyHandler {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/casing.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/casing.js
 function toSnakeCase(input) {
   const words = input.replace(/['\u2019]/g, "").match(/[\da-z]+|[A-Z]+(?![a-z])|[A-Z][\da-z]+/g) ?? [];
   return words.map((word) => word.toLowerCase()).join("_");
@@ -29022,12 +29112,12 @@ var CasingCache = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/view-base.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/view-base.js
 var PgViewBase = class extends View {
   static [entityKind] = "PgViewBase";
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/dialect.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/dialect.js
 var PgDialect = class {
   static [entityKind] = "PgDialect";
   /** @internal */
@@ -30121,7 +30211,7 @@ var PgDialect = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/query-builders/query-builder.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/query-builders/query-builder.js
 var TypedQueryBuilder = class {
   static [entityKind] = "TypedQueryBuilder";
   /** @internal */
@@ -30130,7 +30220,7 @@ var TypedQueryBuilder = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/query-builders/select.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/query-builders/select.js
 var PgSelectBuilder = class {
   static [entityKind] = "PgSelectBuilder";
   fields;
@@ -30946,7 +31036,7 @@ var intersectAll = createSetOperator("intersect", true);
 var except = createSetOperator("except", false);
 var exceptAll = createSetOperator("except", true);
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/query-builders/query-builder.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/query-builders/query-builder.js
 var QueryBuilder = class {
   static [entityKind] = "PgQueryBuilder";
   dialect;
@@ -31033,7 +31123,7 @@ var QueryBuilder = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/utils.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/utils.js
 function extractUsedTable(table) {
   if (is(table, PgTable)) {
     return [table[Schema] ? `${table[Schema]}.${table[Table.Symbol.BaseName]}` : table[Table.Symbol.BaseName]];
@@ -31047,7 +31137,7 @@ function extractUsedTable(table) {
   return [];
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/query-builders/delete.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/query-builders/delete.js
 var PgDeleteBase = class extends QueryPromise {
   constructor(table, session, dialect, withList) {
     super();
@@ -31143,7 +31233,7 @@ var PgDeleteBase = class extends QueryPromise {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/query-builders/insert.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/query-builders/insert.js
 var PgInsertBuilder = class {
   constructor(table, session, dialect, withList, overridingSystemValue_) {
     this.table = table;
@@ -31336,7 +31426,7 @@ var PgInsertBase = class extends QueryPromise {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/query-builders/refresh-materialized-view.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/query-builders/refresh-materialized-view.js
 var PgRefreshMaterializedView = class extends QueryPromise {
   constructor(view, session, dialect) {
     super();
@@ -31390,7 +31480,7 @@ var PgRefreshMaterializedView = class extends QueryPromise {
   };
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/query-builders/update.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/query-builders/update.js
 var PgUpdateBuilder = class {
   constructor(table, session, dialect, withList) {
     this.table = table;
@@ -31602,7 +31692,7 @@ var PgUpdateBase = class extends QueryPromise {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/query-builders/count.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/query-builders/count.js
 var PgCountBuilder = class _PgCountBuilder extends SQL {
   constructor(params) {
     super(_PgCountBuilder.buildEmbeddedCount(params.source, params.filters).queryChunks);
@@ -31653,7 +31743,7 @@ var PgCountBuilder = class _PgCountBuilder extends SQL {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/query-builders/query.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/query-builders/query.js
 var RelationalQueryBuilder = class {
   constructor(fullSchema, schema, tableNamesMap, table, tableConfig, dialect, session) {
     this.fullSchema = fullSchema;
@@ -31766,7 +31856,7 @@ var PgRelationalQuery = class extends QueryPromise {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/query-builders/raw.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/query-builders/raw.js
 var PgRaw = class extends QueryPromise {
   constructor(execute, sql2, query, mapBatchResult) {
     super();
@@ -31795,7 +31885,7 @@ var PgRaw = class extends QueryPromise {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/db.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/db.js
 var PgDatabase = class {
   constructor(dialect, session, schema) {
     this.dialect = dialect;
@@ -32074,7 +32164,7 @@ var PgDatabase = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/cache/core/cache.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/cache/core/cache.js
 var Cache = class {
   static [entityKind] = "Cache";
 };
@@ -32101,7 +32191,7 @@ async function hashQuery(sql2, params) {
   return hashHex;
 }
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/pg-core/session.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/pg-core/session.js
 var PgPreparedQuery = class {
   constructor(query, cache, queryMetadata, cacheConfig) {
     this.query = query;
@@ -32261,7 +32351,7 @@ var PgTransaction = class extends PgDatabase {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/node-postgres/session.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/node-postgres/session.js
 var { Pool: Pool2, types: types2 } = esm_default;
 var NodePgPreparedQuery = class extends PgPreparedQuery {
   constructor(client, queryString, params, logger2, cache, queryMetadata, cacheConfig, fields, name, _isResponseInArrayMode, customResultMapper) {
@@ -32478,7 +32568,7 @@ var NodePgTransaction = class _NodePgTransaction extends PgTransaction {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/node-postgres/driver.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/node-postgres/driver.js
 var NodePgDriver = class {
   constructor(client, dialect, options = {}) {
     this.client = client;
@@ -34945,7 +35035,7 @@ var administrationModel = class extends AbstractModels {
 // src/features/auth/auth.model.ts
 var AuthModel = class extends AbstractModels {
   async createOrganization(name, tx) {
-    const org = await this.query(tx).insert(this.table.organization).values({ name }).returning().then((rows) => rows[0]);
+    const org = this.query(tx).insert(this.table.organization).values({ name }).returning().then((rows) => rows[0]);
     return org;
   }
   async getDefaultAdminRole(tx) {
@@ -35179,7 +35269,7 @@ var CategoryService = class {
   };
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/foreign-keys.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/mysql-core/foreign-keys.js
 var ForeignKeyBuilder2 = class {
   static [entityKind] = "MySqlForeignKeyBuilder";
   /** @internal */
@@ -35236,7 +35326,7 @@ var ForeignKey2 = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/unique-constraint.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/mysql-core/unique-constraint.js
 function uniqueKeyName2(table, columns) {
   return `${table[TableName]}_${columns.join("_")}_unique`;
 }
@@ -35279,7 +35369,7 @@ var UniqueConstraint2 = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/common.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/mysql-core/columns/common.js
 var MySqlColumnBuilder = class extends ColumnBuilder {
   static [entityKind] = "MySqlColumnBuilder";
   foreignKeyConfigs = [];
@@ -35346,7 +35436,7 @@ var MySqlColumnWithAutoIncrement = class extends MySqlColumn {
   autoIncrement = this.config.autoIncrement;
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/char.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/mysql-core/columns/char.js
 var MySqlCharBuilder = class extends MySqlColumnBuilder {
   static [entityKind] = "MySqlCharBuilder";
   constructor(name, config2) {
@@ -35371,7 +35461,7 @@ var MySqlChar = class extends MySqlColumn {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/varbinary.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/mysql-core/columns/varbinary.js
 var MySqlVarBinaryBuilder = class extends MySqlColumnBuilder {
   static [entityKind] = "MySqlVarBinaryBuilder";
   /** @internal */
@@ -35404,7 +35494,7 @@ var MySqlVarBinary = class extends MySqlColumn {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/mysql-core/columns/varchar.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/mysql-core/columns/varchar.js
 var MySqlVarCharBuilder = class extends MySqlColumnBuilder {
   static [entityKind] = "MySqlVarCharBuilder";
   /** @internal */
@@ -35430,7 +35520,7 @@ var MySqlVarChar = class extends MySqlColumn {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/foreign-keys.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/sqlite-core/foreign-keys.js
 var ForeignKeyBuilder3 = class {
   static [entityKind] = "SQLiteForeignKeyBuilder";
   /** @internal */
@@ -35487,7 +35577,7 @@ var ForeignKey3 = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/unique-constraint.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/sqlite-core/unique-constraint.js
 function uniqueKeyName3(table, columns) {
   return `${table[TableName]}_${columns.join("_")}_unique`;
 }
@@ -35529,7 +35619,7 @@ var UniqueConstraint3 = class {
   }
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/columns/common.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/sqlite-core/columns/common.js
 var SQLiteColumnBuilder = class extends ColumnBuilder {
   static [entityKind] = "SQLiteColumnBuilder";
   foreignKeyConfigs = [];
@@ -35580,7 +35670,7 @@ var SQLiteColumn = class extends Column {
   static [entityKind] = "SQLiteColumn";
 };
 
-// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.16.3/node_modules/drizzle-orm/sqlite-core/columns/text.js
+// node_modules/.pnpm/drizzle-orm@0.44.7_@types+pg@8.16.0_pg@8.17.1/node_modules/drizzle-orm/sqlite-core/columns/text.js
 var SQLiteTextBuilder = class extends SQLiteColumnBuilder {
   static [entityKind] = "SQLiteTextBuilder";
   constructor(name, config2) {
@@ -35633,7 +35723,7 @@ var SQLiteTextJson = class extends SQLiteColumn {
   }
 };
 
-// node_modules/.pnpm/drizzle-zod@0.5.1_drizzle-o_93a4a91ac346d4b719e222d9cf7f585d/node_modules/drizzle-zod/index.mjs
+// node_modules/.pnpm/drizzle-zod@0.5.1_drizzle-o_a375e2877e70bd3d8d3d7939f644906d/node_modules/drizzle-zod/index.mjs
 var m = external_exports.union([external_exports.string(), external_exports.number(), external_exports.boolean(), external_exports.null()]);
 var f = external_exports.lazy((() => external_exports.union([m, external_exports.array(f), external_exports.record(f)])));
 function c(t, n) {
@@ -36731,7 +36821,7 @@ var SupplierRouter = class {
   routes = createRouter().openapi(this.schema.addSupplier, this.service.addSupplier).openapi(this.schema.updateSupplier, this.service.updateSupplier).openapi(this.schema.deleteSupplier, this.service.deleteSupplier).openapi(this.schema.getSupplier, this.service.getSupplier);
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/jwt/jwa.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/jwt/jwa.js
 var AlgorithmTypes = /* @__PURE__ */ ((AlgorithmTypes2) => {
   AlgorithmTypes2["HS256"] = "HS256";
   AlgorithmTypes2["HS384"] = "HS384";
@@ -36749,7 +36839,7 @@ var AlgorithmTypes = /* @__PURE__ */ ((AlgorithmTypes2) => {
   return AlgorithmTypes2;
 })(AlgorithmTypes || {});
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/helper/adapter/index.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/helper/adapter/index.js
 var knownUserAgents = {
   deno: "Deno",
   bun: "Bun",
@@ -36782,11 +36872,23 @@ var checkUserAgentEquals = (platform) => {
   return userAgent.startsWith(platform);
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/jwt/types.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/jwt/types.js
 var JwtAlgorithmNotImplemented = class extends Error {
   constructor(alg) {
     super(`${alg} is not an implemented algorithm`);
     this.name = "JwtAlgorithmNotImplemented";
+  }
+};
+var JwtAlgorithmRequired = class extends Error {
+  constructor() {
+    super('JWT verification requires "alg" option to be specified');
+    this.name = "JwtAlgorithmRequired";
+  }
+};
+var JwtAlgorithmMismatch = class extends Error {
+  constructor(expected, actual) {
+    super(`JWT algorithm mismatch: expected "${expected}", got "${actual}"`);
+    this.name = "JwtAlgorithmMismatch";
   }
 };
 var JwtTokenInvalid = class extends Error {
@@ -36833,6 +36935,18 @@ var JwtHeaderRequiresKid = class extends Error {
     this.name = "JwtHeaderRequiresKid";
   }
 };
+var JwtSymmetricAlgorithmNotAllowed = class extends Error {
+  constructor(alg) {
+    super(`symmetric algorithm "${alg}" is not allowed for JWK verification`);
+    this.name = "JwtSymmetricAlgorithmNotAllowed";
+  }
+};
+var JwtAlgorithmNotAllowed = class extends Error {
+  constructor(alg, allowedAlgorithms) {
+    super(`algorithm "${alg}" is not in the allowed list: [${allowedAlgorithms.join(", ")}]`);
+    this.name = "JwtAlgorithmNotAllowed";
+  }
+};
 var JwtTokenSignatureMismatched = class extends Error {
   constructor(token) {
     super(`token(${token}) signature mismatched`);
@@ -36865,11 +36979,11 @@ var CryptoKeyUsage = /* @__PURE__ */ ((CryptoKeyUsage2) => {
   return CryptoKeyUsage2;
 })(CryptoKeyUsage || {});
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/jwt/utf8.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/jwt/utf8.js
 var utf8Encoder = new TextEncoder();
 var utf8Decoder = new TextDecoder();
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/jwt/jws.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/jwt/jws.js
 async function signing(privateKey, alg, data) {
   const algorithm = getKeyAlgorithm(alg);
   const cryptoKey = await importPrivateKey(privateKey, algorithm);
@@ -37054,7 +37168,7 @@ function isCryptoKey(key) {
   return key instanceof CryptoKey;
 }
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/jwt/jwt.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/jwt/jwt.js
 var encodeJwtPart = (part) => encodeBase64Url(utf8Encoder.encode(JSON.stringify(part)).buffer).replace(/=/g, "");
 var encodeSignaturePart = (buf) => encodeBase64Url(buf).replace(/=/g, "");
 var decodeJwtPart = (part) => JSON.parse(utf8Decoder.decode(decodeBase64Url(part)));
@@ -37080,14 +37194,20 @@ var sign = async (payload, privateKey, alg = "HS256") => {
   return `${partialToken}.${signature}`;
 };
 var verify = async (token, publicKey, algOrOptions) => {
+  if (!algOrOptions) {
+    throw new JwtAlgorithmRequired();
+  }
   const {
-    alg = "HS256",
+    alg,
     iss,
     nbf = true,
     exp = true,
     iat = true,
     aud
-  } = typeof algOrOptions === "string" ? { alg: algOrOptions } : algOrOptions || {};
+  } = typeof algOrOptions === "string" ? { alg: algOrOptions } : algOrOptions;
+  if (!alg) {
+    throw new JwtAlgorithmRequired();
+  }
   const tokenParts = token.split(".");
   if (tokenParts.length !== 3) {
     throw new JwtTokenInvalid(token);
@@ -37095,6 +37215,9 @@ var verify = async (token, publicKey, algOrOptions) => {
   const { header, payload } = decode(token);
   if (!isTokenHeader(header)) {
     throw new JwtHeaderInvalid(header);
+  }
+  if (header.alg !== alg) {
+    throw new JwtAlgorithmMismatch(alg, header.alg);
   }
   const now = Date.now() / 1e3 | 0;
   if (nbf && payload.nbf && payload.nbf > now) {
@@ -37141,6 +37264,11 @@ var verify = async (token, publicKey, algOrOptions) => {
   }
   return payload;
 };
+var symmetricAlgorithms = [
+  AlgorithmTypes.HS256,
+  AlgorithmTypes.HS384,
+  AlgorithmTypes.HS512
+];
 var verifyWithJwks = async (token, options, init) => {
   const verifyOpts = options.verification || {};
   const header = decodeHeader(token);
@@ -37149,6 +37277,12 @@ var verifyWithJwks = async (token, options, init) => {
   }
   if (!header.kid) {
     throw new JwtHeaderRequiresKid(header);
+  }
+  if (symmetricAlgorithms.includes(header.alg)) {
+    throw new JwtSymmetricAlgorithmNotAllowed(header.alg);
+  }
+  if (!options.allowedAlgorithms.includes(header.alg)) {
+    throw new JwtAlgorithmNotAllowed(header.alg, options.allowedAlgorithms);
   }
   if (options.jwks_uri) {
     const response = await fetch(options.jwks_uri, init);
@@ -37174,8 +37308,11 @@ var verifyWithJwks = async (token, options, init) => {
   if (!matchingKey) {
     throw new JwtTokenInvalid(token);
   }
+  if (matchingKey.alg && matchingKey.alg !== header.alg) {
+    throw new JwtAlgorithmMismatch(matchingKey.alg, header.alg);
+  }
   return await verify(token, matchingKey, {
-    alg: matchingKey.alg || header.alg,
+    alg: header.alg,
     ...verifyOpts
   });
 };
@@ -37201,10 +37338,10 @@ var decodeHeader = (token) => {
   }
 };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/utils/jwt/index.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/jwt/index.js
 var Jwt = { sign, verify, decode, verifyWithJwks };
 
-// node_modules/.pnpm/hono@4.11.3/node_modules/hono/dist/middleware/jwt/jwt.js
+// node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/middleware/jwt/jwt.js
 var verifyWithJwks2 = Jwt.verifyWithJwks;
 var verify2 = Jwt.verify;
 var decode2 = Jwt.decode;
@@ -37219,11 +37356,11 @@ var authMiddleware = () => {
     }
     const token = authHeader.split(" ")[1];
     try {
-      const payload = await verify2(token, env_default.JWT_SECRET);
+      const payload = await verify2(token, env_default.JWT_SECRET, "HS256");
       c2.set("jwtPayload", payload);
       await next();
     } catch (err) {
-      return c2.json({ message: "Unauthorized: Invalid token", err }, 401);
+      return c2.json({ message: "You are not authorized" }, 401);
     }
   };
 };
@@ -37575,8 +37712,7 @@ var AuthService = class {
     const { agency_name, email, name, password } = body;
     return await db.transaction(async (tx) => {
       const existingUser = await this.db_conn.checkExistingUser(email);
-      console.log({ existingUser });
-      if (existingUser?.length) {
+      if (existingUser?.users?.email) {
         return c2.json({ message: "Email already in use" }, CONFLICT);
       }
       const hashedPassword = await bcryptjs_default.hash(password, 10);
@@ -37623,7 +37759,8 @@ var AuthService = class {
         userId: user.userId,
         orgId: org?.orgId,
         email: user.email,
-        exp: Math.floor(Date.now() / 1e3) * 60 * 15
+        exp: Math.floor(Date.now() / 1e3) + 60
+        // 1 minute
       };
       const accessToken = await sign2(accessPayload, env_default.JWT_SECRET);
       const refreshToken = crypto.randomUUID();
