@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "dev": "cross-env NODE_ENV=test tsx watch src/server.ts",
+    "dev": "cross-env NODE_ENV=local tsx watch src/server.ts",
     "prod": "cross-env NODE_ENV=production tsx watch src/server.ts",
     "start": "node dist/server.js",
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",
@@ -11,7 +11,12 @@
     "update": "aws lambda update-function-code --zip-file fileb://lambda.zip --function-name hello",
     "deploy": "run-s build zip update",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio:local": "cross-env NODE_ENV=local drizzle-kit studio",
+    "db:studio:prod": "cross-env NODE_ENV=production drizzle-kit studio",
+    "db:generate:local": "cross-env NODE_ENV=local drizzle-kit generate",
+    "db:migrate:local": "cross-env NODE_ENV=local drizzle-kit migrate",
+    "db:generate:prod": "cross-env NODE_ENV=production drizzle-kit generate",
+    "db:migrate:prod": "cross-env NODE_ENV=production drizzle-kit migrate"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
@@ -23,7 +28,6 @@
     "drizzle-orm": "^0.44.2",
     "drizzle-zod": "^0.5.1",
     "express": "^5.2.1",
-    "geoip-lite": "^1.4.10",
     "hono": "^4.7.9",
     "hono-pino": "^0.8.0",
     "jsonwebtoken": "^9.0.2",
@@ -32,16 +36,13 @@
     "pino": "^10.1.0",
     "pino-pretty": "^13.0.0",
     "stoker": "^1.4.2",
-    "ua-parser-js": "^2.0.7",
     "zod": "^3.25.63"
   },
   "devDependencies": {
-    "@types/geoip-lite": "^1.4.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.11.17",
     "@types/nodemailer": "^7.0.4",
     "@types/pg": "^8.15.4",
-    "@types/ua-parser-js": "^0.7.39",
     "cross-env": "^7.0.3",
     "drizzle-kit": "^0.31.1",
     "npm-run-all2": "^8.0.4",

@@ -4,9 +4,7 @@ import { db } from "../db/db";
 import * as table from "../db/schema";
 import { Pool } from "pg";
 
-type DB = NodePgDatabase<Record<string, never>> & {
-  $client: Pool;
-};
+type DB = NodePgDatabase<Record<string, never>> | Transaction;
 
 export abstract class AbstractModels {
   protected readonly db = db;

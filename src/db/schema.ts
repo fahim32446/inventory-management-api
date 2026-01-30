@@ -33,8 +33,8 @@ export const users = pgTable("users", {
     onDelete: "cascade",
   }),
   roleId: integer("role_id").references(() => roles.roleId),
-
   type: userTypeE("type"),
+  twoFa: boolean("two_fa").default(false),
 });
 
 export const roles = pgTable("roles", {
@@ -61,7 +61,7 @@ export const rolePermissions = pgTable(
   },
   (t) => ({
     pk: primaryKey(t.roleId, t.permissionId),
-  })
+  }),
 );
 
 // SESSIONS
@@ -71,6 +71,10 @@ export const sessions = pgTable("sessions", {
     .notNull()
     .references(() => users.userId, { onDelete: "cascade" }),
   refreshToken: varchar("refresh_token", { length: 500 }).notNull(),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  location: text("location"),
+  device: text("device"),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -202,7 +206,7 @@ export const otpCodes = pgTable("otp_codes", {
     .notNull()
     .references(() => users.userId, { onDelete: "cascade" }),
   code: text("code").notNull(),
-  type: text("type").notNull(), // 'FORGOT_PASSWORD'
+  type: text("type").notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });

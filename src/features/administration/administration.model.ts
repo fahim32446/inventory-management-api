@@ -77,11 +77,11 @@ export class administrationModel extends AbstractModels {
         .from(this.table.roles)
         .leftJoin(
           this.table.rolePermissions,
-          eq(this.table.roles.roleId, this.table.rolePermissions.roleId)
+          eq(this.table.roles.roleId, this.table.rolePermissions.roleId),
         )
         .leftJoin(
           this.table.permissions,
-          eq(this.table.rolePermissions.permissionId, this.table.permissions.permissionId)
+          eq(this.table.rolePermissions.permissionId, this.table.permissions.permissionId),
         )
         .where(eq(this.table.roles.roleId, Number(id)));
 
@@ -158,7 +158,8 @@ export class administrationModel extends AbstractModels {
       .update(this.table.users)
       .set(body)
       .where(and(eq(this.table.users.userId, id), eq(this.table.users.orgId, orgId)))
-      .returning();
+      .returning()
+      .then((rows) => rows[0]);
 
     return user;
   }
@@ -166,8 +167,9 @@ export class administrationModel extends AbstractModels {
   async deleteUser(orgId: number, id: any) {
     const user = await this.query()
       .delete(this.table.users)
-      .where(eq(this.table.users.userId, id) && eq(this.table.users.orgId, orgId))
-      .returning();
+      .where(and(eq(this.table.users.userId, id), eq(this.table.users.orgId, orgId)))
+      .returning()
+      .then((rows) => rows[0]);
 
     return user;
   }

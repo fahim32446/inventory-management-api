@@ -11,25 +11,25 @@ const cwd = process.cwd();
 expand(
   config({
     path: path.resolve(cwd, ".env"),
-  })
+  }),
 );
 
 /**
  * Load .env.local ONLY in local/dev
  */
-if (process.env.NODE_ENV === "test" || !process.env.NODE_ENV) {
+if (process.env.NODE_ENV === "local" || !process.env.NODE_ENV) {
   expand(
     config({
-      path: path.resolve(cwd, ".env.test"),
+      path: path.resolve(cwd, ".env.local"),
       override: true,
-    })
+    }),
   );
 }
 
-console.log({ env: process.env.PORT });
+console.log({ env: process.env.NODE_ENV });
 
 const EnvSchema = z.object({
-  NODE_ENV: z.enum(["test", "production"]).default("test"),
+  NODE_ENV: z.enum(["local", "test", "production"]).default("local"),
 
   PORT: z.coerce.number().default(5050),
 

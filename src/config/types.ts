@@ -6,6 +6,8 @@ import { db } from "../db/db";
 export interface AppBindings {
   Variables: {
     logger: PinoLogger;
+    clientIp: string;
+    jwtPayload: any;
   };
 }
 

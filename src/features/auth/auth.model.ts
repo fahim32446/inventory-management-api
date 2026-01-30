@@ -45,6 +45,7 @@ export class AuthModel extends AbstractModels {
       .select()
       .from(this.table.users)
       .leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId))
+      .leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId))
       .where(eq(this.table.users.email, email))
       .limit(1)
       .then((rows) => rows[0]);
@@ -56,6 +57,7 @@ export class AuthModel extends AbstractModels {
       .select()
       .from(this.table.users)
       .leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId))
+      .leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId))
       .where(eq(this.table.users.userId, id))
       .limit(1)
       .then((rows) => rows[0]);
@@ -63,11 +65,26 @@ export class AuthModel extends AbstractModels {
     return result;
   }
 
-  async insertSession(userID: number, refreshToken: any, expiresAt: Date, tx?: Transaction) {
+  async insertSession(
+    userID: number,
+    refreshToken: any,
+    expiresAt: Date,
+    sessionInfo?: {
+      userAgent?: string;
+      ipAddress?: string;
+      location?: string;
+      device?: string;
+    },
+    tx?: Transaction,
+  ) {
     const result = await this.query(tx).insert(this.table.sessions).values({
       userId: userID,
       refreshToken: refreshToken,
       expiresAt: expiresAt,
+      userAgent: sessionInfo?.userAgent,
+      ipAddress: sessionInfo?.ipAddress,
+      location: sessionInfo?.location,
+      device: sessionInfo?.device,
     });
 
     return result;
@@ -89,13 +106,7 @@ export class AuthModel extends AbstractModels {
     return result[0];
   }
 
-  async createOTP(
-    userId: number,
-    code: string,
-    type: "FORGOT_PASSWORD",
-    expiresAt: Date,
-    tx?: Transaction,
-  ) {
+  async createOTP(userId: number, code: string, type: string, expiresAt: Date, tx?: Transaction) {
     return await this.query(tx)
       .insert(this.table.otpCodes)
       .values({
@@ -108,7 +119,7 @@ export class AuthModel extends AbstractModels {
       .then((rows) => rows[0]);
   }
 
-  async findOTP(userId: number, code: string, type: "FORGOT_PASSWORD", tx?: Transaction) {
+  async findOTP(userId: number, code: string, type: string, tx?: Transaction) {
     return await this.query(tx)
       .select()
       .from(this.table.otpCodes)

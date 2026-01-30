@@ -52,11 +52,11 @@ export class administrationService {
         orgId: org.orgId,
         isAdmin: false,
       },
-      id
+      id,
     );
     return c.json(
       { roleName: res.roleName, message: "Role updated successfully" },
-      HttpStatusCodes.OK
+      HttpStatusCodes.OK,
     );
   };
 
@@ -71,7 +71,7 @@ export class administrationService {
           permissions: res?.permissions!,
         },
       },
-      HttpStatusCodes.OK
+      HttpStatusCodes.OK,
     );
   };
 
@@ -86,19 +86,19 @@ export class administrationService {
     const org = c.get("jwtPayload");
     const body = c.req.valid("json");
 
-    const { password, ...ohters } = body;
+    const { password, ...others } = body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await this.auth_conn.checkExistingUser(ohters.email);
+    const user = await this.auth_conn.checkExistingUser(others.email);
     if (user) {
       return c.json({ message: "User already exists" }, HttpStatusCodes.BAD_REQUEST);
     }
 
-    const { type, ...rest } = await this.db_conn.createUser(
-      { ...ohters, password: hashedPassword },
-      org.orgId
+    const { userId, type, ...rest } = await this.db_conn.createUser(
+      { ...others, password: hashedPassword },
+      org.orgId,
     );
-    return c.json(rest, HttpStatusCodes.CREATED);
+    return c.json({ id: userId, ...rest }, HttpStatusCodes.CREATED);
   };
 
   getUsers: AppRouteHandler<IRGetUsersRoute> = async (c) => {
@@ -113,9 +113,9 @@ export class administrationService {
     const body = c.req.valid("json");
     const { id } = c.req.valid("param");
 
-    const { password, ...ohters } = body;
+    const { password, ...others } = body;
 
-    const user = await this.auth_conn.checkExistingUser(ohters?.email!);
+    const user = await this.auth_conn.checkExistingUser(others?.email!);
 
     if (user) {
       return c.json({ message: "User already exists" }, HttpStatusCodes.BAD_REQUEST);
@@ -124,14 +124,16 @@ export class administrationService {
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       const res = await this.db_conn.updateUser(
-        { ...ohters, password: hashedPassword },
+        { ...others, password: hashedPassword },
         org.orgId,
-        id
+        id,
       );
-      return c.json(res, HttpStatusCodes.OK);
+      const { userId, ...rest } = res;
+      return c.json({ id: userId, ...rest } as any, HttpStatusCodes.OK);
     }
-    const res = await this.db_conn.updateUser(ohters, org.orgId, id);
-    return c.json(res, HttpStatusCodes.OK);
+    const res = await this.db_conn.updateUser(others, org.orgId, id);
+    const { userId, ...rest } = res;
+    return c.json({ id: userId, ...rest } as any, HttpStatusCodes.OK);
   };
 
   deleteUser: AppRouteHandler<IRDeleteUserRoute> = async (c) => {

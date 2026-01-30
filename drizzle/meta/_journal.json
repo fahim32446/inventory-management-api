@@ -8,6 +8,20 @@
       "when": 1768054580063,
       "tag": "0000_quiet_solo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769703963950,
+      "tag": "0001_bouncy_piledriver",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769764960192,
+      "tag": "0002_tricky_living_tribunal",
+      "breakpoints": true
     }
   ]
 }

@@ -18742,7 +18742,7 @@ var package_default = {
   type: "module",
   version: "1.0.0",
   scripts: {
-    dev: "cross-env NODE_ENV=test tsx watch src/server.ts",
+    dev: "cross-env NODE_ENV=local tsx watch src/server.ts",
     prod: "cross-env NODE_ENV=production tsx watch src/server.ts",
     start: "node dist/server.js",
     build: "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",
@@ -18750,7 +18750,12 @@ var package_default = {
     update: "aws lambda update-function-code --zip-file fileb://lambda.zip --function-name hello",
     deploy: "run-s build zip update",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio:local": "cross-env NODE_ENV=local drizzle-kit studio",
+    "db:studio:prod": "cross-env NODE_ENV=production drizzle-kit studio",
+    "db:generate:local": "cross-env NODE_ENV=local drizzle-kit generate",
+    "db:migrate:local": "cross-env NODE_ENV=local drizzle-kit migrate",
+    "db:generate:prod": "cross-env NODE_ENV=production drizzle-kit generate",
+    "db:migrate:prod": "cross-env NODE_ENV=production drizzle-kit migrate"
   },
   dependencies: {
     "@hono/node-server": "^1.14.1",
@@ -18762,7 +18767,6 @@ var package_default = {
     "drizzle-orm": "^0.44.2",
     "drizzle-zod": "^0.5.1",
     express: "^5.2.1",
-    "geoip-lite": "^1.4.10",
     hono: "^4.7.9",
     "hono-pino": "^0.8.0",
     jsonwebtoken: "^9.0.2",
@@ -18771,16 +18775,13 @@ var package_default = {
     pino: "^10.1.0",
     "pino-pretty": "^13.0.0",
     stoker: "^1.4.2",
-    "ua-parser-js": "^2.0.7",
     zod: "^3.25.63"
   },
   devDependencies: {
-    "@types/geoip-lite": "^1.4.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.11.17",
     "@types/nodemailer": "^7.0.4",
     "@types/pg": "^8.15.4",
-    "@types/ua-parser-js": "^0.7.39",
     "cross-env": "^7.0.3",
     "drizzle-kit": "^0.31.1",
     "npm-run-all2": "^8.0.4",
@@ -25660,9 +25661,13 @@ function createApp() {
   app2.use(
     "*",
     cors({
-      origin: ["http://localhost:5173"],
+      origin: [
+        "http://localhost:5173",
+        "http://localhost:6565",
+        "https://inventory-management-client-tau.vercel.app"
+      ],
       allowHeaders: ["Content-Type", "Authorization", "X-Custom-Header"],
-      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       credentials: true
     })
   );
@@ -32618,18 +32623,18 @@ function construct(client, config2 = {}) {
 }
 function drizzle(...params) {
   if (typeof params[0] === "string") {
-    const instance9 = new esm_default.Pool({
+    const instance10 = new esm_default.Pool({
       connectionString: params[0]
     });
-    return construct(instance9, params[1]);
+    return construct(instance10, params[1]);
   }
   if (isConfig(params[0])) {
     const { connection, client, ...drizzleConfig } = params[0];
     if (client) return construct(client, drizzleConfig);
-    const instance9 = typeof connection === "string" ? new esm_default.Pool({
+    const instance10 = typeof connection === "string" ? new esm_default.Pool({
       connectionString: connection
     }) : new esm_default.Pool(connection);
-    return construct(instance9, drizzleConfig);
+    return construct(instance10, drizzleConfig);
   }
   return construct(params[0], params[1]);
 }
@@ -32650,17 +32655,17 @@ var cwd = process.cwd();
     path: import_node_path.default.resolve(cwd, ".env")
   })
 );
-if (process.env.NODE_ENV === "test" || !process.env.NODE_ENV) {
+if (process.env.NODE_ENV === "local" || !process.env.NODE_ENV) {
   (0, import_dotenv_expand.expand)(
     (0, import_dotenv.config)({
-      path: import_node_path.default.resolve(cwd, ".env.test"),
+      path: import_node_path.default.resolve(cwd, ".env.local"),
       override: true
     })
   );
 }
-console.log({ env: process.env.PORT });
+console.log({ env: process.env.NODE_ENV });
 var EnvSchema = external_exports.object({
-  NODE_ENV: external_exports.enum(["test", "production"]).default("test"),
+  NODE_ENV: external_exports.enum(["local", "test", "production"]).default("local"),
   PORT: external_exports.coerce.number().default(5050),
   EMAIL_USER: external_exports.string(),
   EMAIL_PASS: external_exports.string(),
@@ -32685,13 +32690,13 @@ var env_default = env;
 
 // src/db/db.ts
 var pool = new Pool({
-  host: env_default.DB_HOST,
-  port: env_default.DB_PORT,
-  user: env_default.DB_USER,
-  password: env_default.DB_PASSWORD,
-  database: env_default.DB_NAME,
+  // host: env.DB_HOST,
+  // port: env.DB_PORT,
+  // user: env.DB_USER,
+  // password: env.DB_PASSWORD,
+  // database: env.DB_NAME,
   connectionString: env_default.DATABASE_URL,
-  ssl: env_default.NODE_ENV === "production" ? true : false
+  ssl: env_default.NODE_ENV === "production" ? { rejectUnauthorized: true } : false
 });
 var db = drizzle(pool);
 pool.on("connect", () => {
@@ -32736,7 +32741,8 @@ var users = pgTable("users", {
     onDelete: "cascade"
   }),
   roleId: integer("role_id").references(() => roles.roleId),
-  type: userTypeE("type")
+  type: userTypeE("type"),
+  twoFa: boolean("two_fa").default(false)
 });
 var roles = pgTable("roles", {
   roleId: serial("role_id").primaryKey(),
@@ -32764,6 +32770,10 @@ var sessions = pgTable("sessions", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: integer("user_id").notNull().references(() => users.userId, { onDelete: "cascade" }),
   refreshToken: varchar("refresh_token", { length: 500 }).notNull(),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  location: text("location"),
+  device: text("device"),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow()
@@ -32864,7 +32874,6 @@ var otpCodes = pgTable("otp_codes", {
   userId: integer("user_id").notNull().references(() => users.userId, { onDelete: "cascade" }),
   code: text("code").notNull(),
   type: text("type").notNull(),
-  // 'FORGOT_PASSWORD'
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
@@ -34986,11 +34995,11 @@ var administrationModel = class extends AbstractModels {
     return result;
   }
   async updateUser(body, orgId, id) {
-    const user = await this.query().update(this.table.users).set(body).where(and(eq(this.table.users.userId, id), eq(this.table.users.orgId, orgId))).returning();
+    const user = await this.query().update(this.table.users).set(body).where(and(eq(this.table.users.userId, id), eq(this.table.users.orgId, orgId))).returning().then((rows) => rows[0]);
     return user;
   }
   async deleteUser(orgId, id) {
-    const user = await this.query().delete(this.table.users).where(eq(this.table.users.userId, id) && eq(this.table.users.orgId, orgId)).returning();
+    const user = await this.query().delete(this.table.users).where(and(eq(this.table.users.userId, id), eq(this.table.users.orgId, orgId))).returning().then((rows) => rows[0]);
     return user;
   }
   // async updateWarehouse(body: IUpdateWarehousesType & { orgId?: number }, id: number) {
@@ -35053,14 +35062,22 @@ var AuthModel = class extends AbstractModels {
     return user;
   }
   async checkExistingUser(email, tx) {
-    const result = await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).where(eq(this.table.users.email, email)).limit(1).then((rows) => rows[0]);
+    const result = await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId)).where(eq(this.table.users.email, email)).limit(1).then((rows) => rows[0]);
     return result;
   }
-  async insertSession(userID, refreshToken, expiresAt, tx) {
+  async checkUserById(id, tx) {
+    const result = await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId)).where(eq(this.table.users.userId, id)).limit(1).then((rows) => rows[0]);
+    return result;
+  }
+  async insertSession(userID, refreshToken, expiresAt, sessionInfo, tx) {
     const result = await this.query(tx).insert(this.table.sessions).values({
       userId: userID,
       refreshToken,
-      expiresAt
+      expiresAt,
+      userAgent: sessionInfo?.userAgent,
+      ipAddress: sessionInfo?.ipAddress,
+      location: sessionInfo?.location,
+      device: sessionInfo?.device
     });
     return result;
   }
@@ -35158,17 +35175,17 @@ var administrationService = class {
   createUser = async (c2) => {
     const org = c2.get("jwtPayload");
     const body = c2.req.valid("json");
-    const { password, ...ohters } = body;
+    const { password, ...others } = body;
     const hashedPassword = await bcryptjs_default.hash(password, 10);
-    const user = await this.auth_conn.checkExistingUser(ohters.email);
+    const user = await this.auth_conn.checkExistingUser(others.email);
     if (user) {
       return c2.json({ message: "User already exists" }, BAD_REQUEST);
     }
-    const { type, ...rest } = await this.db_conn.createUser(
-      { ...ohters, password: hashedPassword },
+    const { userId, type, ...rest } = await this.db_conn.createUser(
+      { ...others, password: hashedPassword },
       org.orgId
     );
-    return c2.json(rest, CREATED);
+    return c2.json({ id: userId, ...rest }, CREATED);
   };
   getUsers = async (c2) => {
     const org = c2.get("jwtPayload");
@@ -35179,22 +35196,24 @@ var administrationService = class {
     const org = c2.get("jwtPayload");
     const body = c2.req.valid("json");
     const { id } = c2.req.valid("param");
-    const { password, ...ohters } = body;
-    const user = await this.auth_conn.checkExistingUser(ohters?.email);
+    const { password, ...others } = body;
+    const user = await this.auth_conn.checkExistingUser(others?.email);
     if (user) {
       return c2.json({ message: "User already exists" }, BAD_REQUEST);
     }
     if (password) {
       const hashedPassword = await bcryptjs_default.hash(password, 10);
       const res2 = await this.db_conn.updateUser(
-        { ...ohters, password: hashedPassword },
+        { ...others, password: hashedPassword },
         org.orgId,
         id
       );
-      return c2.json(res2, OK2);
+      const { userId: userId2, ...rest2 } = res2;
+      return c2.json({ id: userId2, ...rest2 }, OK2);
     }
-    const res = await this.db_conn.updateUser(ohters, org.orgId, id);
-    return c2.json(res, OK2);
+    const res = await this.db_conn.updateUser(others, org.orgId, id);
+    const { userId, ...rest } = res;
+    return c2.json({ id: userId, ...rest }, OK2);
   };
   deleteUser = async (c2) => {
     const org = c2.get("jwtPayload");
@@ -35816,6 +35835,11 @@ var idParams = external_exports.object({
     external_exports.number().int().positive()
   )
 });
+var ApiResponse = (dataSchema) => external_exports.object({
+  success: external_exports.boolean(),
+  message: external_exports.string().optional(),
+  data: dataSchema
+});
 
 // src/features/category/category.schema.ts
 var ZUpdateCategory = ZCategory.partial();
@@ -35911,53 +35935,6 @@ var CategoryRouter = class {
   routes = createRouter().openapi(this.schema.addCategory, this.service.addCategory).openapi(this.schema.updateCategory, this.service.updateCategory).openapi(this.schema.deleteCategory, this.service.deleteCategory).openapi(this.schema.getCategory, this.service.getCategory);
 };
 
-// src/features/health/health.schema.ts
-var HealthSchema = class {
-  createHealth = createRoute({
-    path: "/",
-    method: "get",
-    tags: ["health"],
-    security: [
-      {
-        bearerAuth: []
-      }
-    ],
-    request: {},
-    responses: {
-      [OK2]: json_content_default(IHealthLog, "Insert to db for test purpose")
-    }
-  });
-};
-var instance3 = new HealthSchema();
-
-// src/features/health/health.model.ts
-var HealthModel = class extends AbstractModels {
-  async insertHealthLogDB() {
-    const [row] = await this.query().insert(this.table.healthLogs).values({}).returning();
-    return row;
-  }
-};
-
-// src/features/health/health.service.ts
-var HealthService = class {
-  db = new HealthModel();
-  healthCheck = async (c2) => {
-    const auth2 = c2.get("jwtPayload");
-    const result = await this.db.insertHealthLogDB();
-    return c2.json(result, OK2);
-  };
-};
-
-// src/features/health/health.router.ts
-var HealthRoute = class {
-  controller = new HealthService();
-  schema = new HealthSchema();
-  routes = createRouter().openapi(
-    this.schema.createHealth,
-    this.controller.healthCheck
-  );
-};
-
 // src/features/product/product.schema.ts
 var ZUpdateProduct = ZProduct.partial();
 var ProductSchema = class {
@@ -36043,7 +36020,7 @@ var ProductSchema = class {
     }
   });
 };
-var instance4 = new ProductSchema();
+var instance3 = new ProductSchema();
 
 // src/features/product/product.model.ts
 var ProductModel = class extends AbstractModels {
@@ -36660,7 +36637,7 @@ var StockSchema = class {
     }
   });
 };
-var instance5 = new StockSchema();
+var instance4 = new StockSchema();
 
 // src/features/stock/stock.router.ts
 var StockRouter = class {
@@ -36754,7 +36731,7 @@ var SupplierSchema = class {
     }
   });
 };
-var instance6 = new SupplierSchema();
+var instance5 = new SupplierSchema();
 
 // src/features/supplier/supplier.model.ts
 var SupplierModel = class extends AbstractModels {
@@ -37351,17 +37328,26 @@ var sign2 = Jwt.sign;
 var authMiddleware = () => {
   return async (c2, next) => {
     const authHeader = c2.req.header("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer")) {
-      return c2.json({ message: "Unauthorized: Missing or invalid token" }, 401);
+    const refreshToken = getCookie(c2, env_default.COOKIES_NAME);
+    if (!authHeader?.startsWith("Bearer ")) {
+      return c2.json({ message: "Unauthorized: Missing token" }, 401);
+    }
+    if (!refreshToken) {
+      return c2.json({ message: "Unauthorized: Missing session" }, 401);
     }
     const token = authHeader.split(" ")[1];
+    let payload;
     try {
-      const payload = await verify2(token, env_default.JWT_SECRET, "HS256");
-      c2.set("jwtPayload", payload);
-      await next();
-    } catch (err) {
-      return c2.json({ message: "You are not authorized" }, 401);
+      payload = await verify2(token, env_default.JWT_SECRET, "HS256");
+    } catch {
+      return c2.json({ message: "Token expired" }, 401);
     }
+    const session = await db.select().from(sessions).where(eq(sessions.refreshToken, refreshToken)).limit(1).then((r) => r[0]);
+    if (!session?.id) {
+      return c2.json({ message: "Session revoked" }, 401);
+    }
+    c2.set("jwtPayload", payload);
+    await next();
   };
 };
 
@@ -37450,7 +37436,7 @@ var WarehousesSchema = class {
     }
   });
 };
-var instance7 = new WarehousesSchema();
+var instance6 = new WarehousesSchema();
 
 // src/features/warehouse/warehouse.model.ts
 var WarehouseModel = class extends AbstractModels {
@@ -37517,16 +37503,251 @@ var WarehouseRouter = class {
   routes = createRouter().openapi(this.schema.addWarehouse, this.service.addWarehouse).openapi(this.schema.updateWarehouse, this.service.updateWarehouse).openapi(this.schema.deleteWarehouse, this.service.deleteWarehouse).openapi(this.schema.getWarehouse, this.service.getWarehouse);
 };
 
+// src/features/profile/profile.schema.ts
+var ProfileSchema = class {
+  getProfile = createRoute({
+    path: "/",
+    method: "get",
+    tags: ["profile"],
+    responses: {
+      [OK2]: json_content_default(
+        ApiResponse(
+          external_exports.object({
+            id: external_exports.number(),
+            name: external_exports.string(),
+            company_name: external_exports.string(),
+            email: external_exports.string(),
+            type: external_exports.string(),
+            two_fa: external_exports.boolean(),
+            role: external_exports.any().optional(),
+            photo: external_exports.string().optional()
+          })
+        ),
+        "Profile data"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "User not found"
+      )
+    }
+  });
+  updateProfile = createRoute({
+    path: "/",
+    method: "patch",
+    tags: ["profile"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          username: external_exports.string().optional(),
+          name: external_exports.string().optional(),
+          email: external_exports.string().email().optional(),
+          phone_number: external_exports.string().optional(),
+          two_fa: external_exports.boolean().optional()
+        }),
+        "Update profile or toggle 2FA"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "Profile updated")
+    }
+  });
+  changePassword = createRoute({
+    path: "/change-password",
+    method: "post",
+    tags: ["profile"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          old_password: external_exports.string(),
+          new_password: external_exports.string().min(6)
+        }),
+        "Change password body"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "Password changed"),
+      [BAD_REQUEST]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Invalid password"
+      )
+    }
+  });
+  getSessions = createRoute({
+    path: "/sessions",
+    method: "get",
+    tags: ["profile"],
+    responses: {
+      [OK2]: json_content_default(
+        ApiResponse(
+          external_exports.array(
+            external_exports.object({
+              id: external_exports.string(),
+              user_id: external_exports.number(),
+              user_agent: external_exports.string().nullable(),
+              ip_address: external_exports.string().nullable(),
+              location: external_exports.string().nullable(),
+              device: external_exports.string().nullable(),
+              is_revoked: external_exports.boolean(),
+              expires_at: external_exports.string(),
+              created_at: external_exports.string(),
+              user_type: external_exports.string()
+            })
+          )
+        ),
+        "Active sessions"
+      )
+    }
+  });
+  revokeSession = createRoute({
+    path: "/sessions/{sessionId}",
+    method: "delete",
+    tags: ["profile"],
+    request: {
+      params: external_exports.object({
+        sessionId: external_exports.string()
+      })
+    },
+    responses: {
+      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "Session revoked")
+    }
+  });
+  revokeAllSessions = createRoute({
+    path: "/sessions",
+    method: "delete",
+    tags: ["profile"],
+    responses: {
+      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "All sessions revoked")
+    }
+  });
+};
+var instance7 = new ProfileSchema();
+
+// src/features/profile/profile.model.ts
+var ProfileModel = class extends AbstractModels {
+  async getUserProfile(userId, tx) {
+    return await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId)).where(eq(this.table.users.userId, userId)).limit(1).then((rows) => rows[0]);
+  }
+  async updateUser(userId, data, tx) {
+    return await this.query(tx).update(this.table.users).set(data).where(eq(this.table.users.userId, userId)).returning();
+  }
+  async getUserPassword(userId, tx) {
+    return await this.query(tx).select({ password: this.table.users.password }).from(this.table.users).where(eq(this.table.users.userId, userId)).limit(1).then((rows) => rows[0]?.password);
+  }
+  async updatePassword(userId, password, tx) {
+    return await this.query(tx).update(this.table.users).set({ password }).where(eq(this.table.users.userId, userId));
+  }
+  async getSessions(userId, tx) {
+    return await this.query(tx).select().from(this.table.sessions).where(eq(this.table.sessions.userId, userId));
+  }
+  async revokeSession(sessionId, userId, tx) {
+    return await this.query(tx).delete(this.table.sessions).where(and(eq(this.table.sessions.id, sessionId), eq(this.table.sessions.userId, userId)));
+  }
+  async revokeAllSessions(userId, currentSessionId, tx) {
+    return await this.query(tx).delete(this.table.sessions).where(eq(this.table.sessions.userId, userId));
+  }
+};
+
+// src/features/profile/profile.service.ts
+var ProfileService = class {
+  db_conn = new ProfileModel();
+  getProfile = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const user = await this.db_conn.getUserProfile(payload.userId);
+    if (!user) {
+      return c2.json({ message: "User not found" }, NOT_FOUND);
+    }
+    const responseData = {
+      id: user.users.userId,
+      name: user.users.name,
+      company_name: user.organization?.name || "",
+      email: user.users.email,
+      type: user.users.type || "N/A",
+      two_fa: user.users.twoFa || false,
+      role: user.roles ?? void 0,
+      photo: ""
+    };
+    return c2.json(
+      { success: true, message: "Profile data", data: responseData },
+      OK2
+    );
+  };
+  updateProfile = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const body = c2.req.valid("json");
+    await this.db_conn.updateUser(payload.userId, {
+      name: body.name,
+      email: body.email,
+      twoFa: body.two_fa
+    });
+    return c2.json({ message: "Profile updated" }, OK2);
+  };
+  changePassword = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const { old_password, new_password } = c2.req.valid("json");
+    const currentPassword = await this.db_conn.getUserPassword(payload.userId);
+    if (!currentPassword) {
+      return c2.json({ message: "User not found" }, BAD_REQUEST);
+    }
+    const isMatch = await bcryptjs_default.compare(old_password, currentPassword);
+    if (!isMatch) {
+      return c2.json({ message: "Invalid password" }, BAD_REQUEST);
+    }
+    const hashedPassword = await bcryptjs_default.hash(new_password, 10);
+    await this.db_conn.updatePassword(payload.userId, hashedPassword);
+    return c2.json({ message: "Password changed" }, OK2);
+  };
+  getSessions = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const sessions2 = await this.db_conn.getSessions(payload.userId);
+    const formattedSessions = sessions2.map((s) => ({
+      id: s.id,
+      user_id: s.userId,
+      user_agent: s.userAgent,
+      ip_address: s.ipAddress,
+      location: s.location,
+      device: s.device,
+      is_revoked: false,
+      expires_at: s.expiresAt.toISOString(),
+      created_at: s.createdAt?.toISOString() || "",
+      user_type: "N/A"
+    }));
+    return c2.json(
+      { success: true, message: "Active sessions", data: formattedSessions },
+      OK2
+    );
+  };
+  revokeSession = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const { sessionId } = c2.req.valid("param");
+    await this.db_conn.revokeSession(sessionId, payload.userId);
+    return c2.json({ message: "Session revoked" }, OK2);
+  };
+  revokeAllSessions = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    await this.db_conn.revokeAllSessions(payload.userId);
+    return c2.json({ message: "All sessions revoked" }, OK2);
+  };
+};
+
+// src/features/profile/profile.router.ts
+var ProfileRouter = class {
+  service = new ProfileService();
+  schema = new ProfileSchema();
+  routes = createRouter().openapi(this.schema.getProfile, this.service.getProfile).openapi(this.schema.updateProfile, this.service.updateProfile).openapi(this.schema.changePassword, this.service.changePassword).openapi(this.schema.getSessions, this.service.getSessions).openapi(this.schema.revokeSession, this.service.revokeSession).openapi(this.schema.revokeAllSessions, this.service.revokeAllSessions);
+};
+
 // src/routes/private.routes.ts
 var privateRoutes = createRouter();
 privateRoutes.use("*", authMiddleware());
-privateRoutes.route("/health", new HealthRoute().routes);
 privateRoutes.route("/supplier", new SupplierRouter().routes);
 privateRoutes.route("/warehouse", new WarehouseRouter().routes);
 privateRoutes.route("/category", new CategoryRouter().routes);
 privateRoutes.route("/product", new ProductRouter().routes);
 privateRoutes.route("/stock", new StockRouter().routes);
 privateRoutes.route("/administration", new administrationRouter().routes);
+privateRoutes.route("/admin/profile", new ProfileRouter().routes);
 
 // src/features/auth/auth.schema.ts
 var AuthSchema = class {
@@ -37561,8 +37782,8 @@ var AuthSchema = class {
     request: {
       body: json_content_required_default(
         external_exports.object({
-          email: external_exports.string().nonempty().default("azmir.ahx@gmail.com"),
-          password: external_exports.string().nonempty().default("12345678")
+          user_or_email: external_exports.string().nonempty(),
+          password: external_exports.string().nonempty()
         }),
         "login user"
       )
@@ -37570,12 +37791,27 @@ var AuthSchema = class {
     responses: {
       [OK2]: json_content_default(
         external_exports.object({
-          id: external_exports.number(),
-          name: external_exports.string(),
-          company_name: external_exports.string(),
-          email: external_exports.string(),
-          type: external_exports.string(),
-          accessToken: external_exports.string()
+          success: external_exports.boolean(),
+          message: external_exports.string().optional(),
+          accessToken: external_exports.string(),
+          data: external_exports.object({
+            id: external_exports.number(),
+            name: external_exports.string(),
+            company_name: external_exports.string(),
+            email: external_exports.string(),
+            type: external_exports.string(),
+            two_fa: external_exports.boolean().optional(),
+            role: external_exports.object({
+              id: external_exports.number(),
+              role_name: external_exports.string(),
+              status: external_exports.boolean(),
+              is_main_role: external_exports.boolean(),
+              create_date: external_exports.string(),
+              created_by: external_exports.string(),
+              created_by_name: external_exports.string()
+            }).optional(),
+            photo: external_exports.string().optional()
+          }).nullable()
         }),
         "User login response"
       ),
@@ -37593,6 +37829,52 @@ var AuthSchema = class {
       )
     }
   });
+  login2FA = createRoute({
+    path: "/login/2fa",
+    method: "post",
+    tags: ["auth"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          user_or_email: external_exports.string().nonempty(),
+          otp: external_exports.string().nonempty()
+        }),
+        "login user 2fa"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          success: external_exports.boolean(),
+          message: external_exports.string().optional(),
+          accessToken: external_exports.string(),
+          data: external_exports.object({
+            id: external_exports.number(),
+            name: external_exports.string(),
+            company_name: external_exports.string(),
+            email: external_exports.string(),
+            type: external_exports.string(),
+            two_fa: external_exports.boolean().optional(),
+            role: external_exports.any().optional(),
+            photo: external_exports.string().optional()
+          }).nullable()
+        }),
+        "User login response"
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Wrong credential or OTP"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "User not found"
+      )
+    }
+  });
   refreshToken = createRoute({
     path: "/refresh-token",
     method: "get",
@@ -37601,7 +37883,27 @@ var AuthSchema = class {
     responses: {
       [OK2]: json_content_default(
         external_exports.object({
-          accessToken: external_exports.string()
+          success: external_exports.boolean(),
+          message: external_exports.string().optional(),
+          accessToken: external_exports.string(),
+          data: external_exports.object({
+            id: external_exports.number(),
+            name: external_exports.string(),
+            company_name: external_exports.string(),
+            email: external_exports.string(),
+            type: external_exports.string(),
+            two_fa: external_exports.boolean().optional(),
+            role: external_exports.object({
+              id: external_exports.number(),
+              role_name: external_exports.string(),
+              status: external_exports.boolean(),
+              is_main_role: external_exports.boolean(),
+              create_date: external_exports.string(),
+              created_by: external_exports.string(),
+              created_by_name: external_exports.string()
+            }).optional(),
+            photo: external_exports.string().optional()
+          }).nullable()
         }),
         "New refresh token generated"
       ),
@@ -37615,7 +37917,7 @@ var AuthSchema = class {
   });
   logout = createRoute({
     path: "/logout",
-    method: "get",
+    method: "post",
     tags: ["auth"],
     request: {},
     responses: {
@@ -37660,6 +37962,63 @@ var AuthSchema = class {
       )
     }
   });
+  sendEmailVerification = createRoute({
+    path: "/email-otp/send",
+    method: "post",
+    tags: ["auth"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          email: external_exports.string().email(),
+          type: external_exports.enum(["reset_admin", "reset_employee"])
+        }),
+        "Send email verification"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(
+        ApiResponse(external_exports.object({ email: external_exports.string() })),
+        "OTP sent successfully"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "User not found"
+      )
+    }
+  });
+  matchOptVerification = createRoute({
+    path: "/email-otp/match",
+    method: "post",
+    tags: ["auth"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          email: external_exports.string().email(),
+          otp: external_exports.string(),
+          type: external_exports.enum(["reset_admin", "reset_employee"])
+        }),
+        "Match OTP verification"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          success: external_exports.boolean(),
+          message: external_exports.string(),
+          token: external_exports.string()
+        }),
+        "OTP matched"
+      ),
+      [BAD_REQUEST]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Invalid OTP or Request"
+      )
+    }
+  });
   resetPassword = createRoute({
     path: "/reset-password",
     method: "post",
@@ -37667,9 +38026,8 @@ var AuthSchema = class {
     request: {
       body: json_content_required_default(
         external_exports.object({
-          email: external_exports.string().email(),
-          code: external_exports.string().length(6),
-          newPassword: external_exports.string().min(6)
+          token: external_exports.string(),
+          password: external_exports.string().min(6)
         }),
         "Reset password request"
       )
@@ -37685,7 +38043,7 @@ var AuthSchema = class {
         external_exports.object({
           message: external_exports.string()
         }),
-        "Invalid or expired OTP"
+        "Invalid token or request"
       )
     }
   });
@@ -37694,11 +38052,12 @@ var instance8 = new AuthSchema();
 
 // src/features/auth/auth.service.ts
 var import_nodemailer = __toESM(require_nodemailer(), 1);
-var getAuditInfo = (c2) => {
+var getAuditInfo = async (c2) => {
   const userAgent = c2.req.header("User-Agent") || "";
-  const ip = c2.req.header("X-Forwarded-For") || c2.req.header("X-Real-IP") || "127.0.0.1";
+  const ip = c2.req.header("cf-connecting-ip") || c2.req.header("x-forwarded-for")?.split(",")?.[0]?.trim() || c2.req.header("x-real-ip") || "127.0.0.1";
   return {
-    ip,
+    ipAddress: ip,
+    userAgent,
     location: "Unknown",
     browser: "Unknown",
     device: "Unknown",
@@ -37727,7 +38086,7 @@ var AuthService = class {
         defaultRole.roleId,
         tx
       );
-      const auditInfo = getAuditInfo(c2);
+      const auditInfo = await getAuditInfo(c2);
       await this.db_conn.logAudit(
         {
           userId: user.userId,
@@ -37743,11 +38102,13 @@ var AuthService = class {
   };
   signIn = async (c2) => {
     const body = c2.req.valid("json");
-    const { email, password: user_password } = body;
+    const { user_or_email, password: user_password } = body;
+    const ip = c2.get("clientIp");
     return await db.transaction(async (trx) => {
-      const db_user = await this.db_conn.checkExistingUser(email, trx);
+      const db_user = await this.db_conn.checkExistingUser(user_or_email, trx);
       const user = db_user?.users;
       const org = db_user?.organization;
+      const role = db_user?.roles;
       if (!user) {
         return c2.json({ message: "No user found" }, NOT_FOUND);
       }
@@ -37755,26 +38116,61 @@ var AuthService = class {
       if (!isMatch) {
         return c2.json({ message: "Wrong credential" }, UNAUTHORIZED);
       }
+      if (user.twoFa) {
+        const otp = Math.floor(1e5 + Math.random() * 9e5).toString();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1e3);
+        await this.db_conn.createOTP(user.userId, otp, "LOGIN_2FA", expiresAt, trx);
+        const transporter = import_nodemailer.default.createTransport({
+          service: "gmail",
+          auth: {
+            user: env_default.EMAIL_USER,
+            pass: env_default.EMAIL_PASS
+          }
+        });
+        await transporter.sendMail({
+          from: env_default.EMAIL_USER,
+          to: user.email,
+          subject: "Login OTP",
+          html: `<p>Your Login OTP is: <strong>${otp}</strong>. Expires in 5 mins.</p>`
+        });
+        return c2.json(
+          {
+            success: true,
+            message: "2FA required, OTP sent to email",
+            accessToken: "two_fa_required",
+            data: {
+              id: user.userId,
+              name: user.name,
+              company_name: org?.name,
+              email: user.email,
+              type: user.type ?? "N/A",
+              two_fa: true,
+              role: role ?? void 0,
+              photo: ""
+            }
+          },
+          OK2
+        );
+      }
       const accessPayload = {
         userId: user.userId,
         orgId: org?.orgId,
         email: user.email,
-        exp: Math.floor(Date.now() / 1e3) + 60
-        // 1 minute
+        exp: Math.floor(Date.now() / 1e3) + 24 * 60 * 60
+        // 1 day
       };
       const accessToken = await sign2(accessPayload, env_default.JWT_SECRET);
       const refreshToken = crypto.randomUUID();
       const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1e3);
-      await this.db_conn.deleteSession(user.userId, trx);
-      await this.db_conn.insertSession(user.userId, refreshToken, refreshExpiresAt, trx);
+      const auditInfo = await getAuditInfo(c2);
+      await this.db_conn.insertSession(user.userId, refreshToken, refreshExpiresAt, auditInfo, trx);
       setCookie(c2, env_default.COOKIES_NAME, refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "none",
         path: "/",
         maxAge: 7 * 24 * 60 * 60
       });
-      const auditInfo = getAuditInfo(c2);
       await this.db_conn.logAudit(
         {
           userId: user.userId,
@@ -37787,12 +38183,83 @@ var AuthService = class {
       );
       return c2.json(
         {
-          id: user.userId,
-          name: user.name,
-          company_name: org?.name,
-          email: user.email,
-          type: user.type ?? "N/A",
-          accessToken
+          success: true,
+          message: "User logged in successfully",
+          accessToken,
+          data: {
+            id: user.userId,
+            name: user.name,
+            company_name: org?.name,
+            email: user.email,
+            type: user.type ?? "N/A",
+            two_fa: false,
+            role: role ?? void 0,
+            photo: ""
+          }
+        },
+        OK2
+      );
+    });
+  };
+  login2FA = async (c2) => {
+    const body = c2.req.valid("json");
+    const { user_or_email, otp } = body;
+    return await db.transaction(async (trx) => {
+      const db_user = await this.db_conn.checkExistingUser(user_or_email, trx);
+      const user = db_user?.users;
+      const org = db_user?.organization;
+      const role = db_user?.roles;
+      if (!user) {
+        return c2.json({ message: "No user found" }, NOT_FOUND);
+      }
+      const otpRecord = await this.db_conn.findOTP(user.userId, otp, "LOGIN_2FA", trx);
+      if (!otpRecord || otpRecord.expiresAt < /* @__PURE__ */ new Date()) {
+        return c2.json({ message: "Invalid or expired OTP" }, UNAUTHORIZED);
+      }
+      await this.db_conn.deleteOTP(otpRecord.id, trx);
+      const accessPayload = {
+        userId: user.userId,
+        orgId: org?.orgId,
+        email: user.email,
+        exp: Math.floor(Date.now() / 1e3) + 24 * 60 * 60
+      };
+      const accessToken = await sign2(accessPayload, env_default.JWT_SECRET);
+      const refreshToken = crypto.randomUUID();
+      const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1e3);
+      const auditInfo = await getAuditInfo(c2);
+      await this.db_conn.insertSession(user.userId, refreshToken, refreshExpiresAt, auditInfo, trx);
+      setCookie(c2, env_default.COOKIES_NAME, refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60
+      });
+      await this.db_conn.logAudit(
+        {
+          userId: user.userId,
+          orgId: org?.orgId,
+          action: "USER_LOGIN_2FA",
+          details: "User logged in with 2FA",
+          ...auditInfo
+        },
+        trx
+      );
+      return c2.json(
+        {
+          success: true,
+          message: "User logged in successfully",
+          accessToken,
+          data: {
+            id: user.userId,
+            name: user.name,
+            company_name: org?.name,
+            email: user.email,
+            type: user.type ?? "N/A",
+            two_fa: false,
+            role,
+            photo: ""
+          }
         },
         OK2
       );
@@ -37807,18 +38274,38 @@ var AuthService = class {
     if (!session || session.expiresAt < /* @__PURE__ */ new Date()) {
       return c2.json({ message: "Invalid or expired refresh token" }, UNAUTHORIZED);
     }
+    const { users: users2, organization: organization2 } = await this.db_conn.checkUserById(session.userId);
     const accessToken = await sign2(
-      { userId: session.userId, exp: Math.floor(Date.now() / 1e3) * 60 * 15 },
+      {
+        userId: users2?.userId,
+        orgId: organization2?.orgId,
+        email: users2?.email,
+        exp: Math.floor(Date.now() / 1e3) + 5
+      },
       env_default.JWT_SECRET
     );
-    return c2.json({ accessToken }, OK2);
+    return c2.json(
+      {
+        success: true,
+        accessToken,
+        message: "Refresh token generated successfully",
+        data: {
+          id: users2?.userId,
+          name: users2?.name,
+          company_name: organization2?.name,
+          email: users2?.email,
+          type: users2?.type ?? "N/A"
+        }
+      },
+      OK2
+    );
   };
   logout = async (c2) => {
     const refreshToken = getCookie(c2, env_default.COOKIES_NAME);
     if (refreshToken) {
       const deletedSession = await db.delete(sessions).where(eq(sessions.refreshToken, refreshToken)).returning();
       if (deletedSession.length > 0) {
-        const auditInfo = getAuditInfo(c2);
+        const auditInfo = await getAuditInfo(c2);
         await this.db_conn.logAudit({
           userId: deletedSession[0].userId,
           action: "USER_LOGOUT",
@@ -37830,15 +38317,15 @@ var AuthService = class {
     }
     return c2.json({ message: "Logged out" }, OK2);
   };
-  forgotPassword = async (c2) => {
-    const { email } = c2.req.valid("json");
-    const existingUser = await this.db_conn.checkExistingUser(email);
-    if (!existingUser || !existingUser.users) {
+  sendEmailVerification = async (c2) => {
+    const { email, type } = c2.req.valid("json");
+    const user = await this.db_conn.checkExistingUser(email);
+    if (!user || !user.users) {
       return c2.json({ message: "User not found" }, NOT_FOUND);
     }
     const otp = Math.floor(1e5 + Math.random() * 9e5).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1e3);
-    await this.db_conn.createOTP(existingUser.users.userId, otp, "FORGOT_PASSWORD", expiresAt);
+    await this.db_conn.createOTP(user.users.userId, otp, type, expiresAt);
     const transporter = import_nodemailer.default.createTransport({
       service: "gmail",
       auth: {
@@ -37846,48 +38333,58 @@ var AuthService = class {
         pass: env_default.EMAIL_PASS
       }
     });
-    const auditInfo = getAuditInfo(c2);
-    await this.db_conn.logAudit({
-      userId: existingUser.users.userId,
-      orgId: existingUser.organization?.orgId,
-      action: "FORGOT_PASSWORD_REQUEST",
-      details: "OTP sent to email",
-      ...auditInfo
-    });
     await transporter.sendMail({
       from: env_default.EMAIL_USER,
       to: email,
-      subject: "Password Reset OTP",
-      html: `<p>Your OTP for password reset is: <strong>${otp}</strong>. It expires in 5 minutes.</p>`
+      subject: "Verification OTP",
+      html: `<p>Your OTP is: <strong>${otp}</strong>. It expires in 5 minutes.</p>`
     });
-    return c2.json({ message: "OTP sent successfully" }, OK2);
+    return c2.json({ success: true, message: "OTP sent", data: { email } }, OK2);
   };
-  resetPassword = async (c2) => {
-    const { email, code, newPassword } = c2.req.valid("json");
+  matchOptVerification = async (c2) => {
+    const { email, otp, type } = c2.req.valid("json");
     return await db.transaction(async (tx) => {
-      const existingUser = await this.db_conn.checkExistingUser(email, tx);
-      if (!existingUser || !existingUser.users) {
-        return c2.json({ message: "Invalid or expired OTP" }, BAD_REQUEST);
+      const user = await this.db_conn.checkExistingUser(email, tx);
+      if (!user || !user.users) {
+        return c2.json({ message: "Invalid request" }, BAD_REQUEST);
       }
-      const otpRecord = await this.db_conn.findOTP(
-        existingUser.users.userId,
-        code,
-        "FORGOT_PASSWORD",
-        tx
-      );
+      const otpRecord = await this.db_conn.findOTP(user.users.userId, otp, type, tx);
       if (!otpRecord || otpRecord.expiresAt < /* @__PURE__ */ new Date()) {
         return c2.json({ message: "Invalid or expired OTP" }, BAD_REQUEST);
       }
-      const hashedPassword = await bcryptjs_default.hash(newPassword, 10);
-      await this.db_conn.updatePassword(existingUser.users.userId, hashedPassword, tx);
+      const token = await sign2(
+        { email, purpose: type, exp: Math.floor(Date.now() / 1e3) + 15 * 60 },
+        // 15 mins
+        env_default.JWT_SECRET
+      );
       await this.db_conn.deleteOTP(otpRecord.id, tx);
-      const auditInfo = getAuditInfo(c2);
+      return c2.json({ success: true, message: "OTP matched", token }, OK2);
+    });
+  };
+  resetPassword = async (c2) => {
+    const { token, password } = c2.req.valid("json");
+    return await db.transaction(async (tx) => {
+      let payload;
+      try {
+        payload = await verify2(token, env_default.JWT_SECRET, "HS256");
+      } catch (e) {
+        return c2.json({ message: "Invalid or expired token" }, BAD_REQUEST);
+      }
+      const email = payload.email;
+      if (!email) return c2.json({ message: "Invalid token payload" }, BAD_REQUEST);
+      const existingUser = await this.db_conn.checkExistingUser(email, tx);
+      if (!existingUser || !existingUser.users) {
+        return c2.json({ message: "User not found" }, BAD_REQUEST);
+      }
+      const hashedPassword = await bcryptjs_default.hash(password, 10);
+      await this.db_conn.updatePassword(existingUser.users.userId, hashedPassword, tx);
+      const auditInfo = await getAuditInfo(c2);
       await this.db_conn.logAudit(
         {
           userId: existingUser.users.userId,
           orgId: existingUser.organization?.orgId,
           action: "PASSWORD_RESET",
-          details: "Password reset successfully using OTP",
+          details: "Password reset successfully via token",
           ...auditInfo
         },
         tx
@@ -37901,13 +38398,61 @@ var AuthService = class {
 var AuthRoutes = class {
   service = new AuthService();
   schema = new AuthSchema();
-  routes = createRouter().openapi(this.schema.signUp, this.service.signUp).openapi(this.schema.signIn, this.service.signIn).openapi(this.schema.refreshToken, this.service.refreshToken).openapi(this.schema.logout, this.service.logout).openapi(this.schema.forgotPassword, this.service.forgotPassword).openapi(this.schema.resetPassword, this.service.resetPassword);
+  routes = createRouter().openapi(this.schema.signUp, this.service.signUp).openapi(this.schema.signIn, this.service.signIn).openapi(this.schema.refreshToken, this.service.refreshToken).openapi(this.schema.login2FA, this.service.login2FA).openapi(this.schema.sendEmailVerification, this.service.sendEmailVerification).openapi(this.schema.matchOptVerification, this.service.matchOptVerification).openapi(this.schema.logout, this.service.logout).openapi(this.schema.resetPassword, this.service.resetPassword);
+};
+
+// src/features/health/health.schema.ts
+var HealthSchema = class {
+  createHealth = createRoute({
+    path: "/",
+    method: "get",
+    tags: ["health"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {},
+    responses: {
+      [OK2]: json_content_default(IHealthLog, "Insert to db for test purpose")
+    }
+  });
+};
+var instance9 = new HealthSchema();
+
+// src/features/health/health.model.ts
+var HealthModel = class extends AbstractModels {
+  async insertHealthLogDB() {
+    const [row] = await this.query().insert(this.table.healthLogs).values({}).returning();
+    return row;
+  }
+};
+
+// src/features/health/health.service.ts
+var HealthService = class {
+  db = new HealthModel();
+  healthCheck = async (c2) => {
+    const auth2 = c2.get("jwtPayload");
+    const result = await this.db.insertHealthLogDB();
+    return c2.json(result, OK2);
+  };
+};
+
+// src/features/health/health.router.ts
+var HealthRoute = class {
+  controller = new HealthService();
+  schema = new HealthSchema();
+  routes = createRouter().openapi(
+    this.schema.createHealth,
+    this.controller.healthCheck
+  );
 };
 
 // src/routes/public.routes.ts
 var publicRoutes = createRouter();
 var auth = new AuthRoutes();
 publicRoutes.route("/auth", auth.routes);
+publicRoutes.route("/health", new HealthRoute().routes);
 
 // src/routes/index.ts
 var v1Routes = createRouter();
@@ -37915,6 +38460,12 @@ v1Routes.route("/public", publicRoutes);
 v1Routes.route("/", privateRoutes);
 
 // src/index.ts
+process.on("uncaughtException", (err) => {
+  console.error("CRITICAL: Uncaught Exception:", err);
+});
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("CRITICAL: Unhandled Rejection at:", promise, "reason:", reason);
+});
 var app = createApp();
 configureOpenAPI(app);
 app.get("/", (c2) => {
@@ -37926,8 +38477,14 @@ app.get("/api/rbac/seed", async (c2) => {
   return c2.text("RBAC seeded successfully");
 });
 app.onError((err, c2) => {
-  console.error("GLOBAL ERROR:", err);
-  return c2.json({ error: "Internal Server Error" }, 500);
+  console.error("FINAL FALLBACK ERROR:", err);
+  return c2.json(
+    {
+      success: false,
+      message: err instanceof Error ? err.message : "Internal Server Error"
+    },
+    500
+  );
 });
 var handler = handle(app);
 // Annotate the CommonJS export names for ESM import in node:

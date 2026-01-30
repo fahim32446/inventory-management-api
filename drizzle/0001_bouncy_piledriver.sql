@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "two_fa" boolean DEFAULT false;

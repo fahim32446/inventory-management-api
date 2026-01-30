@@ -19,9 +19,13 @@ export default function createApp() {
   app.use(
     "*",
     cors({
-      origin: ["http://localhost:5173", "http://localhost:6565"],
+      origin: [
+        "http://localhost:5173",
+        "http://localhost:6565",
+        "https://inventory-management-client-tau.vercel.app",
+      ],
       allowHeaders: ["Content-Type", "Authorization", "X-Custom-Header"],
-      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       credentials: true,
     }),
   );
