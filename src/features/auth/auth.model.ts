@@ -52,6 +52,26 @@ export class AuthModel extends AbstractModels {
 
     return result;
   }
+
+  async getPermissions(userId: number, tx?: Transaction): Promise<string[]> {
+    const rows = await this.query(tx)
+      .select({
+        permission: this.table.permissions.key,
+      })
+      .from(this.table.users)
+      .where(eq(this.table.users.userId, userId))
+      .leftJoin(
+        this.table.rolePermissions,
+        eq(this.table.users.roleId, this.table.rolePermissions.roleId),
+      )
+      .leftJoin(
+        this.table.permissions,
+        eq(this.table.rolePermissions.permissionId, this.table.permissions.permissionId),
+      );
+
+    return rows.map((r) => r.permission).filter((p): p is string => !!p);
+  }
+
   async checkUserById(id: number, tx?: Transaction) {
     const result = await this.query(tx)
       .select()

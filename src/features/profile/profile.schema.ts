@@ -20,6 +20,7 @@ export class ProfileSchema {
             two_fa: z.boolean(),
             role: z.any().optional(),
             photo: z.string().optional(),
+            permission: z.array(z.string()).optional(),
           }),
         ),
         "Profile data",

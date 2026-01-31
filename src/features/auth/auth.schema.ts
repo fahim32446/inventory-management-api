@@ -70,6 +70,7 @@ export class AuthSchema {
                 })
                 .optional(),
               photo: z.string().optional(),
+              permission: z.array(z.string()).optional(),
             })
             .nullable(),
         }),

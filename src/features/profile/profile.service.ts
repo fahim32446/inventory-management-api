@@ -10,6 +10,7 @@ import type {
   IRevokeSession,
   IUpdateProfile,
 } from "./profile.schema";
+import { AuthModel } from "../auth/auth.model";
 
 export class ProfileService {
   private db_conn = new ProfileModel();
@@ -17,6 +18,9 @@ export class ProfileService {
   getProfile: AppRouteHandler<IGetProfile> = async (c) => {
     const payload = c.get("jwtPayload");
     const user = await this.db_conn.getUserProfile(payload.userId);
+
+    const db_conn = new AuthModel();
+    const permission = await db_conn.getPermissions(payload.userId);
 
     if (!user) {
       return c.json({ message: "User not found" }, HttpStatusCodes.NOT_FOUND);
@@ -33,6 +37,7 @@ export class ProfileService {
       two_fa: user.users.twoFa || false,
       role: user.roles ?? undefined,
       photo: "",
+      permission,
     };
 
     return c.json(

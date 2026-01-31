@@ -35065,6 +35065,18 @@ var AuthModel = class extends AbstractModels {
     const result = await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId)).where(eq(this.table.users.email, email)).limit(1).then((rows) => rows[0]);
     return result;
   }
+  async getPermissions(userId, tx) {
+    const rows = await this.query(tx).select({
+      permission: this.table.permissions.key
+    }).from(this.table.users).where(eq(this.table.users.userId, userId)).leftJoin(
+      this.table.rolePermissions,
+      eq(this.table.users.roleId, this.table.rolePermissions.roleId)
+    ).leftJoin(
+      this.table.permissions,
+      eq(this.table.rolePermissions.permissionId, this.table.permissions.permissionId)
+    );
+    return rows.map((r) => r.permission).filter((p2) => !!p2);
+  }
   async checkUserById(id, tx) {
     const result = await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId)).where(eq(this.table.users.userId, id)).limit(1).then((rows) => rows[0]);
     return result;
@@ -37520,7 +37532,8 @@ var ProfileSchema = class {
             type: external_exports.string(),
             two_fa: external_exports.boolean(),
             role: external_exports.any().optional(),
-            photo: external_exports.string().optional()
+            photo: external_exports.string().optional(),
+            permission: external_exports.array(external_exports.string()).optional()
           })
         ),
         "Profile data"
@@ -37655,6 +37668,8 @@ var ProfileService = class {
   getProfile = async (c2) => {
     const payload = c2.get("jwtPayload");
     const user = await this.db_conn.getUserProfile(payload.userId);
+    const db_conn = new AuthModel();
+    const permission = await db_conn.getPermissions(payload.userId);
     if (!user) {
       return c2.json({ message: "User not found" }, NOT_FOUND);
     }
@@ -37666,7 +37681,8 @@ var ProfileService = class {
       type: user.users.type || "N/A",
       two_fa: user.users.twoFa || false,
       role: user.roles ?? void 0,
-      photo: ""
+      photo: "",
+      permission
     };
     return c2.json(
       { success: true, message: "Profile data", data: responseData },
@@ -37810,7 +37826,8 @@ var AuthSchema = class {
               created_by: external_exports.string(),
               created_by_name: external_exports.string()
             }).optional(),
-            photo: external_exports.string().optional()
+            photo: external_exports.string().optional(),
+            permission: external_exports.array(external_exports.string()).optional()
           }).nullable()
         }),
         "User login response"
@@ -38103,7 +38120,6 @@ var AuthService = class {
   signIn = async (c2) => {
     const body = c2.req.valid("json");
     const { user_or_email, password: user_password } = body;
-    const ip = c2.get("clientIp");
     return await db.transaction(async (trx) => {
       const db_user = await this.db_conn.checkExistingUser(user_or_email, trx);
       const user = db_user?.users;
@@ -38116,6 +38132,7 @@ var AuthService = class {
       if (!isMatch) {
         return c2.json({ message: "Wrong credential" }, UNAUTHORIZED);
       }
+      const permission = await this.db_conn.getPermissions(user.userId, trx);
       if (user.twoFa) {
         const otp = Math.floor(1e5 + Math.random() * 9e5).toString();
         const expiresAt = new Date(Date.now() + 5 * 60 * 1e3);
@@ -38146,7 +38163,8 @@ var AuthService = class {
               type: user.type ?? "N/A",
               two_fa: true,
               role: role ?? void 0,
-              photo: ""
+              photo: "",
+              permission
             }
           },
           OK2
@@ -38167,7 +38185,7 @@ var AuthService = class {
       setCookie(c2, env_default.COOKIES_NAME, refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: 7 * 24 * 60 * 60
       });
@@ -38194,7 +38212,8 @@ var AuthService = class {
             type: user.type ?? "N/A",
             two_fa: false,
             role: role ?? void 0,
-            photo: ""
+            photo: "",
+            permission
           }
         },
         OK2
@@ -38231,7 +38250,7 @@ var AuthService = class {
       setCookie(c2, env_default.COOKIES_NAME, refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: 7 * 24 * 60 * 60
       });

@@ -100,8 +100,6 @@ export class AuthService {
     const body = c.req.valid("json");
     const { user_or_email, password: user_password } = body;
 
-    const ip = c.get("clientIp");
-
     return await db.transaction(async (trx) => {
       // Assuming user_or_email is email as per schema
       const db_user = await this.db_conn.checkExistingUser(user_or_email, trx);
@@ -119,6 +117,8 @@ export class AuthService {
       if (!isMatch) {
         return c.json({ message: "Wrong credential" }, HttpStatusCodes.UNAUTHORIZED);
       }
+
+      const permission = await this.db_conn.getPermissions(user.userId, trx);
 
       if (user.twoFa) {
         // Generate and send OTP for 2FA
@@ -156,6 +156,7 @@ export class AuthService {
               two_fa: true,
               role: role ?? undefined,
               photo: "",
+              permission,
             },
           },
           HttpStatusCodes.OK,
@@ -180,7 +181,7 @@ export class AuthService {
       setCookie(c, env.COOKIES_NAME, refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: 7 * 24 * 60 * 60,
       });
@@ -211,6 +212,7 @@ export class AuthService {
             two_fa: false,
             role: role ?? undefined,
             photo: "",
+            permission,
           },
         },
         HttpStatusCodes.OK,
@@ -259,7 +261,7 @@ export class AuthService {
       setCookie(c, env.COOKIES_NAME, refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: 7 * 24 * 60 * 60,
       });
