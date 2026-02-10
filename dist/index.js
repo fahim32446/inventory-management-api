@@ -32623,18 +32623,18 @@ function construct(client, config2 = {}) {
 }
 function drizzle(...params) {
   if (typeof params[0] === "string") {
-    const instance10 = new esm_default.Pool({
+    const instance11 = new esm_default.Pool({
       connectionString: params[0]
     });
-    return construct(instance10, params[1]);
+    return construct(instance11, params[1]);
   }
   if (isConfig(params[0])) {
     const { connection, client, ...drizzleConfig } = params[0];
     if (client) return construct(client, drizzleConfig);
-    const instance10 = typeof connection === "string" ? new esm_default.Pool({
+    const instance11 = typeof connection === "string" ? new esm_default.Pool({
       connectionString: connection
     }) : new esm_default.Pool(connection);
-    return construct(instance10, drizzleConfig);
+    return construct(instance11, drizzleConfig);
   }
   return construct(params[0], params[1]);
 }
@@ -36810,6 +36810,628 @@ var SupplierRouter = class {
   routes = createRouter().openapi(this.schema.addSupplier, this.service.addSupplier).openapi(this.schema.updateSupplier, this.service.updateSupplier).openapi(this.schema.deleteSupplier, this.service.deleteSupplier).openapi(this.schema.getSupplier, this.service.getSupplier);
 };
 
+// src/features/dashboard/dashboard.schema.ts
+var ZStats = external_exports.object({
+  title: external_exports.string(),
+  value: external_exports.string(),
+  trend: external_exports.string(),
+  isUp: external_exports.boolean(),
+  color: external_exports.string()
+});
+var ZCashFlow = external_exports.object({
+  month: external_exports.string(),
+  inflow: external_exports.number(),
+  outflow: external_exports.number()
+});
+var ZRevenueDistribution = external_exports.object({
+  name: external_exports.string(),
+  value: external_exports.number(),
+  color: external_exports.string()
+});
+var ZRecentTransaction = external_exports.object({
+  key: external_exports.string(),
+  id: external_exports.string(),
+  date: external_exports.string(),
+  customer: external_exports.string(),
+  amount: external_exports.number(),
+  status: external_exports.string(),
+  type: external_exports.enum(["Inbound", "Outbound"]),
+  category: external_exports.string()
+});
+var ZDashboardAnalyticsResponse = external_exports.object({
+  stats: external_exports.array(ZStats),
+  cashFlow: external_exports.array(ZCashFlow),
+  revenueDistribution: external_exports.array(ZRevenueDistribution),
+  recentTransactions: external_exports.array(ZRecentTransaction)
+});
+var DashboardSchema = class {
+  getAnalytics = createRoute({
+    path: "/analytics",
+    method: "get",
+    tags: ["dashboard"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    responses: {
+      [OK2]: json_content_default(ZDashboardAnalyticsResponse, "Dashboard analytics data")
+    }
+  });
+};
+var instance6 = new DashboardSchema();
+
+// src/features/dashboard/dashboard.model.ts
+var DashboardModel = class extends AbstractModels {
+  async getRevenue(orgId) {
+    const res = await this.query().select({
+      total: sql`COALESCE(SUM(${this.table.saleItems.subtotal}), 0)`
+    }).from(this.table.sales).innerJoin(this.table.saleItems, eq(this.table.sales.saleId, this.table.saleItems.saleId)).where(eq(this.table.sales.orgId, orgId));
+    return res[0]?.total || 0;
+  }
+  async getExpenses(orgId) {
+    const res = await this.query().select({
+      total: sql`COALESCE(SUM(${this.table.purchaseItems.subtotal}), 0)`
+    }).from(this.table.purchases).innerJoin(
+      this.table.purchaseItems,
+      eq(this.table.purchases.purchaseId, this.table.purchaseItems.purchaseId)
+    ).where(eq(this.table.purchases.orgId, orgId));
+    return res[0]?.total || 0;
+  }
+  async getMonthlyCashFlow(orgId) {
+    const inflows = await this.query().select({
+      month: sql`TO_CHAR(${this.table.sales.saleDate}, 'Mon')`,
+      monthNum: sql`EXTRACT(MONTH FROM ${this.table.sales.saleDate})`,
+      amount: sql`SUM(${this.table.saleItems.subtotal})`
+    }).from(this.table.sales).innerJoin(this.table.saleItems, eq(this.table.sales.saleId, this.table.saleItems.saleId)).where(eq(this.table.sales.orgId, orgId)).groupBy(
+      sql`TO_CHAR(${this.table.sales.saleDate}, 'Mon'), EXTRACT(MONTH FROM ${this.table.sales.saleDate})`
+    ).orderBy(sql`EXTRACT(MONTH FROM ${this.table.sales.saleDate})`);
+    const outflows = await this.query().select({
+      month: sql`TO_CHAR(${this.table.purchases.purchaseDate}, 'Mon')`,
+      monthNum: sql`EXTRACT(MONTH FROM ${this.table.purchases.purchaseDate})`,
+      amount: sql`SUM(${this.table.purchaseItems.subtotal})`
+    }).from(this.table.purchases).innerJoin(
+      this.table.purchaseItems,
+      eq(this.table.purchases.purchaseId, this.table.purchaseItems.purchaseId)
+    ).where(eq(this.table.purchases.orgId, orgId)).groupBy(
+      sql`TO_CHAR(${this.table.purchases.purchaseDate}, 'Mon'), EXTRACT(MONTH FROM ${this.table.purchases.purchaseDate})`
+    ).orderBy(sql`EXTRACT(MONTH FROM ${this.table.purchases.purchaseDate})`);
+    return { inflows, outflows };
+  }
+  async getRevenueByCategories(orgId) {
+    return await this.query().select({
+      name: this.table.categories.name,
+      value: sql`SUM(${this.table.saleItems.subtotal})`
+    }).from(this.table.saleItems).innerJoin(this.table.sales, eq(this.table.saleItems.saleId, this.table.sales.saleId)).innerJoin(
+      this.table.products,
+      eq(this.table.saleItems.productId, this.table.products.productId)
+    ).innerJoin(this.table.categories, eq(this.table.products.catId, this.table.categories.catId)).where(eq(this.table.sales.orgId, orgId)).groupBy(this.table.categories.name);
+  }
+  async getRecentTransactions(orgId) {
+    const lastSales = await this.query().select({
+      id: sql`CAST(${this.table.sales.saleId} AS TEXT)`,
+      date: this.table.sales.saleDate,
+      customer: this.table.sales.customerName,
+      amount: sql`(SELECT SUM(${this.table.saleItems.subtotal}) FROM ${this.table.saleItems} WHERE ${this.table.saleItems.saleId} = ${this.table.sales.saleId})`,
+      status: sql`'completed'`,
+      type: sql`'Inbound'`
+    }).from(this.table.sales).where(eq(this.table.sales.orgId, orgId)).orderBy(desc(this.table.sales.saleDate)).limit(5);
+    const lastPurchases = await this.query().select({
+      id: sql`${this.table.purchases.invoiceNo}`,
+      date: this.table.purchases.purchaseDate,
+      customer: this.table.suppliers.name,
+      amount: sql`- (SELECT SUM(${this.table.purchaseItems.subtotal}) FROM ${this.table.purchaseItems} WHERE ${this.table.purchaseItems.purchaseId} = ${this.table.purchases.purchaseId})`,
+      status: sql`'completed'`,
+      type: sql`'Outbound'`
+    }).from(this.table.purchases).leftJoin(
+      this.table.suppliers,
+      eq(this.table.purchases.supplierId, this.table.suppliers.supId)
+    ).where(eq(this.table.purchases.orgId, orgId)).orderBy(desc(this.table.purchases.purchaseDate)).limit(5);
+    return [...lastSales, ...lastPurchases].sort((a, b2) => new Date(b2.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
+  }
+};
+
+// src/features/dashboard/dashboard.service.ts
+var DashboardService = class {
+  model = new DashboardModel();
+  getAnalytics = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const orgId = org.orgId;
+    const revenue = await this.model.getRevenue(orgId);
+    const expenses = await this.model.getExpenses(orgId);
+    const profit = revenue - expenses;
+    const { inflows, outflows } = await this.model.getMonthlyCashFlow(orgId);
+    const revenueByCat = await this.model.getRevenueByCategories(orgId);
+    const recentTx = await this.model.getRecentTransactions(orgId);
+    const stats = [
+      {
+        title: "Total Revenue",
+        value: `${revenue.toLocaleString()}`,
+        trend: "+0%",
+        // Placeholder as historical data comparison requires more complexity
+        isUp: true,
+        color: "bg-blue-50 dark:bg-blue-900/20"
+      },
+      {
+        title: "Total Expenses",
+        value: `${expenses.toLocaleString()}`,
+        trend: "+0%",
+        isUp: false,
+        color: "bg-rose-50 dark:bg-rose-900/20"
+      },
+      {
+        title: "Net Profit",
+        value: `${profit.toLocaleString()}`,
+        trend: "+0%",
+        isUp: profit >= 0,
+        color: "bg-emerald-50 dark:bg-emerald-900/20"
+      },
+      {
+        title: "Pending Invoices",
+        value: "0",
+        trend: "-0%",
+        isUp: true,
+        color: "bg-amber-50 dark:bg-amber-900/20"
+      }
+    ];
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ];
+    const cashFlow = monthNames.map((month) => {
+      const inflow = inflows.find((i) => i.month === month)?.amount || 0;
+      const outflow = outflows.find((o) => o.month === month)?.amount || 0;
+      return { month, inflow, outflow };
+    }).filter((cf) => cf.inflow > 0 || cf.outflow > 0);
+    if (cashFlow.length === 0) {
+      const last6Months = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = /* @__PURE__ */ new Date();
+        d.setMonth(d.getMonth() - i);
+        last6Months.push({ month: monthNames[d.getMonth()], inflow: 0, outflow: 0 });
+      }
+      cashFlow.push(...last6Months);
+    }
+    const totalRev = revenueByCat.reduce((acc, curr) => acc + Number(curr.value), 0);
+    const colors = ["#3b82f6", "#10b981", "#f59e0b", "#6366f1", "#ec4899"];
+    const revenueDistribution = revenueByCat.map((item, idx) => ({
+      name: item.name,
+      value: totalRev > 0 ? Math.round(Number(item.value) / totalRev * 100) : 0,
+      color: colors[idx % colors.length]
+    }));
+    const recentTransactions = recentTx.map((tx, idx) => ({
+      key: String(idx + 1),
+      id: tx.id || `TXN-${Math.floor(Math.random() * 1e4)}`,
+      date: tx.date,
+      customer: tx.customer || "Walking Customer",
+      amount: Number(tx.amount),
+      status: tx.status,
+      type: tx.type,
+      category: tx.type === "Inbound" ? "Sales" : "Purchase"
+    }));
+    return c2.json(
+      {
+        stats,
+        cashFlow,
+        revenueDistribution,
+        recentTransactions
+      },
+      OK2
+    );
+  };
+};
+
+// src/features/dashboard/dashboard.router.ts
+var DashboardRouter = class {
+  service = new DashboardService();
+  schema = new DashboardSchema();
+  routes = createRouter().openapi(
+    this.schema.getAnalytics,
+    this.service.getAnalytics
+  );
+};
+
+// src/features/profile/profile.schema.ts
+var ProfileSchema = class {
+  getProfile = createRoute({
+    path: "/",
+    method: "get",
+    tags: ["profile"],
+    responses: {
+      [OK2]: json_content_default(
+        ApiResponse(
+          external_exports.object({
+            id: external_exports.number(),
+            name: external_exports.string(),
+            company_name: external_exports.string(),
+            email: external_exports.string(),
+            type: external_exports.string(),
+            two_fa: external_exports.boolean(),
+            role: external_exports.any().optional(),
+            photo: external_exports.string().optional(),
+            permission: external_exports.array(external_exports.string()).optional()
+          })
+        ),
+        "Profile data"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "User not found"
+      )
+    }
+  });
+  updateProfile = createRoute({
+    path: "/",
+    method: "patch",
+    tags: ["profile"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          username: external_exports.string().optional(),
+          name: external_exports.string().optional(),
+          email: external_exports.string().email().optional(),
+          phone_number: external_exports.string().optional(),
+          two_fa: external_exports.boolean().optional()
+        }),
+        "Update profile or toggle 2FA"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "Profile updated")
+    }
+  });
+  changePassword = createRoute({
+    path: "/change-password",
+    method: "post",
+    tags: ["profile"],
+    request: {
+      body: json_content_required_default(
+        external_exports.object({
+          old_password: external_exports.string(),
+          new_password: external_exports.string().min(6)
+        }),
+        "Change password body"
+      )
+    },
+    responses: {
+      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "Password changed"),
+      [BAD_REQUEST]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Invalid password"
+      )
+    }
+  });
+  getSessions = createRoute({
+    path: "/sessions",
+    method: "get",
+    tags: ["profile"],
+    responses: {
+      [OK2]: json_content_default(
+        ApiResponse(
+          external_exports.array(
+            external_exports.object({
+              id: external_exports.string(),
+              user_id: external_exports.number(),
+              user_agent: external_exports.string().nullable(),
+              ip_address: external_exports.string().nullable(),
+              location: external_exports.string().nullable(),
+              device: external_exports.string().nullable(),
+              is_revoked: external_exports.boolean(),
+              expires_at: external_exports.string(),
+              created_at: external_exports.string(),
+              user_type: external_exports.string()
+            })
+          )
+        ),
+        "Active sessions"
+      )
+    }
+  });
+  revokeSession = createRoute({
+    path: "/sessions/{sessionId}",
+    method: "delete",
+    tags: ["profile"],
+    request: {
+      params: external_exports.object({
+        sessionId: external_exports.string()
+      })
+    },
+    responses: {
+      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "Session revoked")
+    }
+  });
+  revokeAllSessions = createRoute({
+    path: "/sessions",
+    method: "delete",
+    tags: ["profile"],
+    responses: {
+      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "All sessions revoked")
+    }
+  });
+};
+var instance7 = new ProfileSchema();
+
+// src/features/profile/profile.model.ts
+var ProfileModel = class extends AbstractModels {
+  async getUserProfile(userId, tx) {
+    return await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId)).where(eq(this.table.users.userId, userId)).limit(1).then((rows) => rows[0]);
+  }
+  async updateUser(userId, data, tx) {
+    return await this.query(tx).update(this.table.users).set(data).where(eq(this.table.users.userId, userId)).returning();
+  }
+  async getUserPassword(userId, tx) {
+    return await this.query(tx).select({ password: this.table.users.password }).from(this.table.users).where(eq(this.table.users.userId, userId)).limit(1).then((rows) => rows[0]?.password);
+  }
+  async updatePassword(userId, password, tx) {
+    return await this.query(tx).update(this.table.users).set({ password }).where(eq(this.table.users.userId, userId));
+  }
+  async getSessions(userId, tx) {
+    return await this.query(tx).select().from(this.table.sessions).where(eq(this.table.sessions.userId, userId));
+  }
+  async revokeSession(sessionId, userId, tx) {
+    return await this.query(tx).delete(this.table.sessions).where(and(eq(this.table.sessions.id, sessionId), eq(this.table.sessions.userId, userId)));
+  }
+  async revokeAllSessions(userId, currentSessionId, tx) {
+    return await this.query(tx).delete(this.table.sessions).where(eq(this.table.sessions.userId, userId));
+  }
+};
+
+// src/features/profile/profile.service.ts
+var ProfileService = class {
+  db_conn = new ProfileModel();
+  getProfile = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const user = await this.db_conn.getUserProfile(payload.userId);
+    const db_conn = new AuthModel();
+    const permission = await db_conn.getPermissions(payload.userId);
+    if (!user) {
+      return c2.json({ message: "User not found" }, NOT_FOUND);
+    }
+    const responseData = {
+      id: user.users.userId,
+      name: user.users.name,
+      company_name: user.organization?.name || "",
+      email: user.users.email,
+      type: user.users.type || "N/A",
+      two_fa: user.users.twoFa || false,
+      role: user.roles ?? void 0,
+      photo: "",
+      permission
+    };
+    return c2.json(
+      { success: true, message: "Profile data", data: responseData },
+      OK2
+    );
+  };
+  updateProfile = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const body = c2.req.valid("json");
+    await this.db_conn.updateUser(payload.userId, {
+      name: body.name,
+      email: body.email,
+      twoFa: body.two_fa
+    });
+    return c2.json({ message: "Profile updated" }, OK2);
+  };
+  changePassword = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const { old_password, new_password } = c2.req.valid("json");
+    const currentPassword = await this.db_conn.getUserPassword(payload.userId);
+    if (!currentPassword) {
+      return c2.json({ message: "User not found" }, BAD_REQUEST);
+    }
+    const isMatch = await bcryptjs_default.compare(old_password, currentPassword);
+    if (!isMatch) {
+      return c2.json({ message: "Invalid password" }, BAD_REQUEST);
+    }
+    const hashedPassword = await bcryptjs_default.hash(new_password, 10);
+    await this.db_conn.updatePassword(payload.userId, hashedPassword);
+    return c2.json({ message: "Password changed" }, OK2);
+  };
+  getSessions = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const sessions2 = await this.db_conn.getSessions(payload.userId);
+    const formattedSessions = sessions2.map((s) => ({
+      id: s.id,
+      user_id: s.userId,
+      user_agent: s.userAgent,
+      ip_address: s.ipAddress,
+      location: s.location,
+      device: s.device,
+      is_revoked: false,
+      expires_at: s.expiresAt.toISOString(),
+      created_at: s.createdAt?.toISOString() || "",
+      user_type: "N/A"
+    }));
+    return c2.json(
+      { success: true, message: "Active sessions", data: formattedSessions },
+      OK2
+    );
+  };
+  revokeSession = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    const { sessionId } = c2.req.valid("param");
+    await this.db_conn.revokeSession(sessionId, payload.userId);
+    return c2.json({ message: "Session revoked" }, OK2);
+  };
+  revokeAllSessions = async (c2) => {
+    const payload = c2.get("jwtPayload");
+    await this.db_conn.revokeAllSessions(payload.userId);
+    return c2.json({ message: "All sessions revoked" }, OK2);
+  };
+};
+
+// src/features/profile/profile.router.ts
+var ProfileRouter = class {
+  service = new ProfileService();
+  schema = new ProfileSchema();
+  routes = createRouter().openapi(this.schema.getProfile, this.service.getProfile).openapi(this.schema.updateProfile, this.service.updateProfile).openapi(this.schema.changePassword, this.service.changePassword).openapi(this.schema.getSessions, this.service.getSessions).openapi(this.schema.revokeSession, this.service.revokeSession).openapi(this.schema.revokeAllSessions, this.service.revokeAllSessions);
+};
+
+// src/features/warehouse/warehouse.schema.ts
+var ZUpdateWarehouses = ZWarehouse.partial();
+var WarehousesSchema = class {
+  addWarehouse = createRoute({
+    path: "/",
+    method: "post",
+    tags: ["warehouse"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { body: json_content_required_default(ZWarehouse, "create warehouses") },
+    responses: {
+      [CREATED]: json_content_default(ZWarehouse, "Warehouses created response")
+    }
+  });
+  getWarehouse = createRoute({
+    path: "/",
+    method: "get",
+    tags: ["warehouse"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      query: external_exports.object({
+        limit: external_exports.string().default("10").transform((val) => val ? parseInt(val) : 10),
+        offset: external_exports.string().default("0").transform((val) => val ? parseInt(val) : 0)
+      })
+    },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          count: external_exports.number(),
+          result: external_exports.array(ZWarehouse)
+        }),
+        "Warehouses fetched"
+      ),
+      [NOT_FOUND]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "No warehouses found"
+      )
+    }
+  });
+  updateWarehouse = createRoute({
+    path: "/:id",
+    method: "put",
+    tags: ["warehouse"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: {
+      params: idParams,
+      body: json_content_required_default(ZUpdateWarehouses, "Update warehouses")
+    },
+    responses: {
+      [OK2]: json_content_default(ZWarehouse, "Warehouses updated")
+    }
+  });
+  deleteWarehouse = createRoute({
+    path: "/:id",
+    method: "delete",
+    tags: ["warehouse"],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+    request: { params: idParams },
+    responses: {
+      [OK2]: json_content_default(
+        external_exports.object({
+          message: external_exports.string()
+        }),
+        "Warehouses deleted"
+      )
+    }
+  });
+};
+var instance8 = new WarehousesSchema();
+
+// src/features/warehouse/warehouse.model.ts
+var WarehouseModel = class extends AbstractModels {
+  async addWarehouse(body) {
+    const res = await this.query().insert(this.table.warehouses).values(body).returning();
+    return res;
+  }
+  async updateWarehouse(body, id) {
+    const res = await this.query().update(this.table.warehouses).set(body).where(eq(this.table.warehouses.whId, id)).returning();
+    return res;
+  }
+  async deleteWarehouse(id) {
+    const res = await this.query().delete(this.table.warehouses).where(eq(this.table.warehouses.whId, id)).returning();
+    return res;
+  }
+  async getWarehouse(ORG_ID, limit, offset) {
+    const { orgId, ...rest } = getTableColumns(this.table.warehouses);
+    const res = await this.query().select({ ...rest }).from(this.table.warehouses).where(eq(this.table.warehouses.orgId, ORG_ID)).limit(limit).offset(offset);
+    return res;
+  }
+  async getTotalWarehouse() {
+    const res = await this.query().$count(this.table.warehouses);
+    return res;
+  }
+};
+
+// src/features/warehouse/warehouse.service.ts
+var WarehouseService = class {
+  db_conn = new WarehouseModel();
+  addWarehouse = async (c2) => {
+    const body = c2.req.valid("json");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.addWarehouse({ ...body, orgId: org.orgId });
+    return c2.json({ ...res }, CREATED);
+  };
+  updateWarehouse = async (c2) => {
+    const body = c2.req.valid("json");
+    const { id } = c2.req.valid("param");
+    const org = c2.get("jwtPayload");
+    const res = await this.db_conn.updateWarehouse({ ...body, orgId: org.orgId }, id);
+    return c2.json({ ...res }, OK2);
+  };
+  deleteWarehouse = async (c2) => {
+    const { id } = c2.req.valid("param");
+    await this.db_conn.deleteWarehouse(id);
+    return c2.json({ message: "Warehouse deleted" }, OK2);
+  };
+  getWarehouse = async (c2) => {
+    const org = c2.get("jwtPayload");
+    const { limit, offset } = c2.req.valid("query");
+    const res = await this.db_conn.getWarehouse(org.orgId, limit, offset);
+    const count = await this.db_conn.getTotalWarehouse();
+    if (res.length === 0) {
+      return c2.json({ message: "No warehouse found" }, NOT_FOUND);
+    }
+    return c2.json({ count, result: res, message: "Warehouse found" }, OK2);
+  };
+};
+
+// src/features/warehouse/warehouse.router.ts
+var WarehouseRouter = class {
+  service = new WarehouseService();
+  schema = new WarehousesSchema();
+  routes = createRouter().openapi(this.schema.addWarehouse, this.service.addWarehouse).openapi(this.schema.updateWarehouse, this.service.updateWarehouse).openapi(this.schema.deleteWarehouse, this.service.deleteWarehouse).openapi(this.schema.getWarehouse, this.service.getWarehouse);
+};
+
 // node_modules/.pnpm/hono@4.11.4/node_modules/hono/dist/utils/jwt/jwa.js
 var AlgorithmTypes = /* @__PURE__ */ ((AlgorithmTypes2) => {
   AlgorithmTypes2["HS256"] = "HS256";
@@ -37363,400 +37985,10 @@ var authMiddleware = () => {
   };
 };
 
-// src/features/warehouse/warehouse.schema.ts
-var ZUpdateWarehouses = ZWarehouse.partial();
-var WarehousesSchema = class {
-  addWarehouse = createRoute({
-    path: "/",
-    method: "post",
-    tags: ["warehouse"],
-    security: [
-      {
-        bearerAuth: []
-      }
-    ],
-    request: { body: json_content_required_default(ZWarehouse, "create warehouses") },
-    responses: {
-      [CREATED]: json_content_default(ZWarehouse, "Warehouses created response")
-    }
-  });
-  getWarehouse = createRoute({
-    path: "/",
-    method: "get",
-    tags: ["warehouse"],
-    security: [
-      {
-        bearerAuth: []
-      }
-    ],
-    request: {
-      query: external_exports.object({
-        limit: external_exports.string().default("10").transform((val) => val ? parseInt(val) : 10),
-        offset: external_exports.string().default("0").transform((val) => val ? parseInt(val) : 0)
-      })
-    },
-    responses: {
-      [OK2]: json_content_default(
-        external_exports.object({
-          count: external_exports.number(),
-          result: external_exports.array(ZWarehouse)
-        }),
-        "Warehouses fetched"
-      ),
-      [NOT_FOUND]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "No warehouses found"
-      )
-    }
-  });
-  updateWarehouse = createRoute({
-    path: "/:id",
-    method: "put",
-    tags: ["warehouse"],
-    security: [
-      {
-        bearerAuth: []
-      }
-    ],
-    request: {
-      params: idParams,
-      body: json_content_required_default(ZUpdateWarehouses, "Update warehouses")
-    },
-    responses: {
-      [OK2]: json_content_default(ZWarehouse, "Warehouses updated")
-    }
-  });
-  deleteWarehouse = createRoute({
-    path: "/:id",
-    method: "delete",
-    tags: ["warehouse"],
-    security: [
-      {
-        bearerAuth: []
-      }
-    ],
-    request: { params: idParams },
-    responses: {
-      [OK2]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "Warehouses deleted"
-      )
-    }
-  });
-};
-var instance6 = new WarehousesSchema();
-
-// src/features/warehouse/warehouse.model.ts
-var WarehouseModel = class extends AbstractModels {
-  async addWarehouse(body) {
-    const res = await this.query().insert(this.table.warehouses).values(body).returning();
-    return res;
-  }
-  async updateWarehouse(body, id) {
-    const res = await this.query().update(this.table.warehouses).set(body).where(eq(this.table.warehouses.whId, id)).returning();
-    return res;
-  }
-  async deleteWarehouse(id) {
-    const res = await this.query().delete(this.table.warehouses).where(eq(this.table.warehouses.whId, id)).returning();
-    return res;
-  }
-  async getWarehouse(ORG_ID, limit, offset) {
-    const { orgId, ...rest } = getTableColumns(this.table.warehouses);
-    const res = await this.query().select({ ...rest }).from(this.table.warehouses).where(eq(this.table.warehouses.orgId, ORG_ID)).limit(limit).offset(offset);
-    return res;
-  }
-  async getTotalWarehouse() {
-    const res = await this.query().$count(this.table.warehouses);
-    return res;
-  }
-};
-
-// src/features/warehouse/warehouse.service.ts
-var WarehouseService = class {
-  db_conn = new WarehouseModel();
-  addWarehouse = async (c2) => {
-    const body = c2.req.valid("json");
-    const org = c2.get("jwtPayload");
-    const res = await this.db_conn.addWarehouse({ ...body, orgId: org.orgId });
-    return c2.json({ ...res }, CREATED);
-  };
-  updateWarehouse = async (c2) => {
-    const body = c2.req.valid("json");
-    const { id } = c2.req.valid("param");
-    const org = c2.get("jwtPayload");
-    const res = await this.db_conn.updateWarehouse({ ...body, orgId: org.orgId }, id);
-    return c2.json({ ...res }, OK2);
-  };
-  deleteWarehouse = async (c2) => {
-    const { id } = c2.req.valid("param");
-    await this.db_conn.deleteWarehouse(id);
-    return c2.json({ message: "Warehouse deleted" }, OK2);
-  };
-  getWarehouse = async (c2) => {
-    const org = c2.get("jwtPayload");
-    const { limit, offset } = c2.req.valid("query");
-    const res = await this.db_conn.getWarehouse(org.orgId, limit, offset);
-    const count = await this.db_conn.getTotalWarehouse();
-    if (res.length === 0) {
-      return c2.json({ message: "No warehouse found" }, NOT_FOUND);
-    }
-    return c2.json({ count, result: res, message: "Warehouse found" }, OK2);
-  };
-};
-
-// src/features/warehouse/warehouse.router.ts
-var WarehouseRouter = class {
-  service = new WarehouseService();
-  schema = new WarehousesSchema();
-  routes = createRouter().openapi(this.schema.addWarehouse, this.service.addWarehouse).openapi(this.schema.updateWarehouse, this.service.updateWarehouse).openapi(this.schema.deleteWarehouse, this.service.deleteWarehouse).openapi(this.schema.getWarehouse, this.service.getWarehouse);
-};
-
-// src/features/profile/profile.schema.ts
-var ProfileSchema = class {
-  getProfile = createRoute({
-    path: "/",
-    method: "get",
-    tags: ["profile"],
-    responses: {
-      [OK2]: json_content_default(
-        ApiResponse(
-          external_exports.object({
-            id: external_exports.number(),
-            name: external_exports.string(),
-            company_name: external_exports.string(),
-            email: external_exports.string(),
-            type: external_exports.string(),
-            two_fa: external_exports.boolean(),
-            role: external_exports.any().optional(),
-            photo: external_exports.string().optional(),
-            permission: external_exports.array(external_exports.string()).optional()
-          })
-        ),
-        "Profile data"
-      ),
-      [NOT_FOUND]: json_content_default(
-        external_exports.object({
-          message: external_exports.string()
-        }),
-        "User not found"
-      )
-    }
-  });
-  updateProfile = createRoute({
-    path: "/",
-    method: "patch",
-    tags: ["profile"],
-    request: {
-      body: json_content_required_default(
-        external_exports.object({
-          username: external_exports.string().optional(),
-          name: external_exports.string().optional(),
-          email: external_exports.string().email().optional(),
-          phone_number: external_exports.string().optional(),
-          two_fa: external_exports.boolean().optional()
-        }),
-        "Update profile or toggle 2FA"
-      )
-    },
-    responses: {
-      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "Profile updated")
-    }
-  });
-  changePassword = createRoute({
-    path: "/change-password",
-    method: "post",
-    tags: ["profile"],
-    request: {
-      body: json_content_required_default(
-        external_exports.object({
-          old_password: external_exports.string(),
-          new_password: external_exports.string().min(6)
-        }),
-        "Change password body"
-      )
-    },
-    responses: {
-      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "Password changed"),
-      [BAD_REQUEST]: json_content_default(
-        external_exports.object({ message: external_exports.string() }),
-        "Invalid password"
-      )
-    }
-  });
-  getSessions = createRoute({
-    path: "/sessions",
-    method: "get",
-    tags: ["profile"],
-    responses: {
-      [OK2]: json_content_default(
-        ApiResponse(
-          external_exports.array(
-            external_exports.object({
-              id: external_exports.string(),
-              user_id: external_exports.number(),
-              user_agent: external_exports.string().nullable(),
-              ip_address: external_exports.string().nullable(),
-              location: external_exports.string().nullable(),
-              device: external_exports.string().nullable(),
-              is_revoked: external_exports.boolean(),
-              expires_at: external_exports.string(),
-              created_at: external_exports.string(),
-              user_type: external_exports.string()
-            })
-          )
-        ),
-        "Active sessions"
-      )
-    }
-  });
-  revokeSession = createRoute({
-    path: "/sessions/{sessionId}",
-    method: "delete",
-    tags: ["profile"],
-    request: {
-      params: external_exports.object({
-        sessionId: external_exports.string()
-      })
-    },
-    responses: {
-      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "Session revoked")
-    }
-  });
-  revokeAllSessions = createRoute({
-    path: "/sessions",
-    method: "delete",
-    tags: ["profile"],
-    responses: {
-      [OK2]: json_content_default(external_exports.object({ message: external_exports.string() }), "All sessions revoked")
-    }
-  });
-};
-var instance7 = new ProfileSchema();
-
-// src/features/profile/profile.model.ts
-var ProfileModel = class extends AbstractModels {
-  async getUserProfile(userId, tx) {
-    return await this.query(tx).select().from(this.table.users).leftJoin(this.table.organization, eq(this.table.users.orgId, this.table.organization.orgId)).leftJoin(this.table.roles, eq(this.table.users.roleId, this.table.roles.roleId)).where(eq(this.table.users.userId, userId)).limit(1).then((rows) => rows[0]);
-  }
-  async updateUser(userId, data, tx) {
-    return await this.query(tx).update(this.table.users).set(data).where(eq(this.table.users.userId, userId)).returning();
-  }
-  async getUserPassword(userId, tx) {
-    return await this.query(tx).select({ password: this.table.users.password }).from(this.table.users).where(eq(this.table.users.userId, userId)).limit(1).then((rows) => rows[0]?.password);
-  }
-  async updatePassword(userId, password, tx) {
-    return await this.query(tx).update(this.table.users).set({ password }).where(eq(this.table.users.userId, userId));
-  }
-  async getSessions(userId, tx) {
-    return await this.query(tx).select().from(this.table.sessions).where(eq(this.table.sessions.userId, userId));
-  }
-  async revokeSession(sessionId, userId, tx) {
-    return await this.query(tx).delete(this.table.sessions).where(and(eq(this.table.sessions.id, sessionId), eq(this.table.sessions.userId, userId)));
-  }
-  async revokeAllSessions(userId, currentSessionId, tx) {
-    return await this.query(tx).delete(this.table.sessions).where(eq(this.table.sessions.userId, userId));
-  }
-};
-
-// src/features/profile/profile.service.ts
-var ProfileService = class {
-  db_conn = new ProfileModel();
-  getProfile = async (c2) => {
-    const payload = c2.get("jwtPayload");
-    const user = await this.db_conn.getUserProfile(payload.userId);
-    const db_conn = new AuthModel();
-    const permission = await db_conn.getPermissions(payload.userId);
-    if (!user) {
-      return c2.json({ message: "User not found" }, NOT_FOUND);
-    }
-    const responseData = {
-      id: user.users.userId,
-      name: user.users.name,
-      company_name: user.organization?.name || "",
-      email: user.users.email,
-      type: user.users.type || "N/A",
-      two_fa: user.users.twoFa || false,
-      role: user.roles ?? void 0,
-      photo: "",
-      permission
-    };
-    return c2.json(
-      { success: true, message: "Profile data", data: responseData },
-      OK2
-    );
-  };
-  updateProfile = async (c2) => {
-    const payload = c2.get("jwtPayload");
-    const body = c2.req.valid("json");
-    await this.db_conn.updateUser(payload.userId, {
-      name: body.name,
-      email: body.email,
-      twoFa: body.two_fa
-    });
-    return c2.json({ message: "Profile updated" }, OK2);
-  };
-  changePassword = async (c2) => {
-    const payload = c2.get("jwtPayload");
-    const { old_password, new_password } = c2.req.valid("json");
-    const currentPassword = await this.db_conn.getUserPassword(payload.userId);
-    if (!currentPassword) {
-      return c2.json({ message: "User not found" }, BAD_REQUEST);
-    }
-    const isMatch = await bcryptjs_default.compare(old_password, currentPassword);
-    if (!isMatch) {
-      return c2.json({ message: "Invalid password" }, BAD_REQUEST);
-    }
-    const hashedPassword = await bcryptjs_default.hash(new_password, 10);
-    await this.db_conn.updatePassword(payload.userId, hashedPassword);
-    return c2.json({ message: "Password changed" }, OK2);
-  };
-  getSessions = async (c2) => {
-    const payload = c2.get("jwtPayload");
-    const sessions2 = await this.db_conn.getSessions(payload.userId);
-    const formattedSessions = sessions2.map((s) => ({
-      id: s.id,
-      user_id: s.userId,
-      user_agent: s.userAgent,
-      ip_address: s.ipAddress,
-      location: s.location,
-      device: s.device,
-      is_revoked: false,
-      expires_at: s.expiresAt.toISOString(),
-      created_at: s.createdAt?.toISOString() || "",
-      user_type: "N/A"
-    }));
-    return c2.json(
-      { success: true, message: "Active sessions", data: formattedSessions },
-      OK2
-    );
-  };
-  revokeSession = async (c2) => {
-    const payload = c2.get("jwtPayload");
-    const { sessionId } = c2.req.valid("param");
-    await this.db_conn.revokeSession(sessionId, payload.userId);
-    return c2.json({ message: "Session revoked" }, OK2);
-  };
-  revokeAllSessions = async (c2) => {
-    const payload = c2.get("jwtPayload");
-    await this.db_conn.revokeAllSessions(payload.userId);
-    return c2.json({ message: "All sessions revoked" }, OK2);
-  };
-};
-
-// src/features/profile/profile.router.ts
-var ProfileRouter = class {
-  service = new ProfileService();
-  schema = new ProfileSchema();
-  routes = createRouter().openapi(this.schema.getProfile, this.service.getProfile).openapi(this.schema.updateProfile, this.service.updateProfile).openapi(this.schema.changePassword, this.service.changePassword).openapi(this.schema.getSessions, this.service.getSessions).openapi(this.schema.revokeSession, this.service.revokeSession).openapi(this.schema.revokeAllSessions, this.service.revokeAllSessions);
-};
-
 // src/routes/private.routes.ts
 var privateRoutes = createRouter();
 privateRoutes.use("*", authMiddleware());
+privateRoutes.route("/dashboard", new DashboardRouter().routes);
 privateRoutes.route("/supplier", new SupplierRouter().routes);
 privateRoutes.route("/warehouse", new WarehouseRouter().routes);
 privateRoutes.route("/category", new CategoryRouter().routes);
@@ -38065,7 +38297,7 @@ var AuthSchema = class {
     }
   });
 };
-var instance8 = new AuthSchema();
+var instance9 = new AuthSchema();
 
 // src/features/auth/auth.service.ts
 var import_nodemailer = __toESM(require_nodemailer(), 1);
@@ -38437,7 +38669,7 @@ var HealthSchema = class {
     }
   });
 };
-var instance9 = new HealthSchema();
+var instance10 = new HealthSchema();
 
 // src/features/health/health.model.ts
 var HealthModel = class extends AbstractModels {
