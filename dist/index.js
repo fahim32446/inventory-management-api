@@ -35235,11 +35235,70 @@ var administrationService = class {
   };
 };
 
+// src/middlewares/checkPermission.ts
+var checkPermission = (requiredPermission) => {
+  return async (c2, next) => {
+    const payload = c2.get("jwtPayload");
+    if (!payload) {
+      return c2.json({ message: "Unauthorized: Missing user context" }, 401);
+    }
+    const { userId } = payload;
+    const userRole = await db.select({
+      isAdmin: roles.isAdmin,
+      permissionKey: permissions.key
+    }).from(users).leftJoin(roles, eq(users.roleId, roles.roleId)).leftJoin(rolePermissions, eq(roles.roleId, rolePermissions.roleId)).leftJoin(permissions, eq(rolePermissions.permissionId, permissions.permissionId)).where(eq(users.userId, userId));
+    if (userRole.length === 0) {
+      return c2.json({ message: "Forbidden: User has no role or permissions" }, 403);
+    }
+    const hasPermission = userRole.some((r) => r.isAdmin || r.permissionKey === requiredPermission);
+    if (!hasPermission) {
+      return c2.json({ message: `Forbidden: Missing permission '${requiredPermission}'` }, 403);
+    }
+    await next();
+  };
+};
+
 // src/features/administration/administration.router.ts
 var administrationRouter = class {
   service = new administrationService();
   schema = new administrationSchema();
-  routes = createRouter().openapi(this.schema.getPermission, this.service.getPermission).openapi(this.schema.createRole, this.service.createRole).openapi(this.schema.getRoleDetails, this.service.getRoleDetails).openapi(this.schema.getRoles, this.service.getRoles).openapi(this.schema.updateRole, this.service.updateRole).openapi(this.schema.createUser, this.service.createUser).openapi(this.schema.getUsers, this.service.getUsers).openapi(this.schema.updateUser, this.service.updateUser).openapi(this.schema.deleteUser, this.service.deleteUser);
+  routes = createRouter().openapi(
+    this.schema.getPermission,
+    checkPermission("administration:read"),
+    this.service.getPermission
+  ).openapi(
+    this.schema.createRole,
+    checkPermission("administration:roles:create"),
+    this.service.createRole
+  ).openapi(
+    this.schema.getRoleDetails,
+    checkPermission("administration:roles:read"),
+    this.service.getRoleDetails
+  ).openapi(
+    this.schema.getRoles,
+    checkPermission("administration:roles:read"),
+    this.service.getRoles
+  ).openapi(
+    this.schema.updateRole,
+    checkPermission("administration:roles:update"),
+    this.service.updateRole
+  ).openapi(
+    this.schema.createUser,
+    checkPermission("administration:users:create"),
+    this.service.createUser
+  ).openapi(
+    this.schema.getUsers,
+    checkPermission("administration:users:read"),
+    this.service.getUsers
+  ).openapi(
+    this.schema.updateUser,
+    checkPermission("administration:users:update"),
+    this.service.updateUser
+  ).openapi(
+    this.schema.deleteUser,
+    checkPermission("administration:users:delete"),
+    this.service.deleteUser
+  );
 };
 
 // src/features/category/category.model.ts
@@ -35293,9 +35352,6 @@ var CategoryService = class {
     const { limit, offset } = c2.req.valid("query");
     const res = await this.db_conn.getCategory(org.orgId, limit, offset);
     const count = await this.db_conn.getTotalCategory();
-    if (res.length === 0) {
-      return c2.json({ message: "No category found" }, NOT_FOUND);
-    }
     return c2.json({ count, result: res, message: "Category found" }, OK2);
   };
 };
@@ -36087,9 +36143,6 @@ var ProductService = class {
     const { limit, offset } = c2.req.valid("query");
     const res = await this.db_conn.getProduct(org.orgId, limit, offset);
     const count = await this.db_conn.getTotalProduct();
-    if (res.length === 0) {
-      return c2.json({ message: "No product found" }, NOT_FOUND);
-    }
     return c2.json({ count, result: res, message: "Product found" }, OK2);
   };
 };
@@ -36796,9 +36849,6 @@ var SupplierService = class {
     const { limit, offset } = c2.req.valid("query");
     const res = await this.db_conn.getSupplier(org.orgId, limit, offset);
     const count = await this.db_conn.getTotalSupplier();
-    if (res.length === 0) {
-      return c2.json({ message: "No supplier found" }, NOT_FOUND);
-    }
     return c2.json({ count, result: res, message: "Supplier fetched" }, OK2);
   };
 };
@@ -37418,9 +37468,6 @@ var WarehouseService = class {
     const { limit, offset } = c2.req.valid("query");
     const res = await this.db_conn.getWarehouse(org.orgId, limit, offset);
     const count = await this.db_conn.getTotalWarehouse();
-    if (res.length === 0) {
-      return c2.json({ message: "No warehouse found" }, NOT_FOUND);
-    }
     return c2.json({ count, result: res, message: "Warehouse found" }, OK2);
   };
 };

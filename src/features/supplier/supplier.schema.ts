@@ -3,6 +3,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { ZSupplier } from "../../db/schema.type";
 import { idParams } from "../../config/types";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 export const ZUpdateSupplier = ZSupplier.partial();
 
@@ -14,6 +15,7 @@ export class SupplierSchema {
     path: "/",
     method: "post",
     tags: ["supplier"],
+    middleware: [checkPermission("suppliers:create")],
     security: [
       {
         bearerAuth: [],
@@ -29,6 +31,7 @@ export class SupplierSchema {
     path: "/",
     method: "get",
     tags: ["supplier"],
+    middleware: [checkPermission("suppliers:read")],
     security: [
       {
         bearerAuth: [],
@@ -52,14 +55,14 @@ export class SupplierSchema {
           count: z.number(),
           result: z.array(ZSupplier),
         }),
-        "Supplier fetched"
+        "Supplier fetched",
       ),
 
       [HttpStatusCodes.NOT_FOUND]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "No supplier found"
+        "No supplier found",
       ),
     },
   });
@@ -68,6 +71,7 @@ export class SupplierSchema {
     path: "/:id",
     method: "put",
     tags: ["supplier"],
+    middleware: [checkPermission("suppliers:update")],
     security: [
       {
         bearerAuth: [],
@@ -86,6 +90,7 @@ export class SupplierSchema {
     path: "/:id",
     method: "delete",
     tags: ["supplier"],
+    middleware: [checkPermission("suppliers:delete")],
     security: [
       {
         bearerAuth: [],
@@ -97,7 +102,7 @@ export class SupplierSchema {
         z.object({
           message: z.string(),
         }),
-        "Supplier deleted"
+        "Supplier deleted",
       ),
     },
   });

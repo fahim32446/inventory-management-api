@@ -46,9 +46,9 @@ export class WarehouseService {
     const res = await this.db_conn.getWarehouse(org.orgId, limit, offset);
     const count = await this.db_conn.getTotalWarehouse();
 
-    if (res.length === 0) {
-      return c.json({ message: "No warehouse found" }, HttpStatusCodes.NOT_FOUND);
-    }
+    // if (res.length === 0) {
+    //   return c.json({ message: "No warehouse found" }, HttpStatusCodes.NOT_FOUND);
+    // }
 
     return c.json({ count, result: res, message: "Warehouse found" }, HttpStatusCodes.OK);
   };

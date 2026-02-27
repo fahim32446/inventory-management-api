@@ -6,6 +6,6 @@ import env from "./env";
 
 const port = env.PORT;
 
-console.log(`🚀 Server running at http://localhost:${port}`);
+console.log(`🚀 Server running at http://localhost:${port} ${env.DATABASE_URL}`);
 
 serve({ fetch: app.fetch, port });

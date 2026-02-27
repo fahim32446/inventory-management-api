@@ -47,9 +47,9 @@ export class ProductService {
     const res = await this.db_conn.getProduct(org.orgId, limit, offset);
     const count = await this.db_conn.getTotalProduct();
 
-    if (res.length === 0) {
-      return c.json({ message: "No product found" }, HttpStatusCodes.NOT_FOUND);
-    }
+    // if (res.length === 0) {
+    //   return c.json({ message: "No product found" }, HttpStatusCodes.NOT_FOUND);
+    // }
 
     return c.json({ count, result: res, message: "Product found" }, HttpStatusCodes.OK);
   };

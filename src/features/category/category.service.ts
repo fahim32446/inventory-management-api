@@ -45,9 +45,9 @@ export class CategoryService {
     const res = await this.db_conn.getCategory(org.orgId, limit, offset);
     const count = await this.db_conn.getTotalCategory();
 
-    if (res.length === 0) {
-      return c.json({ message: "No category found" }, HttpStatusCodes.NOT_FOUND);
-    }
+    // if (res.length === 0) {
+    //   return c.json({ message: "No category found" }, HttpStatusCodes.NOT_FOUND);
+    // }
 
     return c.json({ count, result: res, message: "Category found" }, HttpStatusCodes.OK);
   };

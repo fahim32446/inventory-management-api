@@ -3,6 +3,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { ZProduct } from "../../db/schema.type";
 import { idParams } from "../../config/types";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 export const ZUpdateProduct = ZProduct.partial();
 
@@ -14,6 +15,7 @@ export class ProductSchema {
     path: "/",
     method: "post",
     tags: ["product"],
+    middleware: [checkPermission("products:create")],
     security: [
       {
         bearerAuth: [],
@@ -29,6 +31,7 @@ export class ProductSchema {
     path: "/",
     method: "get",
     tags: ["product"],
+    middleware: [checkPermission("products:read")],
     security: [
       {
         bearerAuth: [],
@@ -68,6 +71,7 @@ export class ProductSchema {
     path: "/:id",
     method: "put",
     tags: ["product"],
+    middleware: [checkPermission("products:update")],
     security: [
       {
         bearerAuth: [],
@@ -86,6 +90,7 @@ export class ProductSchema {
     path: "/:id",
     method: "delete",
     tags: ["product"],
+    middleware: [checkPermission("products:delete")],
     security: [
       {
         bearerAuth: [],

@@ -1,6 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent } from "stoker/openapi/helpers";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 const ZStats = z.object({
   title: z.string(),
@@ -45,6 +46,7 @@ export class DashboardSchema {
     path: "/analytics",
     method: "get",
     tags: ["dashboard"],
+    middleware: [checkPermission("dashboard:read")],
     security: [
       {
         bearerAuth: [],

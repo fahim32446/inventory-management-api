@@ -1,6 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 export const PurchaseProduct = z.object({
   stock_product_id: z.number().optional(),
@@ -47,7 +48,7 @@ export const AddSaleBody = z.object({
         quantity: z.number().int().positive(),
         unitPrice: z.number().min(0),
         subtotal: z.number().min(0),
-      })
+      }),
     )
     .nonempty(),
 });
@@ -65,7 +66,7 @@ export const UpdateSaleBody = z.object({
         subtotal: z.number().min(0),
         stock: z.number().min(0),
         isDeleted: z.boolean().optional(),
-      })
+      }),
     )
     .nonempty(),
 });
@@ -83,7 +84,7 @@ export const SaleList = z.object({
       quantity: z.number().nullable(),
       unitPrice: z.number().nullable(),
       subtotal: z.number().nullable(),
-    })
+    }),
   ),
 });
 export const StockReportItem = z.object({
@@ -128,13 +129,14 @@ export class StockSchema {
           count: z.number(),
           result: z.array(PurchaseProduct),
         }),
-        "Purchase Lists"
+        "Purchase Lists",
       ),
     },
   });
   readonly purchaseList = createRoute({
     path: "/purchase",
     method: "get",
+    middleware: [checkPermission("purchase:read")],
     tags: ["stock"],
     security: [{ bearerAuth: [] }],
     responses: {
@@ -143,13 +145,14 @@ export class StockSchema {
           count: z.number(),
           result: z.array(PurchaseListSchema),
         }),
-        "Purchase Lists"
+        "Purchase Lists",
       ),
     },
   });
   readonly addPurchase = createRoute({
     path: "/purchase",
     method: "post",
+    middleware: [checkPermission("purchase:create")],
     tags: ["stock"],
     security: [{ bearerAuth: [] }],
     request: {
@@ -163,6 +166,7 @@ export class StockSchema {
   readonly updatePurchase = createRoute({
     path: "/purchase/{id}",
     method: "put",
+    middleware: [checkPermission("purchase:update")],
     tags: ["stock"],
     request: {
       params: z.object({ id: z.string() }),
@@ -176,6 +180,7 @@ export class StockSchema {
   readonly deletePurchase = createRoute({
     path: "/purchase/{id}",
     method: "delete",
+    middleware: [checkPermission("purchase:delete")],
     tags: ["stock"],
     request: { params: z.object({ id: z.string() }) },
     responses: {
@@ -186,6 +191,7 @@ export class StockSchema {
   readonly salesList = createRoute({
     path: "/sale",
     method: "get",
+    middleware: [checkPermission("sale:read")],
     tags: ["stock"],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
@@ -193,13 +199,14 @@ export class StockSchema {
           count: z.number(),
           result: z.array(SaleList),
         }),
-        "Sale list"
+        "Sale list",
       ),
     },
   });
   readonly addSale = createRoute({
     path: "/sale",
     method: "post",
+    middleware: [checkPermission("sale:create")],
     tags: ["stock"],
     request: { body: jsonContentRequired(AddSaleBody, "Create sale") },
     responses: {
@@ -210,6 +217,7 @@ export class StockSchema {
   readonly updateSale = createRoute({
     path: "/sale/{id}",
     method: "put",
+    middleware: [checkPermission("sale:update")],
     tags: ["stock"],
     request: {
       params: z.object({ id: z.string() }),
@@ -230,7 +238,7 @@ export class StockSchema {
         z.object({
           result: AddSaleBody,
         }),
-        "Get for edit"
+        "Get for edit",
       ),
     },
   });
@@ -238,6 +246,7 @@ export class StockSchema {
   readonly stockReport = createRoute({
     path: "/report/stock",
     method: "get",
+    middleware: [checkPermission("report:read")],
     tags: ["stock"],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
@@ -246,7 +255,7 @@ export class StockSchema {
           result: z.array(StockReportItem),
         }),
 
-        "Stock report"
+        "Stock report",
       ),
     },
   });
@@ -254,6 +263,7 @@ export class StockSchema {
   readonly salesReport = createRoute({
     path: "/report/sales",
     method: "get",
+    middleware: [checkPermission("report:read")],
     tags: ["stock"],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
@@ -261,7 +271,7 @@ export class StockSchema {
           count: z.number(),
           result: z.array(SalesReport),
         }),
-        "Summary report"
+        "Summary report",
       ),
     },
   });

@@ -1,6 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 // ---- Zod Schemas ----
 export const ZRole = z.object({
@@ -44,11 +45,20 @@ export class administrationSchema {
     path: "/permissions",
     method: "get",
     tags: ["administration"],
+    middleware: [checkPermission("administration:read")],
     security: [{ bearerAuth: [] }],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
         z.object({ count: z.number(), result: z.array(ZPermission) }),
-        "Permissions fetched successfully"
+        "Permissions fetched successfully",
+      ),
+      [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+        z.object({ message: z.string() }),
+        "Unauthorized: Missing user context",
+      ),
+      [HttpStatusCodes.FORBIDDEN]: jsonContent(
+        z.object({ message: z.string() }),
+        "Forbidden: Missing permission or role",
       ),
     },
   });
@@ -58,6 +68,7 @@ export class administrationSchema {
     path: "/role",
     method: "post",
     tags: ["administration"],
+    middleware: [checkPermission("administration:roles:create")],
     security: [{ bearerAuth: [] }],
     request: { body: jsonContentRequired(ZRole, "Create a new role") },
     responses: {
@@ -65,8 +76,13 @@ export class administrationSchema {
         z.object({
           roleName: z.string(),
         }),
-        "Role created successfully"
+        "Role created successfully",
       ),
+      [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+        z.object({ message: z.string() }),
+        "Unauthorized",
+      ),
+      [HttpStatusCodes.FORBIDDEN]: jsonContent(z.object({ message: z.string() }), "Forbidden"),
     },
   });
 
@@ -74,6 +90,7 @@ export class administrationSchema {
     path: "/role/details/:id",
     method: "get",
     tags: ["administration"],
+    middleware: [checkPermission("administration:roles:read")],
     security: [{ bearerAuth: [] }],
     request: {
       params: z.object({ id: z.string() }),
@@ -87,8 +104,13 @@ export class administrationSchema {
             permissions: z.array(z.object({ permissionId: z.number(), key: z.string() })),
           }),
         }),
-        "Role fetched successfully"
+        "Role fetched successfully",
       ),
+      [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+        z.object({ message: z.string() }),
+        "Unauthorized",
+      ),
+      [HttpStatusCodes.FORBIDDEN]: jsonContent(z.object({ message: z.string() }), "Forbidden"),
     },
   });
   // Get all Roles
@@ -96,6 +118,7 @@ export class administrationSchema {
     path: "/role",
     method: "get",
     tags: ["administration"],
+    middleware: [checkPermission("administration:roles:read")],
     security: [{ bearerAuth: [] }],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
@@ -106,11 +129,16 @@ export class administrationSchema {
               roleId: z.number(),
               name: z.string(),
               isAdmin: z.boolean().nullable(),
-            })
+            }),
           ),
         }),
-        "Roles fetched successfully"
+        "Roles fetched successfully",
       ),
+      [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+        z.object({ message: z.string() }),
+        "Unauthorized",
+      ),
+      [HttpStatusCodes.FORBIDDEN]: jsonContent(z.object({ message: z.string() }), "Forbidden"),
     },
   });
 
@@ -119,6 +147,7 @@ export class administrationSchema {
     path: "/role/:id",
     method: "put",
     tags: ["administration"],
+    middleware: [checkPermission("administration:roles:update")],
     security: [{ bearerAuth: [] }],
     request: {
       params: z.object({ id: z.string() }),
@@ -127,11 +156,16 @@ export class administrationSchema {
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
         z.object({ roleName: z.string(), message: z.string() }),
-        "Role updated successfully"
+        "Role updated successfully",
       ),
+      [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+        z.object({ message: z.string() }),
+        "Unauthorized",
+      ),
+      [HttpStatusCodes.FORBIDDEN]: jsonContent(z.object({ message: z.string() }), "Forbidden"),
       [HttpStatusCodes.BAD_REQUEST]: jsonContent(
         z.object({ message: z.string() }),
-        "You can't update admin role"
+        "You can't update admin role",
       ),
     },
   });
@@ -140,13 +174,19 @@ export class administrationSchema {
     path: "/user",
     method: "post",
     tags: ["administration"],
+    middleware: [checkPermission("administration:users:create")],
     security: [{ bearerAuth: [] }],
     request: { body: jsonContentRequired(ZUser, "Create a new user") },
     responses: {
       [HttpStatusCodes.CREATED]: jsonContent(ZUser, "User created successfully"),
+      [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+        z.object({ message: z.string() }),
+        "Unauthorized",
+      ),
+      [HttpStatusCodes.FORBIDDEN]: jsonContent(z.object({ message: z.string() }), "Forbidden"),
       [HttpStatusCodes.BAD_REQUEST]: jsonContent(
         z.object({ message: z.string() }),
-        "User already exists"
+        "User already exists",
       ),
     },
   });
@@ -156,6 +196,7 @@ export class administrationSchema {
     path: "/user/list",
     method: "get",
     tags: ["administration"],
+    middleware: [checkPermission("administration:users:read")],
     security: [{ bearerAuth: [] }],
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
@@ -169,11 +210,16 @@ export class administrationSchema {
               type: z.string().nullable(),
               roleId: z.number().nullable(),
               roleName: z.string().nullable(),
-            })
+            }),
           ),
         }),
-        "Users fetched successfully"
+        "Users fetched successfully",
       ),
+      [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+        z.object({ message: z.string() }),
+        "Unauthorized",
+      ),
+      [HttpStatusCodes.FORBIDDEN]: jsonContent(z.object({ message: z.string() }), "Forbidden"),
     },
   });
 
@@ -182,6 +228,7 @@ export class administrationSchema {
     path: "/user/:id",
     method: "put",
     tags: ["administration"],
+    middleware: [checkPermission("administration:users:update")],
     security: [{ bearerAuth: [] }],
     request: {
       params: z.object({ id: z.string() }),
@@ -189,9 +236,14 @@ export class administrationSchema {
     },
     responses: {
       [HttpStatusCodes.OK]: jsonContent(ZUser, "User updated successfully"),
+      [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+        z.object({ message: z.string() }),
+        "Unauthorized",
+      ),
+      [HttpStatusCodes.FORBIDDEN]: jsonContent(z.object({ message: z.string() }), "Forbidden"),
       [HttpStatusCodes.BAD_REQUEST]: jsonContent(
         z.object({ message: z.string() }),
-        "User not found"
+        "User not found",
       ),
     },
   });
@@ -201,13 +253,19 @@ export class administrationSchema {
     path: "/user/:id",
     method: "delete",
     tags: ["administration"],
+    middleware: [checkPermission("administration:users:delete")],
     security: [{ bearerAuth: [] }],
     request: { params: z.object({ id: z.string() }) },
     responses: {
       [HttpStatusCodes.OK]: jsonContent(
         z.object({ message: z.string() }),
-        "User deleted successfully"
+        "User deleted successfully",
       ),
+      [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+        z.object({ message: z.string() }),
+        "Unauthorized",
+      ),
+      [HttpStatusCodes.FORBIDDEN]: jsonContent(z.object({ message: z.string() }), "Forbidden"),
     },
   });
 }

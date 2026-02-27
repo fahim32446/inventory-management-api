@@ -12,7 +12,6 @@ export class administrationRouter {
     .openapi(this.schema.getRoleDetails, this.service.getRoleDetails)
     .openapi(this.schema.getRoles, this.service.getRoles)
     .openapi(this.schema.updateRole, this.service.updateRole)
-
     .openapi(this.schema.createUser, this.service.createUser)
     .openapi(this.schema.getUsers, this.service.getUsers)
     .openapi(this.schema.updateUser, this.service.updateUser)

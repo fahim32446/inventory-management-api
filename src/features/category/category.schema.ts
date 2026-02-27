@@ -3,6 +3,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { ZCategory } from "../../db/schema.type";
 import { idParams } from "../../config/types";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 export const ZUpdateCategory = ZCategory.partial();
 
@@ -14,6 +15,7 @@ export class CategorySchema {
     path: "/",
     method: "post",
     tags: ["category"],
+    middleware: [checkPermission("category:create")],
     security: [
       {
         bearerAuth: [],
@@ -29,6 +31,7 @@ export class CategorySchema {
     path: "/",
     method: "get",
     tags: ["category"],
+    middleware: [checkPermission("category:read")],
     security: [
       {
         bearerAuth: [],
@@ -52,14 +55,14 @@ export class CategorySchema {
           count: z.number(),
           result: z.array(ZCategory),
         }),
-        "Category fetched"
+        "Category fetched",
       ),
 
       [HttpStatusCodes.NOT_FOUND]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "No category found"
+        "No category found",
       ),
     },
   });
@@ -67,6 +70,7 @@ export class CategorySchema {
   readonly updateCategory = createRoute({
     path: "/:id",
     method: "put",
+    middleware: [checkPermission("category:update")],
     tags: ["category"],
     security: [
       {
@@ -85,6 +89,7 @@ export class CategorySchema {
   readonly deleteCategory = createRoute({
     path: "/:id",
     method: "delete",
+    middleware: [checkPermission("category:delete")],
     tags: ["category"],
     security: [
       {
@@ -97,7 +102,7 @@ export class CategorySchema {
         z.object({
           message: z.string(),
         }),
-        "Category deleted"
+        "Category deleted",
       ),
     },
   });

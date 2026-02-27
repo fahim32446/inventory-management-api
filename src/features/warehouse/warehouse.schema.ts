@@ -3,6 +3,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { ZWarehouse } from "../../db/schema.type";
 import { idParams } from "../../config/types";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 export const ZUpdateWarehouses = ZWarehouse.partial();
 
@@ -14,6 +15,7 @@ export class WarehousesSchema {
     path: "/",
     method: "post",
     tags: ["warehouse"],
+    middleware: [checkPermission("warehouse:create")],
     security: [
       {
         bearerAuth: [],
@@ -28,6 +30,7 @@ export class WarehousesSchema {
   readonly getWarehouse = createRoute({
     path: "/",
     method: "get",
+    middleware: [checkPermission("warehouse:read")],
     tags: ["warehouse"],
     security: [
       {
@@ -52,14 +55,14 @@ export class WarehousesSchema {
           count: z.number(),
           result: z.array(ZWarehouse),
         }),
-        "Warehouses fetched"
+        "Warehouses fetched",
       ),
 
       [HttpStatusCodes.NOT_FOUND]: jsonContent(
         z.object({
           message: z.string(),
         }),
-        "No warehouses found"
+        "No warehouses found",
       ),
     },
   });
@@ -67,6 +70,7 @@ export class WarehousesSchema {
   readonly updateWarehouse = createRoute({
     path: "/:id",
     method: "put",
+    middleware: [checkPermission("warehouse:update")],
     tags: ["warehouse"],
     security: [
       {
@@ -85,6 +89,7 @@ export class WarehousesSchema {
   readonly deleteWarehouse = createRoute({
     path: "/:id",
     method: "delete",
+    middleware: [checkPermission("warehouse:delete")],
     tags: ["warehouse"],
     security: [
       {
@@ -97,7 +102,7 @@ export class WarehousesSchema {
         z.object({
           message: z.string(),
         }),
-        "Warehouses deleted"
+        "Warehouses deleted",
       ),
     },
   });
