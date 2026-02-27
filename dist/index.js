@@ -25581,6 +25581,7 @@ var logger = (fn = console.log) => {
 var BAD_REQUEST = 400;
 var CONFLICT = 409;
 var CREATED = 201;
+var FORBIDDEN = 403;
 var INTERNAL_SERVER_ERROR = 500;
 var NOT_FOUND = 404;
 var OK2 = 200;
@@ -32953,6 +32954,29 @@ async function seedRBAC() {
   console.log("\u2705 RBAC seeding completed safely");
 }
 
+// src/middlewares/checkPermission.ts
+var checkPermission = (requiredPermission) => {
+  return async (c2, next) => {
+    const payload = c2.get("jwtPayload");
+    if (!payload) {
+      return c2.json({ message: "Unauthorized: Missing user context" }, 401);
+    }
+    const { userId } = payload;
+    const userRole = await db.select({
+      isAdmin: roles.isAdmin,
+      permissionKey: permissions.key
+    }).from(users).leftJoin(roles, eq(users.roleId, roles.roleId)).leftJoin(rolePermissions, eq(roles.roleId, rolePermissions.roleId)).leftJoin(permissions, eq(rolePermissions.permissionId, permissions.permissionId)).where(eq(users.userId, userId));
+    if (userRole.length === 0) {
+      return c2.json({ message: "Forbidden: User has no role or permissions" }, 403);
+    }
+    const hasPermission = userRole.some((r) => r.isAdmin || r.permissionKey === requiredPermission);
+    if (!hasPermission) {
+      return c2.json({ message: `Your are not permitted to do this action` }, 403);
+    }
+    return await next();
+  };
+};
+
 // src/features/administration/administration.schema.ts
 var ZRole = external_exports.object({
   id: external_exports.number().optional(),
@@ -32986,11 +33010,20 @@ var administrationSchema = class {
     path: "/permissions",
     method: "get",
     tags: ["administration"],
+    middleware: [checkPermission("administration:read")],
     security: [{ bearerAuth: [] }],
     responses: {
       [OK2]: json_content_default(
         external_exports.object({ count: external_exports.number(), result: external_exports.array(ZPermission) }),
         "Permissions fetched successfully"
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Unauthorized: Missing user context"
+      ),
+      [FORBIDDEN]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Forbidden: Missing permission or role"
       )
     }
   });
@@ -32999,6 +33032,7 @@ var administrationSchema = class {
     path: "/role",
     method: "post",
     tags: ["administration"],
+    middleware: [checkPermission("administration:roles:create")],
     security: [{ bearerAuth: [] }],
     request: { body: json_content_required_default(ZRole, "Create a new role") },
     responses: {
@@ -33007,13 +33041,19 @@ var administrationSchema = class {
           roleName: external_exports.string()
         }),
         "Role created successfully"
-      )
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Unauthorized"
+      ),
+      [FORBIDDEN]: json_content_default(external_exports.object({ message: external_exports.string() }), "Forbidden")
     }
   });
   getRoleDetails = createRoute({
     path: "/role/details/:id",
     method: "get",
     tags: ["administration"],
+    middleware: [checkPermission("administration:roles:read")],
     security: [{ bearerAuth: [] }],
     request: {
       params: external_exports.object({ id: external_exports.string() })
@@ -33028,7 +33068,12 @@ var administrationSchema = class {
           })
         }),
         "Role fetched successfully"
-      )
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Unauthorized"
+      ),
+      [FORBIDDEN]: json_content_default(external_exports.object({ message: external_exports.string() }), "Forbidden")
     }
   });
   // Get all Roles
@@ -33036,6 +33081,7 @@ var administrationSchema = class {
     path: "/role",
     method: "get",
     tags: ["administration"],
+    middleware: [checkPermission("administration:roles:read")],
     security: [{ bearerAuth: [] }],
     responses: {
       [OK2]: json_content_default(
@@ -33050,7 +33096,12 @@ var administrationSchema = class {
           )
         }),
         "Roles fetched successfully"
-      )
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Unauthorized"
+      ),
+      [FORBIDDEN]: json_content_default(external_exports.object({ message: external_exports.string() }), "Forbidden")
     }
   });
   // Update a Role
@@ -33058,6 +33109,7 @@ var administrationSchema = class {
     path: "/role/:id",
     method: "put",
     tags: ["administration"],
+    middleware: [checkPermission("administration:roles:update")],
     security: [{ bearerAuth: [] }],
     request: {
       params: external_exports.object({ id: external_exports.string() }),
@@ -33068,6 +33120,11 @@ var administrationSchema = class {
         external_exports.object({ roleName: external_exports.string(), message: external_exports.string() }),
         "Role updated successfully"
       ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Unauthorized"
+      ),
+      [FORBIDDEN]: json_content_default(external_exports.object({ message: external_exports.string() }), "Forbidden"),
       [BAD_REQUEST]: json_content_default(
         external_exports.object({ message: external_exports.string() }),
         "You can't update admin role"
@@ -33078,10 +33135,16 @@ var administrationSchema = class {
     path: "/user",
     method: "post",
     tags: ["administration"],
+    middleware: [checkPermission("administration:users:create")],
     security: [{ bearerAuth: [] }],
     request: { body: json_content_required_default(ZUser, "Create a new user") },
     responses: {
       [CREATED]: json_content_default(ZUser, "User created successfully"),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Unauthorized"
+      ),
+      [FORBIDDEN]: json_content_default(external_exports.object({ message: external_exports.string() }), "Forbidden"),
       [BAD_REQUEST]: json_content_default(
         external_exports.object({ message: external_exports.string() }),
         "User already exists"
@@ -33093,6 +33156,7 @@ var administrationSchema = class {
     path: "/user/list",
     method: "get",
     tags: ["administration"],
+    middleware: [checkPermission("administration:users:read")],
     security: [{ bearerAuth: [] }],
     responses: {
       [OK2]: json_content_default(
@@ -33110,7 +33174,12 @@ var administrationSchema = class {
           )
         }),
         "Users fetched successfully"
-      )
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Unauthorized"
+      ),
+      [FORBIDDEN]: json_content_default(external_exports.object({ message: external_exports.string() }), "Forbidden")
     }
   });
   // Update User
@@ -33118,6 +33187,7 @@ var administrationSchema = class {
     path: "/user/:id",
     method: "put",
     tags: ["administration"],
+    middleware: [checkPermission("administration:users:update")],
     security: [{ bearerAuth: [] }],
     request: {
       params: external_exports.object({ id: external_exports.string() }),
@@ -33125,6 +33195,11 @@ var administrationSchema = class {
     },
     responses: {
       [OK2]: json_content_default(ZUser, "User updated successfully"),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Unauthorized"
+      ),
+      [FORBIDDEN]: json_content_default(external_exports.object({ message: external_exports.string() }), "Forbidden"),
       [BAD_REQUEST]: json_content_default(
         external_exports.object({ message: external_exports.string() }),
         "User not found"
@@ -33136,13 +33211,19 @@ var administrationSchema = class {
     path: "/user/:id",
     method: "delete",
     tags: ["administration"],
+    middleware: [checkPermission("administration:users:delete")],
     security: [{ bearerAuth: [] }],
     request: { params: external_exports.object({ id: external_exports.string() }) },
     responses: {
       [OK2]: json_content_default(
         external_exports.object({ message: external_exports.string() }),
         "User deleted successfully"
-      )
+      ),
+      [UNAUTHORIZED]: json_content_default(
+        external_exports.object({ message: external_exports.string() }),
+        "Unauthorized"
+      ),
+      [FORBIDDEN]: json_content_default(external_exports.object({ message: external_exports.string() }), "Forbidden")
     }
   });
 };
@@ -35235,70 +35316,11 @@ var administrationService = class {
   };
 };
 
-// src/middlewares/checkPermission.ts
-var checkPermission = (requiredPermission) => {
-  return async (c2, next) => {
-    const payload = c2.get("jwtPayload");
-    if (!payload) {
-      return c2.json({ message: "Unauthorized: Missing user context" }, 401);
-    }
-    const { userId } = payload;
-    const userRole = await db.select({
-      isAdmin: roles.isAdmin,
-      permissionKey: permissions.key
-    }).from(users).leftJoin(roles, eq(users.roleId, roles.roleId)).leftJoin(rolePermissions, eq(roles.roleId, rolePermissions.roleId)).leftJoin(permissions, eq(rolePermissions.permissionId, permissions.permissionId)).where(eq(users.userId, userId));
-    if (userRole.length === 0) {
-      return c2.json({ message: "Forbidden: User has no role or permissions" }, 403);
-    }
-    const hasPermission = userRole.some((r) => r.isAdmin || r.permissionKey === requiredPermission);
-    if (!hasPermission) {
-      return c2.json({ message: `Forbidden: Missing permission '${requiredPermission}'` }, 403);
-    }
-    await next();
-  };
-};
-
 // src/features/administration/administration.router.ts
 var administrationRouter = class {
   service = new administrationService();
   schema = new administrationSchema();
-  routes = createRouter().openapi(
-    this.schema.getPermission,
-    checkPermission("administration:read"),
-    this.service.getPermission
-  ).openapi(
-    this.schema.createRole,
-    checkPermission("administration:roles:create"),
-    this.service.createRole
-  ).openapi(
-    this.schema.getRoleDetails,
-    checkPermission("administration:roles:read"),
-    this.service.getRoleDetails
-  ).openapi(
-    this.schema.getRoles,
-    checkPermission("administration:roles:read"),
-    this.service.getRoles
-  ).openapi(
-    this.schema.updateRole,
-    checkPermission("administration:roles:update"),
-    this.service.updateRole
-  ).openapi(
-    this.schema.createUser,
-    checkPermission("administration:users:create"),
-    this.service.createUser
-  ).openapi(
-    this.schema.getUsers,
-    checkPermission("administration:users:read"),
-    this.service.getUsers
-  ).openapi(
-    this.schema.updateUser,
-    checkPermission("administration:users:update"),
-    this.service.updateUser
-  ).openapi(
-    this.schema.deleteUser,
-    checkPermission("administration:users:delete"),
-    this.service.deleteUser
-  );
+  routes = createRouter().openapi(this.schema.getPermission, this.service.getPermission).openapi(this.schema.createRole, this.service.createRole).openapi(this.schema.getRoleDetails, this.service.getRoleDetails).openapi(this.schema.getRoles, this.service.getRoles).openapi(this.schema.updateRole, this.service.updateRole).openapi(this.schema.createUser, this.service.createUser).openapi(this.schema.getUsers, this.service.getUsers).openapi(this.schema.updateUser, this.service.updateUser).openapi(this.schema.deleteUser, this.service.deleteUser);
 };
 
 // src/features/category/category.model.ts
@@ -35916,6 +35938,7 @@ var CategorySchema = class {
     path: "/",
     method: "post",
     tags: ["category"],
+    middleware: [checkPermission("category:create")],
     security: [
       {
         bearerAuth: []
@@ -35930,6 +35953,7 @@ var CategorySchema = class {
     path: "/",
     method: "get",
     tags: ["category"],
+    middleware: [checkPermission("category:read")],
     security: [
       {
         bearerAuth: []
@@ -35960,6 +35984,7 @@ var CategorySchema = class {
   updateCategory = createRoute({
     path: "/:id",
     method: "put",
+    middleware: [checkPermission("category:update")],
     tags: ["category"],
     security: [
       {
@@ -35977,6 +36002,7 @@ var CategorySchema = class {
   deleteCategory = createRoute({
     path: "/:id",
     method: "delete",
+    middleware: [checkPermission("category:delete")],
     tags: ["category"],
     security: [
       {
@@ -36010,6 +36036,7 @@ var ProductSchema = class {
     path: "/",
     method: "post",
     tags: ["product"],
+    middleware: [checkPermission("products:create")],
     security: [
       {
         bearerAuth: []
@@ -36024,6 +36051,7 @@ var ProductSchema = class {
     path: "/",
     method: "get",
     tags: ["product"],
+    middleware: [checkPermission("products:read")],
     security: [
       {
         bearerAuth: []
@@ -36055,6 +36083,7 @@ var ProductSchema = class {
     path: "/:id",
     method: "put",
     tags: ["product"],
+    middleware: [checkPermission("products:update")],
     security: [
       {
         bearerAuth: []
@@ -36072,6 +36101,7 @@ var ProductSchema = class {
     path: "/:id",
     method: "delete",
     tags: ["product"],
+    middleware: [checkPermission("products:delete")],
     security: [
       {
         bearerAuth: []
@@ -36580,6 +36610,7 @@ var StockSchema = class {
   purchaseList = createRoute({
     path: "/purchase",
     method: "get",
+    middleware: [checkPermission("purchase:read")],
     tags: ["stock"],
     security: [{ bearerAuth: [] }],
     responses: {
@@ -36595,6 +36626,7 @@ var StockSchema = class {
   addPurchase = createRoute({
     path: "/purchase",
     method: "post",
+    middleware: [checkPermission("purchase:create")],
     tags: ["stock"],
     security: [{ bearerAuth: [] }],
     request: {
@@ -36607,6 +36639,7 @@ var StockSchema = class {
   updatePurchase = createRoute({
     path: "/purchase/{id}",
     method: "put",
+    middleware: [checkPermission("purchase:update")],
     tags: ["stock"],
     request: {
       params: external_exports.object({ id: external_exports.string() }),
@@ -36619,6 +36652,7 @@ var StockSchema = class {
   deletePurchase = createRoute({
     path: "/purchase/{id}",
     method: "delete",
+    middleware: [checkPermission("purchase:delete")],
     tags: ["stock"],
     request: { params: external_exports.object({ id: external_exports.string() }) },
     responses: {
@@ -36628,6 +36662,7 @@ var StockSchema = class {
   salesList = createRoute({
     path: "/sale",
     method: "get",
+    middleware: [checkPermission("sale:read")],
     tags: ["stock"],
     responses: {
       [OK2]: json_content_default(
@@ -36642,6 +36677,7 @@ var StockSchema = class {
   addSale = createRoute({
     path: "/sale",
     method: "post",
+    middleware: [checkPermission("sale:create")],
     tags: ["stock"],
     request: { body: json_content_required_default(AddSaleBody, "Create sale") },
     responses: {
@@ -36651,6 +36687,7 @@ var StockSchema = class {
   updateSale = createRoute({
     path: "/sale/{id}",
     method: "put",
+    middleware: [checkPermission("sale:update")],
     tags: ["stock"],
     request: {
       params: external_exports.object({ id: external_exports.string() }),
@@ -36676,6 +36713,7 @@ var StockSchema = class {
   stockReport = createRoute({
     path: "/report/stock",
     method: "get",
+    middleware: [checkPermission("report:read")],
     tags: ["stock"],
     responses: {
       [OK2]: json_content_default(
@@ -36690,6 +36728,7 @@ var StockSchema = class {
   salesReport = createRoute({
     path: "/report/sales",
     method: "get",
+    middleware: [checkPermission("report:read")],
     tags: ["stock"],
     responses: {
       [OK2]: json_content_default(
@@ -36718,6 +36757,7 @@ var SupplierSchema = class {
     path: "/",
     method: "post",
     tags: ["supplier"],
+    middleware: [checkPermission("suppliers:create")],
     security: [
       {
         bearerAuth: []
@@ -36732,6 +36772,7 @@ var SupplierSchema = class {
     path: "/",
     method: "get",
     tags: ["supplier"],
+    middleware: [checkPermission("suppliers:read")],
     security: [
       {
         bearerAuth: []
@@ -36763,6 +36804,7 @@ var SupplierSchema = class {
     path: "/:id",
     method: "put",
     tags: ["supplier"],
+    middleware: [checkPermission("suppliers:update")],
     security: [
       {
         bearerAuth: []
@@ -36780,6 +36822,7 @@ var SupplierSchema = class {
     path: "/:id",
     method: "delete",
     tags: ["supplier"],
+    middleware: [checkPermission("suppliers:delete")],
     security: [
       {
         bearerAuth: []
@@ -36899,6 +36942,7 @@ var DashboardSchema = class {
     path: "/analytics",
     method: "get",
     tags: ["dashboard"],
+    middleware: [checkPermission("dashboard:read")],
     security: [
       {
         bearerAuth: []
@@ -37337,6 +37381,7 @@ var WarehousesSchema = class {
     path: "/",
     method: "post",
     tags: ["warehouse"],
+    middleware: [checkPermission("warehouse:create")],
     security: [
       {
         bearerAuth: []
@@ -37350,6 +37395,7 @@ var WarehousesSchema = class {
   getWarehouse = createRoute({
     path: "/",
     method: "get",
+    middleware: [checkPermission("warehouse:read")],
     tags: ["warehouse"],
     security: [
       {
@@ -37381,6 +37427,7 @@ var WarehousesSchema = class {
   updateWarehouse = createRoute({
     path: "/:id",
     method: "put",
+    middleware: [checkPermission("warehouse:update")],
     tags: ["warehouse"],
     security: [
       {
@@ -37398,6 +37445,7 @@ var WarehousesSchema = class {
   deleteWarehouse = createRoute({
     path: "/:id",
     method: "delete",
+    middleware: [checkPermission("warehouse:delete")],
     tags: ["warehouse"],
     security: [
       {
